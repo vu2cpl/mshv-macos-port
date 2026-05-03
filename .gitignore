@@ -1,0 +1,23 @@
+# Build artifacts
+build/
+bin/MSHV.app/
+bin/MSHV
+Makefile
+.qmake.stash
+*.o
+*.moc
+moc_*
+qrc_*
+
+# Runtime state
+bin/log/
+bin/AllTxtMonthly/
+bin/ExportLog/
+bin/RxWavs/*.wav
+bin/Screenshots/*.png
+bin/settings/*.bak
+bin/settings/ms_start
+bin/settings/mshv_status.txt
+
+# macOS Finder metadata
+.DS_Store
