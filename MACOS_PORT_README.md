@@ -1,9 +1,10 @@
 # MSHV macOS port
 
-Personal native macOS port of [LZ2HV/MSHV](https://github.com/LZ2HV/MSHV).
-Apple Silicon (arm64) + Intel; verified end-to-end against FlexRadio
-6000-series via AetherSDR's TCI bridge for RX/TX with the WSJT-X UDP
-broadcast feeding RUMlogNG's DXSpots window.
+Native macOS port of [LZ2HV/MSHV](https://github.com/LZ2HV/MSHV).
+Apple Silicon (arm64) only — Homebrew Qt 5 is single-arch, so the
+prebuilt binary won't run on Intel Macs. Verified end-to-end against
+FlexRadio 6000-series via AetherSDR's TCI bridge for RX/TX with the
+WSJT-X UDP broadcast feeding RUMlogNG's DXSpots window.
 
 The port is a stack of `_MACOS_`-conditional patches on top of upstream
 `main`. Linux and Windows builds remain untouched.

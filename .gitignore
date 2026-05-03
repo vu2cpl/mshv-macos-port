@@ -1,6 +1,7 @@
 # Build artifacts
 build/
 bin/MSHV.app/
+bin/MSHV.app.zip
 bin/MSHV
 Makefile
 .qmake.stash

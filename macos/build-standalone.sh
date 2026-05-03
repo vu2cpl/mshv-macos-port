@@ -189,6 +189,14 @@ ENTITLEMENTS="$REPO/macos/entitlements.plist"
 if [[ -n "$SIGN_IDENTITY" ]]; then
     echo "==> codesign with Developer ID + hardened runtime"
     echo "    identity: $SIGN_IDENTITY"
+    # Strip remaining xattrs immediately before codesign. Even after the
+    # ditto-strip above, macOS / iCloud / file-provider daemons can re-
+    # apply com.apple.FinderInfo and com.apple.fileprovider.fpfs#P (e.g.
+    # if the build tree lives under an indexed path like ~/Documents).
+    # codesign with hardened runtime rejects non-zero FinderInfo as
+    # "resource fork, Finder information, or similar detritus". Doing
+    # the strip + sign back-to-back narrows the window for re-application.
+    xattr -cr "$APP" 2>/dev/null || true
     # --options runtime  : enable the hardened runtime (required for
     #                      notarisation).
     # --timestamp        : embed an Apple-trusted timestamp (required for
@@ -205,6 +213,7 @@ if [[ -n "$SIGN_IDENTITY" ]]; then
 else
     echo "==> ad-hoc codesign (no Developer ID Application cert in keychain)"
     echo "    bundle will work locally but cannot be notarised."
+    xattr -cr "$APP" 2>/dev/null || true
     codesign --force --deep --sign - "$APP"
 fi
 

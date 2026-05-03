@@ -6,7 +6,10 @@ is a Mac-only port that tracks his upstream releases.
 
 Decodes and operates **FT8, FT4, FT2, MSK144, JT65 A/B/C, JT6M,
 PI4, FSK441/315, ISCAT, Q65 A/B/C/D**, and MA (Multi-Answer) modes
-on Apple Silicon and Intel Macs running macOS 10.13 or later.
+on **Apple Silicon Macs** (M1, M2, M3, M4) running macOS 11 or
+later. Intel Macs are not supported by the prebuilt binary;
+building from source for Intel is possible but not currently
+covered here.
 
 ## Download
 
