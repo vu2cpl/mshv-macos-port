@@ -18,11 +18,13 @@ A pre-built `MSHV.app` is attached to each release on the
 route — no build tools required.
 
 First launch on macOS:
-- macOS Gatekeeper may say *"MSHV cannot be opened because Apple
-  cannot check it for malicious software."* This is the standard
-  warning for apps not distributed through the App Store.
-- Right-click `MSHV.app` → **Open** → confirm. macOS remembers the
-  exception; subsequent launches are normal.
+- The bundle is signed with an Apple Developer ID and notarised by
+  Apple, so Gatekeeper accepts it without complaint.
+- On first open after download, macOS may show the standard *"This
+  app was downloaded from the internet — are you sure you want to
+  open it?"* prompt. Click **Open**. (This is normal for any app
+  downloaded outside the App Store and isn't specific to MSHV.)
+- Subsequent launches: normal double-click, no prompts.
 
 User state (settings, callsign, QSO log, monthly text logs, recorded
 WAVs, screenshots) lives in
