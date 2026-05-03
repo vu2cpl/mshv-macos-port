@@ -172,12 +172,41 @@ ditto --noextattr --norsrc --noacl "$APP" "$CLEAN"
 rm -rf "$APP"
 mv "$CLEAN" "$APP"
 
-echo "==> ad-hoc codesign"
-# No `| tail -N` here — codesign emits one error line per failing
-# nested item, and trimming the tail can hide the actual offender.
-# Output is short anyway (one "replacing existing signature" line per
-# bundle). If codesign fails, the unfiltered errors point at the file.
-codesign --force --deep --sign - "$APP"
+# Codesign — pick a Developer ID Application certificate from the keychain
+# if one is available (allows notarisation later), otherwise fall back to
+# ad-hoc signing. The DEVELOPER_ID_APPLICATION env var lets the operator
+# override the auto-detected identity if they have multiple certs.
+SIGN_IDENTITY="${DEVELOPER_ID_APPLICATION:-}"
+if [[ -z "$SIGN_IDENTITY" ]]; then
+    SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null \
+        | grep "Developer ID Application" | head -1 \
+        | awk -F'"' '{print $2}')"
+fi
+ENTITLEMENTS="$REPO/macos/entitlements.plist"
+# No `| tail -N` here — codesign emits one error line per failing nested
+# item, and trimming the tail can hide the actual offender. Output is
+# short anyway. If codesign fails, the unfiltered errors point at the file.
+if [[ -n "$SIGN_IDENTITY" ]]; then
+    echo "==> codesign with Developer ID + hardened runtime"
+    echo "    identity: $SIGN_IDENTITY"
+    # --options runtime  : enable the hardened runtime (required for
+    #                      notarisation).
+    # --timestamp        : embed an Apple-trusted timestamp (required for
+    #                      notarisation; needs network access at sign time).
+    # --entitlements ... : the disable-library-validation entitlement (for
+    #                      our bundled Qt frameworks) and audio-input.
+    # --deep             : sign all nested binaries with the same identity.
+    codesign --force --deep \
+        --sign "$SIGN_IDENTITY" \
+        --options runtime \
+        --timestamp \
+        --entitlements "$ENTITLEMENTS" \
+        "$APP"
+else
+    echo "==> ad-hoc codesign (no Developer ID Application cert in keychain)"
+    echo "    bundle will work locally but cannot be notarised."
+    codesign --force --deep --sign - "$APP"
+fi
 
 # Bump the .app directory's mtime so Finder/ls show "when this build
 # happened" instead of the ditto-preserved mtime from the original

@@ -71,13 +71,43 @@ QMAKE_POST_LINK += mkdir -p $$RES_DIR/settings && \
     cp $$PWD/macos/MSHV.icns $$RES_DIR/MSHV.icns; \
     true
 
-# `make standalone` — embed Qt + PortAudio + FFTW into the bundle and ad-hoc
-# sign, so the .app runs on a Mac without Homebrew installed. See
+# `make standalone` — embed Qt + PortAudio + FFTW into the bundle and code
+# sign (Developer ID if available in the keychain, otherwise ad-hoc) so the
+# .app runs on a Mac without Homebrew installed. See
 # macos/build-standalone.sh for the actual logic.
 standalone.target = standalone
 standalone.commands = $$PWD/macos/build-standalone.sh
 standalone.depends = first
 QMAKE_EXTRA_TARGETS += standalone
+
+# `make notarize` — ship the standalone bundle to Apple for notarisation,
+# wait for the result, and staple the ticket so the app launches without
+# Gatekeeper friction even offline. Requires:
+#   * A Developer ID Application certificate in the login keychain (the
+#     standalone target signs with it; without it, ad-hoc-signed bundles
+#     are not notarisable and this target will be rejected).
+#   * Apple ID + Team ID + app-specific password cached in the keychain
+#     under a profile name. Default profile name is MSHV-NOTARY; override
+#     with `make notarize MSHV_NOTARY_PROFILE=other-name`. Cache once with:
+#       xcrun notarytool store-credentials MSHV-NOTARY \
+#           --apple-id you@example.com \
+#           --team-id ABCD123456 \
+#           --password xxxx-xxxx-xxxx-xxxx
+notarize.target = notarize
+notarize.commands = \
+    PROF=$${MSHV_NOTARY_PROFILE:-MSHV-NOTARY}; \
+    cd $$PWD/bin && \
+    rm -f MSHV.app.zip && \
+    ditto -c -k --keepParent MSHV.app MSHV.app.zip && \
+    echo \"==> submitting MSHV.app.zip to Apple notarisation (this may take 1-15 min)\" && \
+    xcrun notarytool submit MSHV.app.zip --keychain-profile \"$$PROF\" --wait && \
+    echo \"==> stapling notarisation ticket to MSHV.app\" && \
+    xcrun stapler staple MSHV.app && \
+    rm -f MSHV.app.zip && \
+    ditto -c -k --keepParent MSHV.app MSHV.app.zip && \
+    echo \"==> notarised + stapled. distribute MSHV.app.zip from bin/.\"
+notarize.depends = standalone
+QMAKE_EXTRA_TARGETS += notarize
 
 
 HEADERS = src/main_ms.h \
