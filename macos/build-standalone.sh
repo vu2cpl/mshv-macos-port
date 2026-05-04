@@ -25,12 +25,29 @@ if [[ ! -x "$BIN" ]]; then
     exit 1
 fi
 
-QT_ROOT="$(brew --prefix qt@5 2>/dev/null || echo /opt/homebrew/opt/qt@5)"
+# Pick the Qt installation matching the binary's architecture, NOT what
+# `brew --prefix qt@5` returns — that's whichever brew is first in PATH
+# (the brew binary is universal2 and ignores the calling arch). For an
+# x86_64 binary built against /usr/local Intel-Qt, we MUST use the Intel
+# macdeployqt, otherwise it copies arm64 plugins into our Intel bundle
+# and the Qt platform plugin fails to load at runtime ("no Qt platform
+# plugin could be initialized" → abort()).
+BIN_ARCH="$(lipo -info "$BIN" 2>/dev/null | awk -F': ' '{print $NF}')"
+case "$BIN_ARCH" in
+    arm64)  QT_ROOT="${QT_ROOT:-/opt/homebrew/opt/qt@5}" ;;
+    x86_64) QT_ROOT="${QT_ROOT:-/usr/local/opt/qt@5}" ;;
+    *)
+        echo "error: could not determine binary arch ($BIN_ARCH) — set QT_ROOT manually" >&2
+        exit 1
+        ;;
+esac
 MACDEPLOYQT="$QT_ROOT/bin/macdeployqt"
 if [[ ! -x "$MACDEPLOYQT" ]]; then
     echo "error: macdeployqt not found at $MACDEPLOYQT" >&2
+    echo "       (binary is $BIN_ARCH; expected Qt at $QT_ROOT)" >&2
     exit 1
 fi
+echo "==> using $QT_ROOT for $BIN_ARCH bundle"
 
 # 1. macdeployqt walks the dependency tree, copies Qt frameworks, all the
 #    third-party dylibs (libportaudio, libfftw3, libpng, etc.), and rewrites

@@ -14,13 +14,13 @@ on macOS 11 or later. Separate prebuilt binaries for Apple Silicon
 Pre-built bundles are attached to each release on the
 [Releases page](../../releases) — no build tools required.
 
-- `MSHV.app.zip` — Apple Silicon (arm64): M1, M2, M3, M4 Macs
-- `MSHV-Intel.app.zip` — Intel (x86_64): older Mac Pro / iMac /
-  MacBook Pro / Mini / Air models with Intel CPUs
+- `MSHV-Apple-Silicon.app.zip` — for **Apple Silicon** Macs (M1, M2,
+  M3, M4 — released late 2020 onwards)
+- `MSHV-Intel-Mac-x86.app.zip` — for **Intel** Macs (older Mac Pro /
+  iMac / MacBook Pro / Mini / Air models with Intel processors)
 
-Pick the one that matches your Mac. If unsure: Apple menu → About
-This Mac → look at "Chip" (M-series → Apple Silicon) or
-"Processor" (Intel ... → Intel).
+Not sure which? Apple menu → **About This Mac** → look for
+"Chip" (M-series → Apple Silicon) or "Processor" (Intel ... → Intel).
 
 First launch on macOS:
 - The bundle is signed with an Apple Developer ID and notarised by
