@@ -36,6 +36,15 @@ WAVs, screenshots) lives in
 `~/Library/Application Support/MSHV/`. Replacing the bundle with a
 new release does **not** wipe your data.
 
+## Help & setup guide
+
+[`HELP.md`](HELP.md) covers macOS-specific setup: recommended TCI
+flow with AetherSDR + RUMlogNG, audio device picker, microphone
+permission, rig control, common Gatekeeper / launch issues, and
+how to file bug reports. For general MSHV usage (modes, contests,
+operating procedure) see the upstream docs at
+[lz2hv.org](https://lz2hv.org/).
+
 ## Build from source
 
 Prerequisites (Apple Silicon — Homebrew at `/opt/homebrew`):
