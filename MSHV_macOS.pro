@@ -22,9 +22,16 @@ MOC_DIR = build
 # QESP_NO_UDEV: keep qextserialport from pulling in libudev.
 DEFINES += _MACOS_ QESP_NO_UDEV
 
-# PortAudio + FFTW from Homebrew (Apple Silicon prefix is /opt/homebrew).
-INCLUDEPATH += /opt/homebrew/include
-LIBS += -L/opt/homebrew/lib -lportaudio -lfftw3
+# PortAudio + FFTW from Homebrew. Auto-detect the prefix so the same .pro
+# works for both architectures:
+#   * Apple Silicon native (arm64) → brew lives at /opt/homebrew
+#   * Intel via Rosetta (x86_64)   → brew lives at /usr/local
+# `brew --prefix` returns the right path for whichever arch qmake runs as
+# (under `arch -x86_64 qmake ...` PATH resolves to /usr/local/bin/brew).
+HOMEBREW_PREFIX = $$system(brew --prefix)
+isEmpty(HOMEBREW_PREFIX): HOMEBREW_PREFIX = /opt/homebrew
+INCLUDEPATH += $$HOMEBREW_PREFIX/include
+LIBS += -L$$HOMEBREW_PREFIX/lib -lportaudio -lfftw3
 
 # qextserialenumerator on macOS uses IOKit + CoreFoundation.
 LIBS += -framework CoreFoundation -framework IOKit -framework AppKit
