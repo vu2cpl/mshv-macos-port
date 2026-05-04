@@ -6,16 +6,21 @@ is a Mac-only port that tracks his upstream releases.
 
 Decodes and operates **FT8, FT4, FT2, MSK144, JT65 A/B/C, JT6M,
 PI4, FSK441/315, ISCAT, Q65 A/B/C/D**, and MA (Multi-Answer) modes
-on **Apple Silicon Macs** (M1, M2, M3, M4) running macOS 11 or
-later. Intel Macs are not supported by the prebuilt binary;
-building from source for Intel is possible but not currently
-covered here.
+on macOS 11 or later. Separate prebuilt binaries for Apple Silicon
+(arm64) and Intel (x86_64) are attached to each release.
 
 ## Download
 
-A pre-built `MSHV.app` is attached to each release on the
-[Releases page](../../releases). For most users this is the easiest
-route — no build tools required.
+Pre-built bundles are attached to each release on the
+[Releases page](../../releases) — no build tools required.
+
+- `MSHV.app.zip` — Apple Silicon (arm64): M1, M2, M3, M4 Macs
+- `MSHV-Intel.app.zip` — Intel (x86_64): older Mac Pro / iMac /
+  MacBook Pro / Mini / Air models with Intel CPUs
+
+Pick the one that matches your Mac. If unsure: Apple menu → About
+This Mac → look at "Chip" (M-series → Apple Silicon) or
+"Processor" (Intel ... → Intel).
 
 First launch on macOS:
 - The bundle is signed with an Apple Developer ID and notarised by

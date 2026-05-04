@@ -22,14 +22,15 @@ MOC_DIR = build
 # QESP_NO_UDEV: keep qextserialport from pulling in libudev.
 DEFINES += _MACOS_ QESP_NO_UDEV
 
-# PortAudio + FFTW from Homebrew. Auto-detect the prefix so the same .pro
-# works for both architectures:
-#   * Apple Silicon native (arm64) → brew lives at /opt/homebrew
-#   * Intel via Rosetta (x86_64)   → brew lives at /usr/local
-# `brew --prefix` returns the right path for whichever arch qmake runs as
-# (under `arch -x86_64 qmake ...` PATH resolves to /usr/local/bin/brew).
-HOMEBREW_PREFIX = $$system(brew --prefix)
-isEmpty(HOMEBREW_PREFIX): HOMEBREW_PREFIX = /opt/homebrew
+# PortAudio + FFTW from Homebrew. Pick the prefix from Qt's target
+# architecture so the same .pro works for both:
+#   * Apple Silicon native qmake → QT_ARCH=arm64 → /opt/homebrew
+#   * Intel-arch qmake (under Rosetta) → QT_ARCH=x86_64 → /usr/local
+# Don't rely on `brew --prefix` here — PATH lookup resolves to whichever
+# brew comes first regardless of the arch we're building for, so a Mac
+# with both brews installed will silently pick the wrong prefix.
+HOMEBREW_PREFIX = /opt/homebrew
+contains(QT_ARCH, x86_64): HOMEBREW_PREFIX = /usr/local
 INCLUDEPATH += $$HOMEBREW_PREFIX/include
 LIBS += -L$$HOMEBREW_PREFIX/lib -lportaudio -lfftw3
 
