@@ -61,6 +61,7 @@ open --stderr /tmp/mshv.stderr bin/MSHV.app
 | `feae112` | TCI auto-connect with FlexRadio bridges. WebSocket lifecycle race fix (no `moveToThread` on Mac); `deleteLater` instead of `delete` to avoid disconnect crash; recognise AetherSDR's proactive `vfo:0,0,FREQ;` notification at connect; bumped TCI init retry from 5 to 20; deferred initial connect 1.5 s |
 | `3046141` | "SDR ON/OFF" indicator refreshes when start/stop state changes (was painted once at init, then stale) |
 | `f717734` | UDP broadcast identifies as `WSJT-X MSHV` so RUMlogNG's DXSpots accepts our decode messages |
+| `85c1ff6` | Network configuration tabs defer IP/host validation to `editingFinished`; partial input no longer triggers DNS lookup or the red "UDP server lookup failed" flash on every keystroke |
 
 Plus a number of small fixes during the same sessions: the
 band-switcher list (just edit `def_band_bt_sw` in `ms_settings`),
