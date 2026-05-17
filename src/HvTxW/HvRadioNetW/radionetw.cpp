@@ -1110,8 +1110,16 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     GB_spot_settings->setLayout(V_spot);
     V_l->addWidget(GB_spot_settings);
     connect(pb_tcp_conect, SIGNAL(clicked(bool)), this, SLOT(ConDiscon()));
+#if defined _MACOS_
+    // Defer DX-cluster reconnect until the user finishes editing the host/port
+    // so a partial entry like "d" or "db0" isn't pushed to the telnet client
+    // on every keystroke.
+    connect(TCPServer, &QLineEdit::editingFinished, this, [this]() { TCPServPortChanged(TCPServer->text()); });
+    connect(TCPPort,   &QLineEdit::editingFinished, this, [this]() { TCPServPortChanged(TCPPort->text()); });
+#else
     connect(TCPServer, SIGNAL(textChanged(QString)), this, SLOT(TCPServPortChanged(QString)));
     connect(TCPPort, SIGNAL(textChanged(QString)), this, SLOT(TCPServPortChanged(QString)));
+#endif
     connect(Cb_telnet, SIGNAL(currentIndexChanged(QString)), this, SLOT(CbTelnetChanged(QString)));
     /////////////END TCP///////////////////////////////////////////
     QGroupBox *GB_udp_broad_settings = new QGroupBox(tr("UDP Broadcast Settings")+":");   //Network Services:
@@ -1592,7 +1600,14 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
                                    }
                                    .simplified (),"",4739);
     connect(cb_start_stop_psk_rpt, SIGNAL(toggled(bool)), this, SLOT(StartStopReport(bool)));
+#if defined _MACOS_
+    // Don't push the PSK Reporter host on every keystroke — wait until the
+    // user finishes editing so partial input like "1" or "192.168" isn't
+    // treated as the active server.
+    connect(UDPServer, &QLineEdit::editingFinished, this, [this]() { ServTextChanged(UDPServer->text()); });
+#else
     connect(UDPServer, SIGNAL(textChanged(QString)), this, SLOT(ServTextChanged(QString)));
+#endif
     connect(pb_re_conect, SIGNAL(clicked(bool)), this, SLOT(Reconnect()));
     connect(UDPPort, SIGNAL(textChanged(QString)), this, SLOT(PortTextChanged(QString)));
     connect(cb_udp_tcp_psk_rpt, SIGNAL(toggled(bool)), this, SLOT(UdpTcpChangedPsk(bool)));
@@ -1633,8 +1648,17 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     connect(cb_udp_broad_log_adif, SIGNAL(toggled(bool)), this, SLOT(StartStopUdpBroad(bool)));
     connect(cb_udp_broad_decod, SIGNAL(toggled(bool)), this, SLOT(StartStopUdpBroad(bool)));
     connect(pb_re_conect_udp_broad, SIGNAL(clicked(bool)), this, SLOT(ReconnectUdpBroad()));
+#if defined _MACOS_
+    // UDPSrvPortBroadChanged drives MessageClient::set_server → QHostInfo::
+    // lookupHost, which would otherwise fire (and surface a red "UDP server
+    // lookup failed" status) on the very first keystroke of an IP address.
+    // Fire only when the user is done editing the field.
+    connect(UDPServerBroad, &QLineEdit::editingFinished, this, [this]() { UDPSrvPortBroadChanged(UDPServerBroad->text()); });
+    connect(UDPPortBroad,   &QLineEdit::editingFinished, this, [this]() { UDPSrvPortBroadChanged(UDPPortBroad->text()); });
+#else
     connect(UDPServerBroad, SIGNAL(textChanged(QString)), this, SLOT(UDPSrvPortBroadChanged(QString)));
     connect(UDPPortBroad, SIGNAL(textChanged(QString)), this, SLOT(UDPSrvPortBroadChanged(QString)));
+#endif
 
     sr_path = path+"/settings/ms_stinfonet";
     ReadSettings();
