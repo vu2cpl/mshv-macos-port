@@ -3870,8 +3870,6 @@ void DecoderMs::avg65(int nutc,int &nsave,double snrsync,double dtxx,int nflip,i
 {
 
     int MAXAVE=24;//64 wsjt-x  hv 24
-    double syncsum,dtsum;
-    int nfsum;
 
     double s3b_[63][64];//(64,63)
     double s3c_[63][64];//(64,63)
@@ -3982,9 +3980,6 @@ void DecoderMs::avg65(int nutc,int &nsave,double snrsync,double dtxx,int nflip,i
     //emit EmitAvgSaves(count_saved_avgs_1jt65,count_saved_avgs_2jt65);
 
 c10:
-    syncsum=0.0;
-    dtsum=0.0;
-    nfsum=0;
     //qDebug()<<"1nsum="<<nsum;
     nsum=0;
     for (int i = 0; i < 126; i++)
@@ -4033,9 +4028,6 @@ c10:
             for (int x = -256; x < 256; x++)
                 s1b_[z][x+s1_ofs_jt65]+=s1save_jt65_[i][z][x+s1_ofs_jt65];    //s1b=s1b + s1save(-255:256,1:126,i)
         }
-        syncsum+=syncsave_jt65[i];
-        dtsum+=dtsave_jt65[i];
-        nfsum+=nfsave_jt65[i];
         cused_jt65[i]='$';
         iused_jt65[nsum]=i;
         //qDebug()<<"SUM FROM="<<iutc_jt65[i];
@@ -4259,8 +4251,6 @@ void DecoderMs::jt65_decode(double *dd,int npts,int mode65)
     //bool clearave = false;// iztriva avrg datata parvona4alno go pravi ->first_avg65
     int ndecoded=0;//-1
     int minsync = G_MinSigdB; //-30 0 db za sync
-    int ntry65a = 0; //poznave na kakvo e sinc
-    int ntry65b = 0; //poznave na kakvo e sinc
     double flip = 0.0;
 
     /*int ndepth = 0;//1.49 ndepth 0=no, 1=avg, 2=avg+deep search    old-> avg=16  hint65=32
@@ -4692,8 +4682,6 @@ void DecoderMs::jt65_decode(double *dd,int npts,int mode65)
                 nflip=0;
             }// goto next_cand;
             //qDebug()<<"nfliSSSSSSSSSSSSSSSS="<<nflip<<sync1<<minsync;
-            if (ipass==1) ntry65a++; //if(ipass.eq.1) ntry65a=ntry65a + 1
-            if (ipass==2) ntry65b++; //if(ipass.eq.2) ntry65b=ntry65b + 1
             nft=0;
             nspecial=0;
             double sync_sh_single;

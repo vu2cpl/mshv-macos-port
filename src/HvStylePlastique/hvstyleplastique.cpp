@@ -2416,14 +2416,13 @@ static QString elliditide(const QString &text, const QFontMetrics &fontMetrics, 
         {
             leftHalf.chop(1);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)//2.56
-            int width = fontMetrics.horizontalAdvance(leftHalf + ellipsis + rightHalf);
+            width = fontMetrics.horizontalAdvance(leftHalf + ellipsis + rightHalf);
 #else
-            int width = fontMetrics.width(leftHalf + ellipsis + rightHalf);
+            width = fontMetrics.width(leftHalf + ellipsis + rightHalf);
 #endif
             if (width < rect.width())
             {
                 title = leftHalf + ellipsis + rightHalf;
-                width = width;
                 break;
             }
             rightHalf.remove(0, 1);
@@ -2435,7 +2434,6 @@ static QString elliditide(const QString &text, const QFontMetrics &fontMetrics, 
             if (width < rect.width())
             {
                 title = leftHalf + ellipsis + rightHalf;
-                width = width;
                 break;
             }
         }
@@ -3795,7 +3793,6 @@ void HvStylePlastique::drawControl(ControlElement element, const QStyleOption * 
             QPoint leftMost;
             QPoint leftOne;
             QPoint rightOne;
-            QPoint upOne(0, -1);
             QPoint downOne(0, 1);
 
             if (toolBox->direction != Qt::RightToLeft)
