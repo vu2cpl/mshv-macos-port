@@ -1100,8 +1100,15 @@ void DecoderMs::SetNexColor(bool f)
 }
 void DecoderMs::SetBackColor()
 {
-    if (f_back_color) f_back_color = false;
-    else f_back_color = true;
+    if (f_back_color)
+    {
+        f_back_color = false;
+    }
+    else
+    {
+        f_back_color = true;
+    }
+
     emit EmitBackColor(f_back_color);
 }
 void DecoderMs::wsjt1_mtdecode(double*raw_in,int count_in,bool pick)
