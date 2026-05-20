@@ -4,6 +4,8 @@
  */
 #include "hvcty.h"
 #include <QTextStream>
+#include <QDir>
+#include <QDebug>
 
 //#include <QtGui>
 
@@ -52,10 +54,14 @@ QStringList HvCty::GetCountries()
 }
 void HvCty::ReadCtyDat()
 {
-    QString path = (QCoreApplication::applicationDirPath());
-    path.append("/settings/database/cty.dat");
+    QString path = QDir::homePath();
+    path.append("/Library/Application Support/MSHV/settings/database/cty.dat");
     QFile file(path);
-    if (!file.open(QIODevice::ReadOnly)) return;
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "cty.dat not found:" << path;
+        return;
+    }
     QTextStream in(&file);
     QString line = "";
     //int c_lines = 0;

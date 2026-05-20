@@ -195,9 +195,7 @@ mv "$CLEAN" "$APP"
 # override the auto-detected identity if they have multiple certs.
 SIGN_IDENTITY="${DEVELOPER_ID_APPLICATION:-}"
 if [[ -z "$SIGN_IDENTITY" ]]; then
-    SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null \
-        | grep "Developer ID Application" | head -1 \
-        | awk -F'"' '{print $2}')"
+    SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null | awk -F'"' '/Developer ID Application/ {print $2; exit}')"
 fi
 ENTITLEMENTS="$REPO/macos/entitlements.plist"
 # No `| tail -N` here — codesign emits one error line per failing nested

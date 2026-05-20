@@ -2181,7 +2181,6 @@ void PomFt::osd174_91_1(double *llr,/*int Keff=91*/bool *apmask,int ndeep,bool *
         cw[i]=c0[i];
 
     int nt=0;
-    int nrejected=0;
 
     int nord = 0;
     int npre1 = 0;
@@ -2351,8 +2350,6 @@ void PomFt::osd174_91_1(double *llr,/*int Keff=91*/bool *apmask,int ndeep,bool *
                         //nd1Kptbest=nd1Kpt;
                     }
                 }
-                else
-                    nrejected++;
             }
             /*QString sss = "";///gen_osd174_[174][87];
             for (int z= 0; z < 87; z++)//decoded=87   cw-174 
