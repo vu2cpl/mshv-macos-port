@@ -4,8 +4,10 @@
  */
 #include "hvcty.h"
 #include <QTextStream>
-#include <QDir>
 #include <QDebug>
+#if defined _MACOS_
+#include "../mshv_app_path.h"
+#endif
 
 //#include <QtGui>
 
@@ -54,8 +56,21 @@ QStringList HvCty::GetCountries()
 }
 void HvCty::ReadCtyDat()
 {
-    QString path = QDir::homePath();
-    path.append("/Library/Application Support/MSHV/settings/database/cty.dat");
+#if defined _MACOS_
+    // MAC FIX — applicationDirPath() points at MSHV.app/Contents/MacOS/,
+    // but cty.dat is seeded to the Library tree by mshv_app_data_path()
+    // at first launch. Without this branch the prefix database stays
+    // empty on Mac and every FilndDbPfx() returns false — silently
+    // breaking the Hide-Continent / Show-Country / Show-Prefix filters
+    // that depend on callsign→DXCC resolution. Upstream MSHV's path-
+    // via-applicationDirPath assumption is correct on Linux/Windows
+    // where the executable sits next to its settings/ directory; only
+    // the Mac bundle layout differs.
+   QString path = mshv_app_data_path() + "/settings/database/cty.dat";
+#else
+   QString path = (QCoreApplication::applicationDirPath());
+   path.append("/settings/database/cty.dat");
+#endif
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
     {
