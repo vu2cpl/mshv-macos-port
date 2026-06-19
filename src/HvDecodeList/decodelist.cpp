@@ -450,7 +450,10 @@ void DecodeList::ItemSelectedText(QString str,int in_column,int in_row)
                 if (!model.item(in_row, 4)->text().isEmpty())// vavno moze i da e prazno
                     tx_rpt = model.item(in_row, 4)->text();
             }
-            else tx_rpt = model.item(in_row, 3)->text();
+            else
+            {
+                tx_rpt = model.item(in_row, 3)->text();
+            }
 
             //2.02 need first for Queued
             emit ListSelectedTextAll(model.item(in_row, 6)->text(),str,model.item(in_row, 0)->text(),

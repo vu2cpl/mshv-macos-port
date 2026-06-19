@@ -1818,7 +1818,6 @@ QString RadioAndNetW::URLEncode(QString strEncode)
     for (int i = 0; i < strSrc.count(); ++i)
     {
         QChar ch = strSrc[i];
-        if (ch < ' ') ch = ch;  //??? if (ch < ' ') qDebug()<<(int)ch.toLatin1()<<(int)' ';
         if (!isUnsafe(ch)) strDest += ch;// Safe Character
         else strDest += convert(ch);     // get Hex Value of the Character
     }

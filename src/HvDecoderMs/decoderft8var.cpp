@@ -345,7 +345,7 @@ void DecoderFt8::tone8(bool lmycallstd,bool lhiscallstd)//double complex csynce[
             idtonecqdxcns[z]=itone[z+7];//idtonecqdxcns(1:29)=itone(8:36)
             idtonecqdxcns[z+29]=itone[z+43];//idtonecqdxcns(30:58)=itone(44:72)
         }
-        msg37=="<AA1AAA> "+hiscall+" 73";//msg37='<AA1AAA> '//trim(hiscall)//' 73'
+        msg37="<AA1AAA> "+hiscall+" 73";
         TGenFt8->pack77_make_c77_i4tone(msg37,itone);
         for (int z = 0; z < 29; ++z)
         {
@@ -4704,7 +4704,7 @@ c8:
         }
         //bool lfoxstdr73=false;//HV stop hound
         //bool lfoxspecrpt=false;//HV stop hound
-        int nfoxspecrpt=0; //! checking fo special message with report to mybcall
+        [[maybe_unused]] int nfoxspecrpt=0; //! checking fo special message with report to mybcall
         if (lhound)
         {
             //int nfoxstdbase=0; //! checking for report signal and base of RR73 signal
@@ -4714,8 +4714,8 @@ c8:
             double fdeltam=fmod(fdelta,60.0);//c++   ==.EQ. !=.NE. >.GT. <.LT. >=.GE. <=.LE.
             if (fdelta<245.0 && fdeltam<3.0 && (nQSOProgress==1 || nQSOProgress==3)) //! calculate on possible Fox frequencies only
             {
-                int nfoxstdbase=0; //! checking for report signal and base of RR73 signal
-                int nfoxspecr73=0; //! checking fo special message with RR73 to mybcall
+                [[maybe_unused]] int nfoxstdbase=0; //! checking for report signal and base of RR73 signal
+                [[maybe_unused]] int nfoxspecr73=0; //! checking fo special message with RR73 to mybcall
                 //int nfoxr73=0; //! checking for RR73 signal with standard message
                 for (int i = 0; i < 18; ++i)
                 {//do i=1,18
@@ -4745,7 +4745,7 @@ c8:
                 if (rspecstdrpt>1.0) lfoxspecrpt=true;*/
                 if (nQSOProgress==3)
                 {
-                    int nfoxr73=0;
+                    [[maybe_unused]] int nfoxr73=0;
                     for (int i = 23; i < 58; ++i)
                     {//do i=24,58 //c++   ==.EQ. !=.NE. >.GT. <.LT. >=.GE. <=.LE.
                         if (i<29) ip=pomAll.maxloc_da_beg_to_end(s8_[i+7],0,8);//ip=maxloc(s8(:,i+7))

@@ -948,8 +948,14 @@ void Network::initAll()
             return;
         }
         isGetRadio = true;//2.76.1
-        if (cretr_nt == 0 || cretr_nt == 1) writeData("\\get_rig_info\n",false,NULL);
-        else writeData("\\chk_vfo\n",false,NULL);
+        if (cretr_nt == 0 || cretr_nt == 1)
+        {
+            writeData("\\get_rig_info\n",false,NULL);
+        }
+        else
+        {
+            writeData("\\chk_vfo\n",false,NULL);
+        }
         emit EmitNetConnInfo("<font color='red'>"+tr("Connecting to")+" "+s_nethost+" "+tr("Port")+" "+s_netport+"  "+tr("Try")+": "+QString("%1").arg(cretr_nt)+"</font>",true,false);
     }
     else if (s_ModelID==6)//FlexRadio 6xxx
@@ -1579,9 +1585,15 @@ void Network::readNet()
                 else if (idn=="907") idn = "Flex-6300";
                 else if (idn=="908") idn = "Flex-6400";
                 else if (idn=="909") idn = "Flex-6600";
-                else idn.prepend("ID");
+                else
+                {
+                    idn.prepend("ID");
+                }
                 emit EmitNetConnInfo("<font color='#00b300'>"+tr("Connected to")+" "+s_nethost+" "+tr("Port")+" "+s_netport+" - RIG:"+idn+" -</font>",true,true);
-                if (idn.startsWith("Flex-")) emit EmitFullRigInfo("FlexRadio "+idn);
+                if (idn.startsWith("Flex-"))
+                {
+                    emit EmitFullRigInfo("FlexRadio "+idn);
+                }
             }
         }
         else if ((s_CmdID==GET_FREQ || s_CmdID==GET_MODE) && sba.count()>36 && sba.mid(0,2) == "IF")

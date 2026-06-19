@@ -16,7 +16,9 @@
 //
 // Define BOOST_GCC so we know this is "real" GCC and not some pretender:
 //
+#ifndef BOOST_GCC_VERSION
 #define BOOST_GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#endif
 #if !defined(__CUDACC__)
 #define BOOST_GCC BOOST_GCC_VERSION
 #endif
