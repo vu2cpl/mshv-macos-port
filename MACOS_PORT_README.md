@@ -60,7 +60,7 @@ open --stderr /tmp/mshv.stderr bin/MSHV.app
 | `cbb900e` | App icon (`MSHV.icns`); restore `TCI Client Input/Output` entries to device dropdown (Mac branch was returning early before they got appended) |
 | `feae112` | TCI auto-connect with FlexRadio bridges. WebSocket lifecycle race fix (no `moveToThread` on Mac); `deleteLater` instead of `delete` to avoid disconnect crash; recognise AetherSDR's proactive `vfo:0,0,FREQ;` notification at connect; bumped TCI init retry from 5 to 20; deferred initial connect 1.5 s |
 | `3046141` | "SDR ON/OFF" indicator refreshes when start/stop state changes (was painted once at init, then stale) |
-| `f717734` | UDP broadcast identifies as `WSJT-X MSHV` so RUMlogNG's DXSpots accepts our decode messages |
+| `f717734` | ~~UDP broadcast identifies as `WSJT-X MSHV` so RUMlogNG's DXSpots accepts our decode messages~~ — **reverted**: broadcast now identifies as plain `MSHV` (matches upstream). JTDX/WSJT-X use plain client names and downstream tools accept them fine, so the RUMlog-specific `WSJT-X` prefix was dropped |
 | `85c1ff6` | Network configuration tabs defer IP/host validation to `editingFinished`; partial input no longer triggers DNS lookup or the red "UDP server lookup failed" flash on every keystroke |
 
 Plus a number of small fixes during the same sessions: the

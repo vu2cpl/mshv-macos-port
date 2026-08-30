@@ -1627,17 +1627,7 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     //qDebug()<<"Time===========================";
 
     if (!inst.isEmpty()) inst = " -"+inst;
-#if defined _MACOS_
-    // RUMlogNG's DXSpots window filters incoming decodes by WSJT-X client
-    // identity. Logged-QSO messages get accepted from any sender, but the
-    // decode/spot path only displays decodes coming from a "WSJT-X"-style
-    // client id. Identify as "WSJT-X MSHV..." so RUMlog treats us as a
-    // WSJT-X-compatible decode source while keeping the original "MSHV"
-    // suffix for our own diagnostics.
-    m_messageClientBroad = new MessageClient {"WSJT-X MSHV"+inst,VER_MS,"",2237,true,this};
-#else
     m_messageClientBroad = new MessageClient {"MSHV"+inst,VER_MS,"",2237,true,this};
-#endif
     //m_messageClientBroad = new MessageClient {"MSHV ID:14MHz",VER_MS,"",2237,true,this};
     connect(m_messageClientBroad, SIGNAL(error(QString)), this, SLOT(networkErrorUDPBrodcast(QString)));
     connect(m_messageClientBroad, SIGNAL(replay()), this, SLOT(replayDecodes()));
