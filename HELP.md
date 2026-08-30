@@ -207,7 +207,7 @@ If your USB-CAT cable doesn't show up:
 - IP: `127.0.0.1`
 - Port: `2237` (RUMlogNG's default — verify in RUMlogNG's
   preferences)
-- Identify as: `WSJT-X MSHV`
+- Identify as: `MSHV`
 
 RUMlogNG's DXSpots window will start showing decoded text. QSO
 Logged messages also flow through (logged contacts auto-populate
