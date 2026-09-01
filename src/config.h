@@ -29,7 +29,13 @@
 #define APP_NAME "MSHV version " VER_MS    //c11++ intervaly -> "MSHV version " VER_MS
 #endif
 #if defined _MACOS_
-#define APP_NAME "MSHV version " VER_MS " (macOS)"
+// macOS-port release revision. Manually bumped for each -mac<N> release tag
+// (the current published release is v2.76.6-mac3; these changes ship as mac4).
+// Keep this in step with the git release tag.
+#define MSHV_MAC_REV 4
+// Window-title / About identity, e.g. "MSHV macOS 2.76.6 mac4" (main_ms
+// inserts the band after "MSHV": "MSHV 28 MHz macOS 2.76.6 mac4 …").
+#define APP_NAME "MSHV macOS " VER_MS " mac" TOSTR0(MSHV_MAC_REV)
 #endif
 
 #define DATA_HEIGHT         150

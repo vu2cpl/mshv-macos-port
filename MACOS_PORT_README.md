@@ -62,6 +62,7 @@ open --stderr /tmp/mshv.stderr bin/MSHV.app
 | `3046141` | "SDR ON/OFF" indicator refreshes when start/stop state changes (was painted once at init, then stale) |
 | `f717734` | UDP broadcast identifies as `WSJT-X MSHV` so RUMlogNG's DXSpots accepts our decode messages |
 | `85c1ff6` | Network configuration tabs defer IP/host validation to `editingFinished`; partial input no longer triggers DNS lookup or the red "UDP server lookup failed" flash on every keystroke |
+| `v2.76.6-mac4` | Simplified UDP Broadcast gains a Status line (green "sent hh:mm:ss" / red "not connected") and a Reconnect button, mirroring the WSJT-X path — a QSO that fails to send is no longer dropped silently; window title + About box now show the build as `MSHV macOS 2.76.6 mac4`; perf — data-dir resolver caches its bundle-seed scan (was repeated every call) and the audio capture path no longer heap-allocates per 5 ms tick |
 
 Plus a number of small fixes during the same sessions: the
 band-switcher list (just edit `def_band_bt_sw` in `ms_settings`),

@@ -402,6 +402,10 @@ private:
     QCheckBox *cb_udp2adif;
     QLineEdit *udp2_Server;
     QLineEdit *udp2_Port;
+#if defined _MACOS_
+    QLabel *l_udp2_info;              // F4 — Simplified UDP delivery status
+    QPushButton *pb_re_conect_udp2;  // F4 — Simplified UDP manual reconnect
+#endif
 
     QTcpSocket *socet_tcp_broad;
     QLineEdit *TCPServerBroad;
@@ -525,6 +529,9 @@ private slots:
     void cb_clublog_toggled();
     void UplClubLogAdif();
     void StartStopUdp2Broad(bool);
+#if defined _MACOS_
+    void ReconnectUdp2Broad();//F4 — force a fresh Simplified UDP connect
+#endif
   	//void connected_qrzlog();
   	//void disconnected_qrzlog();
     void cb_qrzlog_toggled();

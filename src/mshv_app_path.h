@@ -56,23 +56,33 @@ static inline void mshv_copy_tree_if_missing(const QString &src, const QString &
 static inline QString mshv_app_data_path()
 {
 #if defined _MACOS_
-    const QString user_path = QDir::homePath() + "/Library/Application Support/MSHV";
-    const QString bundle_resources = QDir::cleanPath(
-        QCoreApplication::applicationDirPath() + "/../Resources");
+    // The seed walk below (one mkpath plus six recursive scans of the bundle's
+    // Resources/, QFile::exists()-ing every destination) produces the same
+    // answer every time and only needs to run once per process. It used to run
+    // on every call — so cache it in a function-local static computed on first
+    // use (F6). cp -n semantics are preserved: the seeding still happens
+    // exactly once, at the first call, and never overwrites existing Library
+    // data. The magic-static init is thread-safe under C++11.
+    static const QString cached = []() -> QString {
+        const QString user_path = QDir::homePath() + "/Library/Application Support/MSHV";
+        const QString bundle_resources = QDir::cleanPath(
+            QCoreApplication::applicationDirPath() + "/../Resources");
 
-    QDir().mkpath(user_path);
+        QDir().mkpath(user_path);
 
-    // Subdirs MSHV writes to. Only present in the bundle as seed data; the
-    // app reads/writes the Library copy at runtime. Seeding is cp -n style —
-    // existing user data in Library is never overwritten.
-    static const char *subdirs[] = {
-        "settings", "log", "AllTxtMonthly", "ExportLog", "RxWavs", "Screenshots"
-    };
-    for (const char *sub : subdirs)
-        mshv_copy_tree_if_missing(bundle_resources + "/" + sub,
-                                   user_path        + "/" + sub);
+        // Subdirs MSHV writes to. Only present in the bundle as seed data; the
+        // app reads/writes the Library copy at runtime. Seeding is cp -n
+        // style — existing user data in Library is never overwritten.
+        static const char *subdirs[] = {
+            "settings", "log", "AllTxtMonthly", "ExportLog", "RxWavs", "Screenshots"
+        };
+        for (const char *sub : subdirs)
+            mshv_copy_tree_if_missing(bundle_resources + "/" + sub,
+                                       user_path        + "/" + sub);
 
-    return user_path;
+        return user_path;
+    }();
+    return cached;
 #else
     return QCoreApplication::applicationDirPath();
 #endif

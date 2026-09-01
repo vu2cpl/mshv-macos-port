@@ -19,6 +19,14 @@ static bool s_pa_in_initialized = false;
 static bool s_pa_in_is_float = false;
 static int  s_pa_in_chan_capt = 2;
 
+// Scratch buffer for the 24-bit->int24 normalisation below. alsa_read_sound()
+// is driven by the 5 ms tick, so the old `new int[]`/`delete[]` here was a
+// malloc/free pair a few hundred times a second on a path that must not stall
+// (F7). nSamples is bounded by SAMP_BUFFER_SIZE, and cSamples_l/cSamples_r are
+// already fixed-size members sized SAMP_BUFFER_SIZE+1000 — this one matches
+// them. The capture path is single-threaded, so a file-static is safe.
+static int s_scratch_dat_t[SAMP_BUFFER_SIZE + 1000];
+
 static void ensure_pa_in_init()
 {
     if (!s_pa_in_initialized)
@@ -304,11 +312,10 @@ int MsCore::alsa_read_sound()
     // input arrives 256x hotter than 16-bit, pegging the waterfall and
     // saturating the decoder. Normalising here brings 24-bit to parity
     // with 16-bit downstream without touching upstream code.
-    int *dat_t = new int[nSamples + 10];
+    int *dat_t = s_scratch_dat_t;   // reused each tick — see decl (F7)
     for (int j = 0; j < nSamples; ++j)
         dat_t[j] = cSamples_l[j] / 256;
     ResampleAndFilter(dat_t, nSamples);
-    delete [] dat_t;
 
     return nSamples;
 }
