@@ -207,11 +207,23 @@ If your USB-CAT cable doesn't show up:
 - IP: `127.0.0.1`
 - Port: `2237` (RUMlogNG's default — verify in RUMlogNG's
   preferences)
-- Identify as: `MSHV`
+- Identify as: `WSJT-X MSHV`
 
 RUMlogNG's DXSpots window will start showing decoded text. QSO
 Logged messages also flow through (logged contacts auto-populate
 RUMlogNG's QSO entry).
+
+The `WSJT-X` prefix in the id is what makes RUMlogNG accept our
+decodes and drive its callsign lookup; the ` MSHV` suffix just
+distinguishes us from a real WSJT-X in network-status views.
+
+**Callsign → RUMlogNG search:** clicking a decode/spot sends the
+DX callsign to RUMlogNG (its search populates), and so does typing
+a call into the "TO RADIO:" field in **normal** operation. The one
+exception is **Multi-Answer (MA)** mode (FT8/FT4/Q65): there a
+*typed* callsign is not broadcast (upstream MSHV suppresses the
+single-DX status update in MA), so use a decode/spot click to push
+the call to RUMlogNG in that mode.
 
 ### Other loggers
 
