@@ -3748,6 +3748,40 @@ void RadioAndNetW::DecodUpdTimer()
 }
 void RadioAndNetW::SaveSettings()
 {
+    // PRESERVE-UNKNOWN-LINES (2026-09-02). Before truncating ms_stinfonet,
+    // capture every key=value line this build does NOT itself write, and
+    // re-append it verbatim at the very end (below). A settings writer must
+    // never delete keys it doesn't understand: a data dir may have been
+    // written by a build carrying a wider settings schema (extra keys this
+    // build has no widgets for), and rewriting the file without preserving
+    // those lines would destroy that data. Carry-over lines are appended
+    // AFTER all known keys, which keeps the order-sensitive ReadSettings()
+    // parser correct (a wider schema only ever appends its extra keys at the
+    // end, so their file position round-trips).
+    static const QStringList knownKeys = {
+        "udp_server","udp_port","psk_spot_val","st_info_all","dx_spot_telnet_val",
+        "tcp_server","tcp_port","udp_broad_server","udp_broad_port","udp_broad_log_all",
+        "psk_udp_tcp","tcp_broad_log_all","tcps_club_log_all","udp2_broad_all",
+        "tcps_qrz_log_all","def_wr_status","tcp_eqsl_log_all","tcp_otp_all",
+        "otp_servers_list","tcp_pass",
+    };
+    QStringList carryOver;
+    {
+        QFile inf(sr_path);
+        if (inf.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream is(&inf);
+            while (!is.atEnd())
+            {
+                const QString l = is.readLine();
+                const int eq = l.indexOf('=');
+                if (eq <= 0) continue;                       // skip blanks / non key=value
+                if (!knownKeys.contains(l.left(eq))) carryOver << l;
+            }
+            inf.close();
+        }
+    }
+
     QFile file(sr_path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
     QTextStream out(&file);
@@ -3805,7 +3839,11 @@ void RadioAndNetW::SaveSettings()
    	}
     out<<"otp_servers_list="<<sada<<"\n";
     out << "tcp_pass=" << TCPPass->text() << "\n";
-    
+
+    // PRESERVE-UNKNOWN-LINES: re-emit any lines from a richer/newer schema
+    // untouched, so this build never destroys them. See top of function.
+    for (const QString &l : carryOver) out << l << "\n";
+
     file.close();
 }
 bool RadioAndNetW::isFindId(QString id,QString line,QString &res)
