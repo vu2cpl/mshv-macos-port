@@ -1,8 +1,9 @@
 # MSHV macOS port
 
 Native macOS port of [LZ2HV/MSHV](https://github.com/LZ2HV/MSHV).
-Apple Silicon (arm64) only — Homebrew Qt 5 is single-arch, so the
-prebuilt binary won't run on Intel Macs. Verified end-to-end against
+Prebuilt, notarised binaries for both **Apple Silicon (arm64)** and
+**Intel (x86_64)** Macs are attached to each release — see `README.md`
+and `HELP.md` for which zip to pick. Verified end-to-end against
 FlexRadio 6000-series via AetherSDR's TCI bridge for RX/TX with the
 WSJT-X UDP broadcast feeding RUMlogNG's DXSpots window.
 
@@ -63,6 +64,7 @@ open --stderr /tmp/mshv.stderr bin/MSHV.app
 | `f717734` | UDP broadcast identifies as `WSJT-X MSHV` so RUMlogNG's DXSpots accepts our decode messages |
 | `85c1ff6` | Network configuration tabs defer IP/host validation to `editingFinished`; partial input no longer triggers DNS lookup or the red "UDP server lookup failed" flash on every keystroke |
 | `v2.76.6-mac4` | Simplified UDP Broadcast gains a Status line (green "sent hh:mm:ss" / red "not connected") and a Reconnect button, mirroring the WSJT-X path — a QSO that fails to send is no longer dropped silently; window title + About box now show the build as `MSHV macOS 2.76.6 mac4`; perf — data-dir resolver caches its bundle-seed scan (was repeated every call) and the audio capture path no longer heap-allocates per 5 ms tick |
+| `v2.76.6-mac6` | Settings preservation — `SaveSettings` now carries over any `ms_stinfonet` line it doesn't itself write, so an older or differently-configured MSHV build sharing the same `~/Library/Application Support/MSHV` can no longer wipe keys it doesn't know about; window title + About box read `MSHV macOS 2.76.6 mac6` (mac5 skipped); this README no longer claims "Apple Silicon only" — both arm64 and x86_64 zips ship with every release. UDP broadcast id is unchanged (`WSJT-X MSHV`) until a public RUMlogNG release recognises `MSHV` natively |
 
 Plus a number of small fixes during the same sessions: the
 band-switcher list (just edit `def_band_bt_sw` in `ms_settings`),
