@@ -139,6 +139,9 @@ private:
     QRadioButton *rb_right_ch;
     int f_tci_restr;//tci
     void TciDevSelectAndRestr();//tci
+    void FlexDevSelectAndRestr();//flex native vita-49
+    static QString FlexNativeInputName(int ch);
+    static int FlexNativeChannelOf(QString name);
 
 };
 #endif

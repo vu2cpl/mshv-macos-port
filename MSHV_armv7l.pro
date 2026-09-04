@@ -91,6 +91,8 @@ HEADERS = src/main_ms.h \
  src/HvRigControl/HvRigCat/racal/racal.h \
  src/HvRigControl/HvRigCat/sdrs/sdrs.h \
  src/HvRigControl/HvRigCat/network/network.h \
+ src/HvRigControl/HvRigCat/flexvita/flexvita.h \
+ src/HvRigControl/HvRigCat/flexvita/flexpanel.h \
  src/HvRigControl/HvRigCat/mits/mits.h \
  src/HvRigControl/qexsp_1_2rc/qextserialport.h \
  src/HvRigControl/qexsp_1_2rc/qextserialenumerator.h \
@@ -207,6 +209,8 @@ SOURCES = src/main.cpp \
  src/HvRigControl/HvRigCat/racal/racal.cpp \
  src/HvRigControl/HvRigCat/sdrs/sdrs.cpp \
  src/HvRigControl/HvRigCat/network/network.cpp \
+ src/HvRigControl/HvRigCat/flexvita/flexvita.cpp \
+ src/HvRigControl/HvRigCat/flexvita/flexpanel.cpp \
  src/HvRigControl/HvRigCat/mits/mits.cpp \
  src/HvRigControl/qexsp_1_2rc/qextserialport.cpp \
  src/HvRigControl/qexsp_1_2rc/qextserialport_unix.cpp \

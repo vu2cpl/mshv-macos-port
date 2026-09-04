@@ -42,6 +42,23 @@ struct netSP
 #include "HvRigCat/network/network_def.h"
 //#define COU_NET_PS NETWORK_COUNT
 static netSP netServPort[NETWORK_COUNT];
+
+// Radio address for the Native Flex VITA-49 audio backend (flexvita.cpp).
+// The eight FlexRadio SmartSDR Slice models occupy netServPort[7..14] and all
+// carry the same radio address, so the operator configures it once in Rig
+// Control and the audio backend reuses it rather than duplicating a setting.
+QString _GetFlexNativeHost_()
+{
+    // Slice A..H are netServPort[7..14] and all address the same radio, so
+    // accept whichever slice the operator actually filled in rather than
+    // insisting on Slice A.  "RIG IP Addr" is the unconfigured placeholder.
+    for (int i = 7; i < NETWORK_COUNT && i <= 14; ++i)
+    {
+        const QString h = netServPort[i].serv.trimmed();
+        if (!h.isEmpty() && h != "RIG IP Addr") return h;
+    }
+    return QString();
+}
 struct netTciCS
 {
 	QString srate;
@@ -2023,6 +2040,11 @@ void HvRigControl::TimerTryStaticTxF()
 }
 void HvRigControl::SetPtt(bool flag, int id)//id 0=All 1=p1 2=p2
 {
+    // NOTE: Native Flex keying is NOT hooked here.  This is called separately
+    // for the master (id 0) and for each PTT line (id 1, id 2), so keying off
+    // it produced an unkey/re-key inside a single transmission -- audible as a
+    // double relay click on the radio.  The Flex hook lives at the single
+    // authoritative TX transition, Main_Ms::SetRigTxRx().
     bool all_sttx = false;  //ft8  ft4 q65
     if (f_static_tx && all_static_tx_modes) all_sttx = true;
     bool all_qrg = false;  //msk fsk

@@ -159,8 +159,17 @@ void _SetTciBuffReset_()
     _flush_raw_   = 2;
     //qDebug()<<"_SetTciBuffReset_==============="<<STREAM_C<<BUF_OFFSET<<BUF_MAXOFFSET<<BUF_MAX;
 }
+// Native Flex VITA-49 transmit backend (flexvita.cpp).  Declared here rather
+// than pulling in the header so this file keeps its existing includes.
+extern bool _FlexVitaTxActive_();
+extern bool _SetTxAudioFlex_(int *raw);
+
 bool _SetTxAudioTci_(int *raw)//, int size
 {
+    // Rawplayer feeds every network transport through this one entry point;
+    // hand the block to Flex when that is the active output device.
+    if (_FlexVitaTxActive_()) return _SetTxAudioFlex_(raw);
+
     exit_txaudio = 750;   //2.57 old=800x5000=4,5s old=900x4000=4,5s  max-wait-time ic53=3200 pG10=3900 ic57=3600 ic59=3700
     while (1)  //max-wait-time need to be > max buffer time
     {

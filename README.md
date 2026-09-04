@@ -36,6 +36,27 @@ WAVs, screenshots) lives in
 `~/Library/Application Support/MSHV/`. Replacing the bundle with a
 new release does **not** wipe your data.
 
+## Native FlexRadio support (new in mac8)
+
+If you run a **FLEX-6000/8000**, MSHV can now talk to the radio directly
+over its own SmartSDR/VITA-49 protocol — **no SmartSDR running, no TCI
+bridge, no DAX virtual audio device, no third-party library**. Receive
+and transmit both go straight between MSHV and the radio.
+
+Set Rig Control to `FlexRadio SmartSDR Slice A TCP` with the radio's IP,
+then pick **`Flex Native Input`** and **`Flex Native Output`** in
+Settings. The radio address is read back from the rig entry, so it is
+entered once. `Flex Native Input DAX 2..8` selects a different DAX
+channel if you are sharing the radio with another DAX application.
+
+A **`Flex`** button then appears in the status row, next to a live
+forward-power / SWR readout. It opens a small panel with forward power,
+SWR, reflected power, ALC, PA temperature and supply voltage, plus RX
+antenna, TX antenna and mode — all read from, and written to, the radio.
+
+TCI with AetherSDR remains fully supported and is still the right choice
+for non-Flex SDRs; see `HELP.md`.
+
 ## Help & setup guide
 
 [`HELP.md`](HELP.md) covers macOS-specific setup: recommended TCI

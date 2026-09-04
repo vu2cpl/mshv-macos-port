@@ -286,6 +286,27 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     //QFont tx_font = font();
     //tx_font.setPointSize(10);
     //tx_font.setBold(true);
+    // Native Flex VITA-49 meter: forward power + SWR read from the radio's own
+    // FWDPWR/REFPWR/SWR meters. Hidden unless the Flex backend is transmitting,
+    // so it is invisible to anyone not using a FlexRadio.
+    l_flex_meter = new QLabel("");
+    l_flex_meter->setFixedHeight(20);
+    l_flex_meter->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    l_flex_meter->setMinimumWidth(150);
+    l_flex_meter->setAlignment(Qt::AlignCenter);
+    l_flex_meter->setToolTip(tr("FlexRadio forward power and SWR"));
+    l_flex_meter->hide();
+    pb_flex_panel = new QPushButton("Flex");
+    pb_flex_panel->setFixedHeight(20);
+    pb_flex_panel->setFixedWidth(46);
+    pb_flex_panel->setToolTip(tr("FlexRadio meters, antenna and mode"));
+    pb_flex_panel->hide();
+    flex_panel = 0;
+    connect(pb_flex_panel, SIGNAL(clicked()), this, SLOT(ShowFlexPanel()));
+    timer_flex_meter = new QTimer(this);
+    connect(timer_flex_meter, SIGNAL(timeout()), this, SLOT(UpdateFlexMeter()));
+    timer_flex_meter->start(250);
+
     l_tx_text = new QLabel("Txing:");
     l_tx_text->setFixedHeight(20);
     //l_tx_text->setFont(tx_font);
@@ -1414,6 +1435,8 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     H_status->addWidget(TPicW);
     //H_status->setAlignment(TPicW,Qt::AlignLeft);
     H_status->addWidget(l_tx_text);
+    H_status->addWidget(l_flex_meter);
+    H_status->addWidget(pb_flex_panel);
     //H_status->setAlignment(l_tx_text,Qt::AlignHCenter);
     H_status->addWidget(THvSMeter_H);
     //H_centr->setAlignment(THvTxW, Qt::AlignRight);
@@ -2624,10 +2647,67 @@ void Main_Ms::ModeMenuStatRefresh(bool dea)
         W_mod_bt_sw->setDisabled(false);
     }
 }
+// Native Flex VITA-49 backend (flexvita.cpp).  A no-op unless the operator has
+// selected the Flex Native output device.
+extern void _FlexVitaSetPtt_(bool on);
+
+// Native Flex VITA-49 backend: live TX metering off the radio.
+extern bool _FlexVitaMeters_(double *fwd_w, double *ref_w, double *swr);
+extern bool _FlexVitaTxActive_();
+extern bool _FlexVitaRxActive_();
+#include "HvRigControl/HvRigCat/flexvita/flexpanel.h"
+
+void Main_Ms::UpdateFlexMeter()
+{
+    // Visible whenever the Flex backend is up, RX or TX -- not only while
+    // transmitting. Hiding it during receive meant the operator could never
+    // see that it existed, nor check SWR except mid-transmission.
+    if (!_FlexVitaRxActive_() && !_FlexVitaTxActive_())
+    {
+        if (l_flex_meter->isVisible()) { l_flex_meter->hide(); pb_flex_panel->hide(); }
+        return;
+    }
+    if (!l_flex_meter->isVisible()) { l_flex_meter->show(); pb_flex_panel->show(); }
+
+    double fwd = 0.0, ref = 0.0, swr = 0.0;
+    if (!_FlexVitaMeters_(&fwd, &ref, &swr))
+    {
+        // Backend is up but the radio has not sent a meter packet yet.
+        l_flex_meter->setText("Flex: --");
+        l_flex_meter->setStyleSheet("");
+        return;
+    }
+
+    l_flex_meter->setText(QString("%1 W   SWR %2")
+                          .arg(fwd, 0, 'f', (fwd < 10.0) ? 1 : 0)
+                          .arg(swr, 0, 'f', 2));
+
+    // Only colour on a genuinely high SWR, and only while actually producing
+    // power -- an idle radio reads SWR 1.00 and would otherwise flicker green.
+    if (fwd > 0.5 && swr >= 3.0)
+        l_flex_meter->setStyleSheet("QLabel{color:rgb(255,80,80);}");
+    else if (fwd > 0.5 && swr >= 2.0)
+        l_flex_meter->setStyleSheet("QLabel{color:rgb(255,180,60);}");
+    else
+        l_flex_meter->setStyleSheet("");
+}
+
+void Main_Ms::ShowFlexPanel()
+{
+    if (!flex_panel) flex_panel = new FlexPanel(dsty, this);
+    flex_panel->show();
+    flex_panel->raise();
+    flex_panel->activateWindow();
+}
+
 void Main_Ms::SetRigTxRx(bool f)
 {
     //qDebug()<<"SetRigTxRx...................."<<f;
     f_tx_busy = f;//2.47
+    // Flex Native keys over its own SmartSDR control session.  This is the one
+    // authoritative TX on/off in the app -- HvRigControl::SetPtt() is called
+    // once per PTT line (id 0/1/2) and hooking it double-keyed the radio.
+    _FlexVitaSetPtt_(f);
     THvRigControl->SetPtt(f,0);//id 0=All 1=p1 2=p2
     THvTxW->SetTxRxCountAutoSeq(f);
     if (f)

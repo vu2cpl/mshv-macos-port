@@ -485,15 +485,19 @@ void MsCore::SetupSettings_(QString dev_in_number,int bpsampl,int latency,int ca
     //if ((QString)rad_sound_state.dev_capt_name==dev_in_number)
     //qDebug()<<"mscore="<<(QString)rad_sound_state.dev_capt_name<<dev_in_number;
     QString str_device_name = (QString)rad_sound_state.dev_capt_name; //qDebug()<<"str_device_name="<<str_device_name;
-    if (str_device_name=="TCI Client Input")
-    {     	
+    // Network audio sources bypass the soundcard entirely and push samples in
+    // through _SetRxAudioTci_().  The Flex Native backend uses the same seam;
+    // s_tci_k_res0=-1 makes the real rate come from the first block's k_res,
+    // so 24000 (Flex) and 48000 (TCI) both settle correctly.
+    if (str_device_name=="TCI Client Input" || str_device_name.startsWith("Flex Native Input"))
+    {
         fftw_sample_rate = (int)ORG_SAMPLE_RATE_12000;
         in_sample_rate = (int)IN_SAMPLE_RATE_48000;//sample_rate.toInt();
         koef_resample = (int)((in_sample_rate/(int)ORG_SAMPLE_RATE_12000)-1);
         ftci = true;
-        s_tci_k_res0 = -1;//reset 	
-   	}	
-    else ftci = false;  	
+        s_tci_k_res0 = -1;//reset
+   	}
+    else ftci = false;
     tci_read_ = 0; //printf("SoundSetup Mode=%2d in_sample_rate=%d fftw_sample_rate=%d k_res=%d\n",s_mod_iden,in_sample_rate,fftw_sample_rate,koef_resample);
    	
     rad_sound_state.latency_millisecs = latency;//50 be6e hv 50-300

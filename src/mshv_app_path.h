@@ -64,7 +64,14 @@ static inline QString mshv_app_data_path()
     // exactly once, at the first call, and never overwrites existing Library
     // data. The magic-static init is thread-safe under C++11.
     static const QString cached = []() -> QString {
-        const QString user_path = QDir::homePath() + "/Library/Application Support/MSHV";
+        // Data-directory name is overridable at build time so a second,
+        // differently-named build can run ALONGSIDE the normal one without
+        // both writing the same ms_settings. Defaults to "MSHV".
+#ifndef MSHV_DATA_DIR_NAME
+#define MSHV_DATA_DIR_NAME "MSHV"
+#endif
+        const QString user_path = QDir::homePath()
+            + "/Library/Application Support/" + QString(MSHV_DATA_DIR_NAME);
         const QString bundle_resources = QDir::cleanPath(
             QCoreApplication::applicationDirPath() + "/../Resources");
 

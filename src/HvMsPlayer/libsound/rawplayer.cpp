@@ -74,7 +74,9 @@ bool Rawplayer::initialize(char *device_name)
     buff_hv = Rawplayer::buffering;
     
     QString str_device_name = (QString)device_name;
-    if (str_device_name=="TCI Client Output")
+    // Both network transports bypass the soundcard; putblock() dispatches to
+    // whichever one is active.
+    if (str_device_name=="TCI Client Output" || str_device_name=="Flex Native Output")
     {
         _SetTciBuffReset_();
         ftci = true;

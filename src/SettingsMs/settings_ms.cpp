@@ -528,6 +528,8 @@ void SettingsMs::SearchSoundDev()
         // need to appear in the dropdowns on every platform, including Mac.
         DevBoxIn->addItem("TCI Client Input");
         DevBoxOut->addItem("TCI Client Output");
+        for (int ch = 1; ch <= 8; ++ch) DevBoxIn->addItem(FlexNativeInputName(ch));
+        DevBoxOut->addItem("Flex Native Output");
         no_emit = false;
         return;
     }
@@ -721,6 +723,10 @@ next_card:
     DevBoxIn->addItem("TCI Client Input");
     DevBoxOut->addItem("TCI Client Output");
     //end tci
+    //flex native vita-49
+    for (int ch = 1; ch <= 8; ++ch) DevBoxIn->addItem(FlexNativeInputName(ch));
+    DevBoxOut->addItem("Flex Native Output");
+    //end flex
     no_emit = false;
 }
 void SettingsMs::SetDevices_Drv(QString dev_in,QString bpsampl,QString card_latency,//sample_rate not used
@@ -773,6 +779,49 @@ void SettingsMs::SetDevices_Drv(QString dev_in,QString bpsampl,QString card_late
 {
     SendDevDrv();
 }*/
+// Native Flex VITA-49 backend (flexvita.cpp) and the radio address already
+// configured for the FlexRadio SmartSDR rig models (hvrigcontrol.cpp).
+extern void _FlexVitaStart_(QString host, int dax_channel, bool want_tx);
+extern void _FlexVitaStop_();
+extern QString _GetFlexNativeHost_();
+
+// DAX channel is carried in the device name so it round-trips through the
+// existing saved-device setting with no new persistence.  Channel 1 keeps the
+// bare name for backward compatibility with settings written before channel
+// selection existed.
+QString SettingsMs::FlexNativeInputName(int ch)
+{
+    if (ch <= 1) return QString("Flex Native Input");
+    return QString("Flex Native Input DAX %1").arg(ch);
+}
+
+// Returns the DAX channel for a Flex Native input device name, or 0 if the
+// name is not one of ours.
+int SettingsMs::FlexNativeChannelOf(QString name)
+{
+    if (name == "Flex Native Input") return 1;
+    if (!name.startsWith("Flex Native Input DAX ")) return 0;
+    bool ok = false;
+    const int ch = name.mid(22).trimmed().toInt(&ok);
+    if (!ok || ch < 1 || ch > 8) return 0;
+    return ch;
+}
+
+void SettingsMs::FlexDevSelectAndRestr()//flex native vita-49
+{
+    const int  ch = FlexNativeChannelOf(DevBoxIn->currentText());
+    const bool rx = (ch > 0);
+    const bool tx = (DevBoxOut->currentText() == "Flex Native Output");
+    if (rx || tx)
+    {
+        const QString host = _GetFlexNativeHost_();
+        // TX shares the RX session's DAX channel; default to 1 for a
+        // transmit-only selection.
+        if (!host.isEmpty()) _FlexVitaStart_(host, rx ? ch : 1, tx);
+    }
+    else _FlexVitaStop_();
+}
+
 void SettingsMs::TciDevSelectAndRestr()//tci
 {
     int out = 0;
@@ -793,6 +842,8 @@ void SettingsMs::TciDevSelectAndRestr()//tci
         out = 1;
     }
     emit EmitTciSelect(out);//0=non 1=rx 2=tx 3=rx,tx
+
+    FlexDevSelectAndRestr();//flex native vita-49
 
     /*if (DevBoxOut->currentText()=="TCI Client Output")
     {

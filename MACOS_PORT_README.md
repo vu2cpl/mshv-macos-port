@@ -284,3 +284,30 @@ so a clean pull request is feasible.
 The exception: the QToolButton replacement in `hvlogw.cpp` is also
 useful on Linux/Windows when running with `setNativeMenuBar(false)`,
 which would make a more general upstream contribution.
+
+## Native FlexRadio VITA-49 backend (mac8)
+
+`src/HvRigControl/HvRigCat/flexvita/` — takes RX and TX audio straight
+off a FLEX-6000/8000 over the radio's own protocol, with no SmartSDR,
+TCI bridge or DAX virtual audio device in the path.
+
+It reuses the network-audio seam LZ2HV already built for TCI
+(`_SetRxAudioTci_`), so `mscore.cpp` needed one condition widened and the
+decoder is untouched. MSHV already spoke the SmartSDR command protocol
+for its eight `FlexRadio SmartSDR Slice A..H` rig models; only the audio
+half was missing.
+
+Measured protocol facts, since two of them are counter-intuitive:
+
+- DAX **receive** is 24 kHz float32 big-endian, stereo-interleaved with
+  L == R — not 48 kHz mono. De-interleaved it is natively one of MSHV's
+  input rates, so it reaches the decoder with no resampling at all.
+- DAX **transmit** is a different wire format, not the mirror of receive:
+  packet type 1, class `0x534C0123`, 284-byte packets carrying 128 mono
+  int16 big-endian samples, to UDP 4991. Send the receive form back and
+  the radio keys perfectly and emits nothing at all.
+- Meter scaling depends on the meter's **unit**: dBm/dBFS/SWR `/128`,
+  Volts `/256`, degC `/64`, RPM `/1`.
+
+The TX format is Dick Hale **W7PP**'s finding, from his GPLv3 WSJT-X
+fork; the implementation here is independent.
