@@ -30,11 +30,11 @@
 #endif
 #if defined _MACOS_
 // macOS-port release revision. Manually bumped for each -mac<N> release tag
-// (the current published release is v2.76.6-mac4; these changes ship as
-// mac6 — mac5 skipped). Keep this in step with the git release tag, and
+// (the previous published release was v2.76.6-mac8, 2026-09-04; these
+// changes ship as mac9). Keep this in step with the git release tag, and
 // check `gh release list` + `git ls-remote --tags origin` before picking
 // the next number.
-#define MSHV_MAC_REV 8
+#define MSHV_MAC_REV 9
 // Window-title / About identity, e.g. "MSHV macOS 2.76.6 mac6" (main_ms
 // inserts the band after "MSHV": "MSHV 28 MHz macOS 2.76.6 mac6 …").
 #define APP_NAME "MSHV macOS " VER_MS " mac" TOSTR0(MSHV_MAC_REV)
