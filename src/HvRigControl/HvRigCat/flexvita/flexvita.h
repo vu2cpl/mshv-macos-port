@@ -102,6 +102,8 @@ private:
     bool    ParseVita(const char *data, int len,
                       int *payload_offset, int *payload_bytes);
     int     FindOwnedSlice() const;
+    bool    SliceExists(int n) const;
+    int     ChooseSlice(int *created);
     void    Fail(QString why);
 
     QTcpSocket *control_;
@@ -126,6 +128,7 @@ private:
     int      dax_channel_;
     int      slice_id_;
     bool     slice_created_;   // only ever remove a slice we made ourselves
+    QString  slice_mismatch_;  // non-empty when audio and Rig Control disagree
     quint32  rx_stream_;
     quint32  tx_stream_;
 

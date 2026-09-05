@@ -50,6 +50,12 @@
 #include <math.h>
 #include <string.h>
 
+// Which slice the operator selected in Rig Control ("FlexRadio SmartSDR
+// Slice A..H TCP"), 0..7, or -1 for any other rig.  Defined in
+// hvrigcontrol.cpp beside _GetFlexNativeHost_(), so the radio address and the
+// slice both come from the one place the operator configures them.
+extern int _GetFlexNativeSlice_();
+
 // ---------------------------------------------------------------- TX buffer
 //
 // Mirrors the ring the TCI client uses, kept separate so that neither
@@ -249,6 +255,7 @@ FlexVita::FlexVita(QObject *parent)
     dax_channel_   = 1;
     slice_id_      = -1;
     slice_created_ = false;
+    slice_mismatch_.clear();
     rx_stream_     = 0;
     tx_stream_     = 0;
     rx_active_     = false;
@@ -437,6 +444,90 @@ int FlexVita::FindOwnedSlice() const
     return found;
 }
 
+// Does slice <n> exist on the radio at all, whoever owns it?  Slices come and
+// go, and the status stream reports both states, so the LAST line wins.
+bool FlexVita::SliceExists(int n) const
+{
+    const QString want = QString("|slice %1 ").arg(n);
+    bool exists = false;
+    for (int i = 0; i < log_.size(); ++i)
+    {
+        const QString l = log_.at(i);
+        if (!l.contains(want)) continue;
+        const QString low = l.toLower();
+        if (low.contains("in_use=1"))      exists = true;
+        else if (low.contains("in_use=0")) exists = false;
+    }
+    return exists;
+}
+
+// Pick the slice this session will source DAX audio from, and transmit on.
+//
+// It MUST be the slice the rig control tunes and reads, otherwise MSHV shows
+// one frequency and works another.  Until 2026-09-05 that was masked: the
+// rig control sent "slice set <n> tx=1" on every key, which dragged the
+// transmitter onto its own slice (and made the radio click its relays twice
+// doing it).  With that gone, the agreement has to be built in here.
+//
+// Order of preference:
+//   1. the slice selected in Rig Control ("Slice A..H TCP"), if it exists
+//   2. any slice this session already owns  -- prior behaviour
+//   3. create one
+//
+// Step 1 deliberately accepts a slice owned by somebody else.  The rig
+// control addresses that slice by number regardless of owner, so following it
+// is what keeps the two halves consistent; and `slice_created_` stays false,
+// so Stop() will never remove a slice it did not make.
+int FlexVita::ChooseSlice(int *created)
+{
+    *created = 0;
+
+    const int want = _GetFlexNativeSlice_();
+    if (want >= 0 && SliceExists(want))
+    {
+        slice_mismatch_.clear();
+        return want;
+    }
+
+    const int owned = FindOwnedSlice();
+    if (owned >= 0)
+    {
+        // Owning a different slice than the operator configured is a real
+        // misconfiguration, not a detail -- say so rather than working the
+        // wrong frequency silently.
+        if (want >= 0 && owned != want)
+            slice_mismatch_ = QString(" [!] rig control is set to Slice %1 "
+                                      "but audio is on slice %2")
+                                  .arg(QChar('A' + want)).arg(owned);
+        else
+            slice_mismatch_.clear();
+        return owned;
+    }
+
+    Command("slice create mode=digu");
+    QElapsedTimer t; t.start();
+    int made = -1;
+    while (t.elapsed() < 4000 && made < 0)
+    {
+        if (control_->waitForReadyRead(100)) ReadControl();
+        made = FindOwnedSlice();
+    }
+    if (made >= 0)
+    {
+        *created = 1;
+        // The radio assigns the index; we do not get to ask for one.  If it
+        // is not the configured slice, the operator has to point Rig Control
+        // at the matching letter -- so make that visible.
+        if (want >= 0 && made != want)
+            slice_mismatch_ = QString(" [!] rig control is set to Slice %1 "
+                                      "but audio is on slice %2")
+                                  .arg(QChar('A' + want)).arg(made);
+        else
+            slice_mismatch_.clear();
+    }
+    return made;
+}
+
 bool FlexVita::Start(QString host, int dax_channel, bool want_tx)
 {
     // Idempotent.  FlexDevSelectAndRestr() is reached from a mode change as
@@ -520,19 +611,9 @@ bool FlexVita::Start(QString host, int dax_channel, bool want_tx)
     // ---- slice ----
     // Needed for receive as well as transmit: a DAX RX stream carries audio
     // only while some slice is routed to that channel.
-    slice_id_ = FindOwnedSlice();
-    slice_created_ = false;
-    if (slice_id_ < 0)
-    {
-        Command("slice create mode=digu");
-        t.restart();
-        while (t.elapsed() < 4000 && slice_id_ < 0)
-        {
-            if (control_->waitForReadyRead(100)) ReadControl();
-            slice_id_ = FindOwnedSlice();
-        }
-        slice_created_ = (slice_id_ >= 0);
-    }
+    int made = 0;
+    slice_id_ = ChooseSlice(&made);
+    slice_created_ = (made != 0);
     if (slice_id_ < 0)
     {
         Fail("no slice available for DAX audio");
@@ -583,9 +664,21 @@ bool FlexVita::Start(QString host, int dax_channel, bool want_tx)
         }
     }
 
-    status_ = QString("Flex Native: RX ch%1%2")
+    status_ = QString("Flex Native: RX ch%1%2 slice %3%4")
                   .arg(dax_channel_)
-                  .arg(tx_active_ ? " + TX" : "");
+                  .arg(tx_active_ ? " + TX" : "")
+                  .arg(slice_id_)
+                  .arg(slice_mismatch_);
+
+    // Record the slice decision.  A Finder-launched bundle has no visible
+    // stderr (CLAUDE.md F12), and this is the one fact that decides whether
+    // MSHV works the frequency it displays -- so it goes in the log next to
+    // the settings, not only in a panel the operator may never open.
+    FlexDiag(qPrintable(QString("START   slice=%1 rig_wants=%2 %3%4")
+                            .arg(slice_id_)
+                            .arg(_GetFlexNativeSlice_())
+                            .arg(slice_created_ ? "created" : "adopted")
+                            .arg(slice_mismatch_)));
     return true;
 }
 
@@ -616,6 +709,7 @@ void FlexVita::Stop()
     tx_stream_     = 0;
     slice_id_      = -1;
     slice_created_ = false;
+    slice_mismatch_.clear();
     ptt_           = false;
 }
 

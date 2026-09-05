@@ -332,5 +332,28 @@ Note the **"PTT OFF" radio button is not a workaround** — for a network
 rig, `SetPtt_p` keys through the `omnirig_active || net_active` branch,
 which is tested before and independently of `rb_ptt_off` / `rb_cat`.
 
+**The slice has to agree too.** Removing that keying also removed what
+had accidentally been holding the two halves together: `slice set <n>
+tx=1` on every key dragged the transmitter onto the rig control's slice.
+Nothing else forced the audio backend and the rig control onto the same
+slice, and a disagreement means MSHV **displays one frequency and works
+another**. `FlexVita::ChooseSlice()` therefore prefers, in order: the
+slice selected in Rig Control (`Slice A..H TCP` → 0..7, read through
+`_GetFlexNativeSlice_()` beside `_GetFlexNativeHost_()`) if it exists on
+the radio; then any slice this session already owns; then a new one.
+
+Adopting the configured slice is allowed even when another client owns
+it — the rig control addresses slices by number regardless of owner, so
+following it is what keeps the two consistent, and `slice_created_`
+stays false so `Stop()` never removes a slice it did not make. The radio
+assigns the index when a slice *is* created, so a mismatch there is
+fixed by pointing Rig Control at the matching slice letter. Either way
+it is now visible instead of silent: red on the Flex panel's top line,
+and a `START` record in `flexvita_tx.log` —
+
+    11:57:15.269  START   slice=0 rig_wants=0 adopted
+
+which matters because a Finder-launched bundle has no visible stderr.
+
 The TX format is Dick Hale **W7PP**'s finding, from his GPLv3 WSJT-X
 fork; the implementation here is independent.

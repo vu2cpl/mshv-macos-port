@@ -62,6 +62,23 @@ QString _GetFlexNativeHost_()
     }
     return QString();
 }
+
+// Which radio slice the operator picked in Rig Control, 0..7 for
+// "FlexRadio SmartSDR Slice A..H TCP" (network model ids 7..14, the same
+// arithmetic network.cpp uses for its own `slicenum`), or -1 when the
+// selected rig is not one of them.
+//
+// The audio backend needs this so it sources DAX audio from the SAME slice
+// the rig control tunes and reads.  If the two disagree, MSHV displays one
+// frequency and transmits on another -- which used to be masked because the
+// rig control sent "slice set <n> tx=1" on every key, dragging the
+// transmitter onto its own slice (and clicking the relays twice doing it).
+// With that removed, the two have to agree by construction instead.
+static int g_flex_native_slice = -1;
+int _GetFlexNativeSlice_()
+{
+    return g_flex_native_slice;
+}
 struct netTciCS
 {
 	QString srate;
@@ -1593,6 +1610,13 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
 
     s_net_model_id = net_model_id;
     s_rig_name = sett.name;
+    // Mirror the selected Flex slice where the free accessor above can reach
+    // it (netServPort is file-static for the same reason).  Network model ids
+    // 7..14 are Slice A..H; anything else means no Flex slice is selected.
+    if (sett.port_type==RIG_PORT_NETWORK && net_model_id>=7 && net_model_id<=14)
+        g_flex_native_slice = net_model_id - 7;
+    else
+        g_flex_native_slice = -1;
     ////// net //////////
     block_save_net = true;
     l_tcisrate->setHidden(true);

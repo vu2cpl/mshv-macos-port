@@ -99,7 +99,16 @@ void FlexPanel::Refresh()
         l_conn->setText("<b>" + tr("Flex Native: not connected") + "</b>");
         return;
     }
-    l_conn->setText("<b>" + tr("Flex Native: connected") + "</b>");
+    // The backend's own status line carries the DAX channel and, more
+    // importantly, the slice it is actually using -- plus a warning when that
+    // is not the slice selected in Rig Control.  A mismatch means MSHV
+    // displays one frequency and works another, so it must be visible rather
+    // than buried: red, and it is the only thing on this line that changes.
+    const QString st = _FlexVitaStatus_();
+    if (st.contains("[!]"))
+        l_conn->setText("<b><font color='#ff5050'>" + st + "</font></b>");
+    else
+        l_conn->setText("<b>" + st + "</b>");
 
     double fwd = 0.0, ref = 0.0, swr = 0.0, v = 0.0;
     if (_FlexVitaMeters_(&fwd, &ref, &swr))
