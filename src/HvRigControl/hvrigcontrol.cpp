@@ -1949,11 +1949,21 @@ void HvRigControl::SetPtt_p(bool flag,int id)//2.17 id 0=All 1=p1 2=p2
         // same radio, and its Flex set_ptt sends "slice set <n> tx=1" a few ms
         // into the transmission -- re-designating the transmit slice while the
         // radio is already keyed, so it drops and re-engages the T/R and band
-        // relays.  That is the audible second relay click.  Only the master /
-        // p1 keying is suppressed; the p2 RTS/DTR line below is untouched
-        // (amp or SO2R keying), as is the static-TX / QRG frequency handling
-        // in the caller.
-        if (_FlexVitaTxActive_()) { /* Flex Native owns PTT */ }
+        // relays.  That is the audible second relay click.
+        //
+        // ONLY id 0 is suppressed, and that distinction is the whole point:
+        //   id 0 ("All") is the app's own TX transition, and comes from
+        //         exactly one place -- Main_Ms::SetRigTxRx() -- which has
+        //         already keyed via the Flex hook.  Duplicate; drop it.
+        //   id 1  is the operator pressing START PTT TEST (TestPtt()).  There
+        //         is no Flex hook on that path, so suppressing it left the
+        //         button turning red with the radio never keying.  It must
+        //         still key here.
+        //   id 2  is the second PTT line (TestPtt2(), amp / SO2R) and is
+        //         handled in the block below, which this never touched.
+        // The static-TX / QRG frequency handling in the caller is likewise
+        // untouched, and it preserves the id through ss_id.
+        if (id==0 && _FlexVitaTxActive_()) { /* Flex Native owns PTT */ }
         ////// omnirig /////////////
         else if (omnirig_active || net_active)////// net //////////
             THvRigCat->set_ptt(flag,false);

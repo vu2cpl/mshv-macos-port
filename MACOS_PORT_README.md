@@ -322,11 +322,23 @@ The rig-control Flex `set_ptt` does not send a bare `xmit` — it sends
 `dax audio set N tx=1`, then `slice set <n> tx=1`, then `xmit 1`, and
 that middle command re-designates the transmit slice milliseconds after
 `flexvita` has already keyed, so the radio drops and re-engages its T/R
-and band relays. `HvRigControl::SetPtt_p()` therefore skips the master /
-p1 keying while `_FlexVitaTxActive_()`. Deliberately narrow: the p2
-RTS/DTR line still fires (amp or SO2R keying), the static-TX and QRG
-frequency handling in the caller is untouched, and `fsdrs_poll` is
+and band relays. `HvRigControl::SetPtt_p()` therefore skips the keying
+when `id==0 && _FlexVitaTxActive_()`. The id matters:
+
+| id | Only caller | Suppressed? |
+|---|---|---|
+| 0 "All" | `Main_Ms::SetRigTxRx()` — the app's TX transition | yes, the Flex hook already keyed |
+| 1 | `TestPtt()` — the START PTT TEST button | no; nothing else keys that path |
+| 2 | `TestPtt2()` — second PTT line (amp / SO2R) | never touched |
+
+Deliberately narrow: the p2 RTS/DTR line still fires, the static-TX and
+QRG frequency handling in the caller is untouched (and preserves the id
+through `ss_id`, so the automatic path stays id 0), and `fsdrs_poll` is
 re-armed from `set_freq` / `set_mode` / init so polling does not stall.
+
+Note START PTT TEST on a Flex still keys over the *rig-control* session,
+so its relay behaviour looks like the pre-fix behaviour — correct, since
+during a deliberate test it is the only thing keying.
 
 Note the **"PTT OFF" radio button is not a workaround** — for a network
 rig, `SetPtt_p` keys through the `omnirig_active || net_active` branch,
