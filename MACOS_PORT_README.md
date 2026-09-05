@@ -309,5 +309,26 @@ Measured protocol facts, since two of them are counter-intuitive:
 - Meter scaling depends on the meter's **unit**: dBm/dBFS/SWR `/128`,
   Volts `/256`, degC `/64`, RPM `/1`.
 
+**Exactly one thing may key the radio.** With the backend running, MSHV
+holds **two** TCP sessions to the radio's API port — `flexvita`'s own
+`client gui` session and the `FlexRadio SmartSDR Slice A..H TCP`
+rig-control session. Two `ESTABLISHED` rows from one MSHV pid in
+`lsof -nP -i TCP:4992` is the normal picture; both *keying* is not.
+
+If both key, you get a **double relay click on every transmission**.
+The rig-control Flex `set_ptt` does not send a bare `xmit` — it sends
+`dax audio set N tx=1`, then `slice set <n> tx=1`, then `xmit 1`, and
+that middle command re-designates the transmit slice milliseconds after
+`flexvita` has already keyed, so the radio drops and re-engages its T/R
+and band relays. `HvRigControl::SetPtt_p()` therefore skips the master /
+p1 keying while `_FlexVitaTxActive_()`. Deliberately narrow: the p2
+RTS/DTR line still fires (amp or SO2R keying), the static-TX and QRG
+frequency handling in the caller is untouched, and `fsdrs_poll` is
+re-armed from `set_freq` / `set_mode` / init so polling does not stall.
+
+Note the **"PTT OFF" radio button is not a workaround** — for a network
+rig, `SetPtt_p` keys through the `omnirig_active || net_active` branch,
+which is tested before and independently of `rb_ptt_off` / `rb_cat`.
+
 The TX format is Dick Hale **W7PP**'s finding, from his GPLv3 WSJT-X
 fork; the implementation here is independent.

@@ -43,6 +43,9 @@ struct netSP
 //#define COU_NET_PS NETWORK_COUNT
 static netSP netServPort[NETWORK_COUNT];
 
+// True while the Native Flex VITA-49 backend owns transmit (flexvita.cpp).
+extern bool _FlexVitaTxActive_();
+
 // Radio address for the Native Flex VITA-49 audio backend (flexvita.cpp).
 // The eight FlexRadio SmartSDR Slice models occupy netServPort[7..14] and all
 // carry the same radio address, so the operator configures it once in Rig
@@ -1916,8 +1919,19 @@ void HvRigControl::SetPtt_p(bool flag,int id)//2.17 id 0=All 1=p1 2=p2
 {
     if (id==0 || id==1)//id 0=All 1=p1 2=p2
     {
+        // Native Flex keys the radio itself over its own SmartSDR session
+        // (Main_Ms::SetRigTxRx -> _FlexVitaSetPtt_ -> "xmit 1").  Letting the
+        // rig-control session key as well opens a SECOND API client to the
+        // same radio, and its Flex set_ptt sends "slice set <n> tx=1" a few ms
+        // into the transmission -- re-designating the transmit slice while the
+        // radio is already keyed, so it drops and re-engages the T/R and band
+        // relays.  That is the audible second relay click.  Only the master /
+        // p1 keying is suppressed; the p2 RTS/DTR line below is untouched
+        // (amp or SO2R keying), as is the static-TX / QRG frequency handling
+        // in the caller.
+        if (_FlexVitaTxActive_()) { /* Flex Native owns PTT */ }
         ////// omnirig /////////////
-        if (omnirig_active || net_active)////// net //////////
+        else if (omnirig_active || net_active)////// net //////////
             THvRigCat->set_ptt(flag,false);
         else
         {
