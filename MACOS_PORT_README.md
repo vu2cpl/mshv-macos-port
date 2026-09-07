@@ -289,9 +289,13 @@ which would make a more general upstream contribution.
 
 ## Native FlexRadio VITA-49 backend (mac8)
 
-`src/HvRigControl/HvRigCat/flexvita/` — takes RX and TX audio straight
-off a FLEX-6000/8000 over the radio's own protocol, with no SmartSDR,
-TCI bridge or DAX virtual audio device in the path.
+`src/HvRigControl/HvRigCat/network/flexvita.{h,cpp}` — takes RX and TX
+audio straight off a FLEX-6000/8000 over the radio's own protocol, with
+no SmartSDR, TCI bridge or DAX virtual audio device in the path. (These
+two files sat in their own `HvRigCat/flexvita/` directory up to mac9;
+LZ2HV asked for them beside `network.cpp`, so from 2026-09-07 they live
+in `HvRigCat/network/`. The control/monitor panel, `flexpanel.{h,cpp}`,
+stayed behind in `flexvita/` — it is UI, not protocol.)
 
 It reuses the network-audio seam LZ2HV already built for TCI
 (`_SetRxAudioTci_`), so `mscore.cpp` needed one condition widened and the

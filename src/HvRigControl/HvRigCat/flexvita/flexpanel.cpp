@@ -3,7 +3,7 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "flexpanel.h"
-#include "flexvita.h"
+#include "../network/flexvita.h"
 
 #include <QComboBox>
 #include <QGridLayout>
