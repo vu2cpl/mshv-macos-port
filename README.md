@@ -6,21 +6,30 @@ is a Mac-only port that tracks his upstream releases.
 
 Decodes and operates **FT8, FT4, FT2, MSK144, JT65 A/B/C, JT6M,
 PI4, FSK441/315, ISCAT, Q65 A/B/C/D**, and MA (Multi-Answer) modes
-on macOS 11 or later. Separate prebuilt binaries for Apple Silicon
-(arm64) and Intel (x86_64) are attached to each release.
+on macOS 11 or later. A prebuilt **universal** bundle — Apple Silicon
+(arm64) and Intel (x86_64) in the same app — is attached to each
+release, as a DMG and as a zip.
 
 ## Download
 
 Pre-built bundles are attached to each release on the
 [Releases page](../../releases) — no build tools required.
 
-- `MSHV-Apple-Silicon.app.zip` — for **Apple Silicon** Macs (M1, M2,
-  M3, M4 — released late 2020 onwards)
-- `MSHV-Intel-Mac-x86.app.zip` — for **Intel** Macs (older Mac Pro /
-  iMac / MacBook Pro / Mini / Air models with Intel processors)
+One download for every Mac — the bundle is **universal** (Apple Silicon
+and Intel in the same app), so there is nothing to choose:
 
-Not sure which? Apple menu → **About This Mac** → look for
-"Chip" (M-series → Apple Silicon) or "Processor" (Intel ... → Intel).
+- **`MSHV-macOS-universal.dmg`** — recommended. Double-click, drag
+  **MSHV** onto **Applications**, eject. A disk image is mounted rather
+  than unpacked, so it opens correctly whatever tools you have.
+- `MSHV-macOS-universal.app.zip` — the same app as a zip. Unpack it by
+  double-clicking it in the Finder.
+
+If macOS ever says *"MSHV is damaged and can't be opened"*, the app is
+not damaged: the zip was unpacked by a tool that left extra files inside
+the bundle (some third-party unarchivers do this, and so does a copy that
+went through a cloud drive's "download as zip"). Use the DMG, or unpack
+the zip with the Finder. Releases before 2026-09-08 were more prone to
+this; the mac9 downloads were re-issued that day.
 
 First launch on macOS:
 - The bundle is signed with an Apple Developer ID and notarised by
