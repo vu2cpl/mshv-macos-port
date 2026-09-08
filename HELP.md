@@ -51,17 +51,27 @@ through a sync agent that stripped the staple:
 
 ---
 
-## Pick the right binary
+## Which download?
 
-| Mac type | Download | Native? |
-|---|---|---|
-| **Apple Silicon** (M1, M2, M3, M4) | [`MSHV-Apple-Silicon.app.zip`](../../releases) | Yes |
-| **Intel** (older Macs with Intel CPUs) | [`MSHV-Intel-Mac-x86.app.zip`](../../releases) | Yes |
-| Apple Silicon, only the Intel zip available | `MSHV-Intel-Mac-x86.app.zip` | Via Rosetta 2 — slower, but functional |
+There is nothing to pick: since 2026-09-08 each release carries **one
+universal bundle** — Apple Silicon and Intel in the same app, native on
+both.
 
-Not sure which you have? Apple menu → **About This Mac** → check
-"Chip" (M-series → Apple Silicon) or "Processor" (Intel ... →
-Intel).
+| File | |
+|---|---|
+| [`MSHV-macOS-universal.dmg`](../../releases) | **Recommended.** Double-click, drag **MSHV** onto **Applications**, eject. |
+| [`MSHV-macOS-universal.app.zip`](../../releases) | The same app as a zip. Unpack it by double-clicking it in the Finder. |
+
+If macOS says *"MSHV is damaged and can't be opened"*, the app is not
+damaged — the zip was unpacked by a tool that left extra files inside the
+bundle, so it no longer matches its code signature. Some third-party
+unarchivers do this, and so does a copy that went through a cloud drive's
+"download as zip". Use the DMG, or unpack the zip with the Finder.
+Releases before 2026-09-08 were more prone to it; the mac9 downloads were
+re-issued that day.
+
+(Older releases carried two per-arch zips, `MSHV-Apple-Silicon.app.zip`
+and `MSHV-Intel-Mac-x86.app.zip`. Those are gone from mac9 onwards.)
 
 ---
 
