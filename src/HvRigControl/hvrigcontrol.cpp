@@ -43,42 +43,11 @@ struct netSP
 //#define COU_NET_PS NETWORK_COUNT
 static netSP netServPort[NETWORK_COUNT];
 
-// True while the Native Flex VITA-49 backend owns transmit (flexvita.cpp).
-extern bool _FlexVitaTxActive_();
 
-// Radio address for the Native Flex VITA-49 audio backend (flexvita.cpp).
-// The eight FlexRadio SmartSDR Slice models occupy netServPort[7..14] and all
-// carry the same radio address, so the operator configures it once in Rig
-// Control and the audio backend reuses it rather than duplicating a setting.
-QString _GetFlexNativeHost_()
-{
-    // Slice A..H are netServPort[7..14] and all address the same radio, so
-    // accept whichever slice the operator actually filled in rather than
-    // insisting on Slice A.  "RIG IP Addr" is the unconfigured placeholder.
-    for (int i = 7; i < NETWORK_COUNT && i <= 14; ++i)
-    {
-        const QString h = netServPort[i].serv.trimmed();
-        if (!h.isEmpty() && h != "RIG IP Addr") return h;
-    }
-    return QString();
-}
-
-// Which radio slice the operator picked in Rig Control, 0..7 for
-// "FlexRadio SmartSDR Slice A..H TCP" (network model ids 7..14, the same
-// arithmetic network.cpp uses for its own `slicenum`), or -1 when the
-// selected rig is not one of them.
-//
-// The audio backend needs this so it sources DAX audio from the SAME slice
-// the rig control tunes and reads.  If the two disagree, MSHV displays one
-// frequency and transmits on another -- which used to be masked because the
-// rig control sent "slice set <n> tx=1" on every key, dragging the
-// transmitter onto its own slice (and clicking the relays twice doing it).
-// With that removed, the two have to agree by construction instead.
-static int g_flex_native_slice = -1;
-int _GetFlexNativeSlice_()
-{
-    return g_flex_native_slice;
-}
+// The Flex VITA-49 backend lives entirely in network.cpp: its control
+// commands ride the CAT session's own socket, so it already has the radio
+// address and the slice (slicenum = s_ModelID - 7), and PTT is simply the
+// CAT set_ptt().  LZ2HV's 2026-09-08 layout -- one API session per MSHV.
 struct netTciCS
 {
 	QString srate;
@@ -865,9 +834,9 @@ HvRigControl::~HvRigControl()
     //DestroyPort();//za mahane
     //qDebug()<<"CLOSE DestroyPort()";//za mahane
 }
-void HvRigControl::SetTciSelect(int i)
+void HvRigControl::SetTciSelect(int i,int vr,bool vt)
 {
-    THvRigCat->SetTciSelect(i);
+    THvRigCat->SetTciSelect(i,vr,vt);
 }
 void HvRigControl::SetMsf(bool f)//2.76sf
 {
@@ -1610,13 +1579,6 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
 
     s_net_model_id = net_model_id;
     s_rig_name = sett.name;
-    // Mirror the selected Flex slice where the free accessor above can reach
-    // it (netServPort is file-static for the same reason).  Network model ids
-    // 7..14 are Slice A..H; anything else means no Flex slice is selected.
-    if (sett.port_type==RIG_PORT_NETWORK && net_model_id>=7 && net_model_id<=14)
-        g_flex_native_slice = net_model_id - 7;
-    else
-        g_flex_native_slice = -1;
     ////// net //////////
     block_save_net = true;
     l_tcisrate->setHidden(true);
@@ -1943,29 +1905,8 @@ void HvRigControl::SetPtt_p(bool flag,int id)//2.17 id 0=All 1=p1 2=p2
 {
     if (id==0 || id==1)//id 0=All 1=p1 2=p2
     {
-        // Native Flex keys the radio itself over its own SmartSDR session
-        // (Main_Ms::SetRigTxRx -> _FlexVitaSetPtt_ -> "xmit 1").  Letting the
-        // rig-control session key as well opens a SECOND API client to the
-        // same radio, and its Flex set_ptt sends "slice set <n> tx=1" a few ms
-        // into the transmission -- re-designating the transmit slice while the
-        // radio is already keyed, so it drops and re-engages the T/R and band
-        // relays.  That is the audible second relay click.
-        //
-        // ONLY id 0 is suppressed, and that distinction is the whole point:
-        //   id 0 ("All") is the app's own TX transition, and comes from
-        //         exactly one place -- Main_Ms::SetRigTxRx() -- which has
-        //         already keyed via the Flex hook.  Duplicate; drop it.
-        //   id 1  is the operator pressing START PTT TEST (TestPtt()).  There
-        //         is no Flex hook on that path, so suppressing it left the
-        //         button turning red with the radio never keying.  It must
-        //         still key here.
-        //   id 2  is the second PTT line (TestPtt2(), amp / SO2R) and is
-        //         handled in the block below, which this never touched.
-        // The static-TX / QRG frequency handling in the caller is likewise
-        // untouched, and it preserves the id through ss_id.
-        if (id==0 && _FlexVitaTxActive_()) { /* Flex Native owns PTT */ }
         ////// omnirig /////////////
-        else if (omnirig_active || net_active)////// net //////////
+        if (omnirig_active || net_active)////// net //////////
             THvRigCat->set_ptt(flag,false);
         else
         {
@@ -2088,11 +2029,6 @@ void HvRigControl::TimerTryStaticTxF()
 }
 void HvRigControl::SetPtt(bool flag, int id)//id 0=All 1=p1 2=p2
 {
-    // NOTE: Native Flex keying is NOT hooked here.  This is called separately
-    // for the master (id 0) and for each PTT line (id 1, id 2), so keying off
-    // it produced an unkey/re-key inside a single transmission -- audible as a
-    // double relay click on the radio.  The Flex hook lives at the single
-    // authoritative TX transition, Main_Ms::SetRigTxRx().
     bool all_sttx = false;  //ft8  ft4 q65
     if (f_static_tx && all_static_tx_modes) all_sttx = true;
     bool all_qrg = false;  //msk fsk

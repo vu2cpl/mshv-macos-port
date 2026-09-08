@@ -211,7 +211,7 @@ private slots:
     void LeOffsetTrsvRigChange(QString);
     void CbOffSetFrqToRig(bool);
     void SetPttDtr(bool);// sea-235
-    void SetTciSelect(int);
+    void SetTciSelect(int,int,bool);
     void SetRigModeFreq();
     void SetFullRigInfo(QString);//2.76.1
     

@@ -528,8 +528,12 @@ void SettingsMs::SearchSoundDev()
         // need to appear in the dropdowns on every platform, including Mac.
         DevBoxIn->addItem("TCI Client Input");
         DevBoxOut->addItem("TCI Client Output");
-        for (int ch = 1; ch <= 8; ++ch) DevBoxIn->addItem(FlexNativeInputName(ch));
-        DevBoxOut->addItem("Flex Native Output");
+	for (int ch = 1; ch <= 8; ++ch)
+	{
+		if (ch==1) DevBoxIn->addItem("Flex Native Input");
+		else DevBoxIn->addItem(QString("Flex Native Input DAX %1").arg(ch));		
+	}
+	DevBoxOut->addItem("Flex Native Output");
         no_emit = false;
         return;
     }
@@ -724,8 +728,12 @@ next_card:
     DevBoxOut->addItem("TCI Client Output");
     //end tci
     //flex native vita-49
-    for (int ch = 1; ch <= 8; ++ch) DevBoxIn->addItem(FlexNativeInputName(ch));
-    DevBoxOut->addItem("Flex Native Output");
+	for (int ch = 1; ch <= 8; ++ch)
+	{
+		if (ch==1) DevBoxIn->addItem("Flex Native Input");
+		else DevBoxIn->addItem(QString("Flex Native Input DAX %1").arg(ch));		
+	}
+	DevBoxOut->addItem("Flex Native Output");
     //end flex
     no_emit = false;
 }
@@ -779,71 +787,48 @@ void SettingsMs::SetDevices_Drv(QString dev_in,QString bpsampl,QString card_late
 {
     SendDevDrv();
 }*/
-// Native Flex VITA-49 backend (flexvita.cpp) and the radio address already
-// configured for the FlexRadio SmartSDR rig models (hvrigcontrol.cpp).
-extern void _FlexVitaStart_(QString host, int dax_channel, bool want_tx);
-extern void _FlexVitaStop_();
-extern QString _GetFlexNativeHost_();
-
-// DAX channel is carried in the device name so it round-trips through the
-// existing saved-device setting with no new persistence.  Channel 1 keeps the
-// bare name for backward compatibility with settings written before channel
-// selection existed.
-QString SettingsMs::FlexNativeInputName(int ch)
-{
-    if (ch <= 1) return QString("Flex Native Input");
-    return QString("Flex Native Input DAX %1").arg(ch);
-}
-
-// Returns the DAX channel for a Flex Native input device name, or 0 if the
-// name is not one of ours.
-int SettingsMs::FlexNativeChannelOf(QString name)
-{
-    if (name == "Flex Native Input") return 1;
-    if (!name.startsWith("Flex Native Input DAX ")) return 0;
-    bool ok = false;
-    const int ch = name.mid(22).trimmed().toInt(&ok);
-    if (!ok || ch < 1 || ch > 8) return 0;
-    return ch;
-}
-
-void SettingsMs::FlexDevSelectAndRestr()//flex native vita-49
-{
-    const int  ch = FlexNativeChannelOf(DevBoxIn->currentText());
-    const bool rx = (ch > 0);
-    const bool tx = (DevBoxOut->currentText() == "Flex Native Output");
-    if (rx || tx)
-    {
-        const QString host = _GetFlexNativeHost_();
-        // TX shares the RX session's DAX channel; default to 1 for a
-        // transmit-only selection.
-        if (!host.isEmpty()) _FlexVitaStart_(host, rx ? ch : 1, tx);
-    }
-    else _FlexVitaStop_();
-}
 
 void SettingsMs::TciDevSelectAndRestr()//tci
 {
-    int out = 0;
+    int out_tci = 0;
     QString dev = "";
     if (DevBoxOut->currentText()=="TCI Client Output" && DevBoxIn->currentText()=="TCI Client Input")
     {
-        dev=tr("Output and Input Devices");
-        out = 3;
+        out_tci = 3;
     }
     else if (DevBoxOut->currentText()=="TCI Client Output")
     {
-        dev=tr("Output Device");
-        out = 2;
+        out_tci = 2;
     }
     else if (DevBoxIn->currentText()=="TCI Client Input")
     {
-        dev=tr("Input Device");
-        out = 1;
+        out_tci = 1;
     }
-    emit EmitTciSelect(out);//0=non 1=rx 2=tx 3=rx,tx
+    
+    int vita_rx = 0;//no RX vita
+    bool vita_tx =false;//no TX vita
+    if (DevBoxOut->currentText()=="Flex Native Output")
+   	{  		
+   		vita_tx = true;
+  	}
+  	QString name = DevBoxIn->currentText();
+    if (name=="Flex Native Input")
+    {    	
+    	vita_rx = 1;
+   	}
+   	else if (name.startsWith("Flex Native Input DAX ") && name.count()>22)
+    {
+    	bool ok = false;
+		vita_rx = name.mid(22).trimmed().toInt(&ok);
+   	} 	
+   	
+   	if (out_tci==3 || (vita_rx>0 && vita_tx)) dev=tr("Output and Input Devices"); 
+   	else if (out_tci==2 && vita_rx>0) 		  dev=tr("Output and Input Devices");
+   	else if (vita_tx && out_tci==1)   		  dev=tr("Output and Input Devices");
+   	else if (vita_tx || out_tci==2)   		  dev=tr("Output Device");
+   	else if (vita_rx>0 || out_tci==1)   	  dev=tr("Input Device");
 
-    FlexDevSelectAndRestr();//flex native vita-49
+    emit EmitTciSelect(out_tci,vita_rx,vita_tx);//tci 0=non 1=rx 2=tx 3=rx,tx
 
     /*if (DevBoxOut->currentText()=="TCI Client Output")
     {
@@ -872,7 +857,7 @@ void SettingsMs::TciDevSelectAndRestr()//tci
     if (!dev.isEmpty())
     {
         QMessageBox::critical(this, "MSHV",
-                              tr("The TCI Client does not support 44100 Hz Sample Rate\n"
+                              tr("The TCI Client and Flex Native does not support 44100 Hz Sample Rate\n"
                                  "Not possible to use modes JTMS, FSK, ISCAT and JT6M\n"
                                  "Please in Sound Settings choose other")+"\n"+dev,
                               QMessageBox::Close);
@@ -914,7 +899,7 @@ void SettingsMs::OutDeviceChanged(QString)
 
         //if (DevBoxOut->currentText()!="pulse")// "pulse: "
         QString dn0 = dev_name+"xxxxxxx";//2.70
-        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Output")
+        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Output" && dev_name!="Flex Native Output")
         {
             QRegExp rx;
             QString card_out, device_out;
@@ -974,7 +959,7 @@ void SettingsMs::InDeviceChanged(QString)
 
         //if (DevBoxIn->currentText()!="pulse")
         QString dn0 = dev_name+"xxxxxxx";//2.70
-        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Input")
+        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Input" && !dev_name.startsWith("Flex Native Input"))
         {
             QRegExp rx;
             QString card, device;

@@ -269,7 +269,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(TSettingsMs, SIGNAL(InDevChanged(QString,int,int,int,int,int,int)),
             this, SLOT(InDevChanged(QString,int,int,int,int,int,int)));
     connect(TSettingsMs, SIGNAL(rejected()), this, SLOT(SaveSettings()));
-    connect(TSettingsMs, SIGNAL(EmitTciSelect(int)), THvRigControl, SLOT(SetTciSelect(int)));//2.59
+    connect(TSettingsMs, SIGNAL(EmitTciSelect(int,int,bool)), THvRigControl, SLOT(SetTciSelect(int,int,bool)));//2.59
     //connect(TSettingsMs, SIGNAL(StndInLevel(int)), TMsCore, SLOT(SetInLevel(int)));
     //connect(TSettingsMs, SIGNAL(SendSettingsTime(QStringList)), this, SLOT(SetTimeOffset(QStringList)));
 
@@ -2647,15 +2647,11 @@ void Main_Ms::ModeMenuStatRefresh(bool dea)
         W_mod_bt_sw->setDisabled(false);
     }
 }
-// Native Flex VITA-49 backend (flexvita.cpp).  A no-op unless the operator has
-// selected the Flex Native output device.
-extern void _FlexVitaSetPtt_(bool on);
-
-// Native Flex VITA-49 backend: live TX metering off the radio.
+// Native Flex VITA-49 backend (network.cpp): live TX metering off the radio.
 extern bool _FlexVitaMeters_(double *fwd_w, double *ref_w, double *swr);
 extern bool _FlexVitaTxActive_();
 extern bool _FlexVitaRxActive_();
-#include "HvRigControl/HvRigCat/flexvita/flexpanel.h"
+#include "HvRigControl/HvRigCat/flexpanel/flexpanel.h"
 
 void Main_Ms::UpdateFlexMeter()
 {
@@ -2704,10 +2700,6 @@ void Main_Ms::SetRigTxRx(bool f)
 {
     //qDebug()<<"SetRigTxRx...................."<<f;
     f_tx_busy = f;//2.47
-    // Flex Native keys over its own SmartSDR control session.  This is the one
-    // authoritative TX on/off in the app -- HvRigControl::SetPtt() is called
-    // once per PTT line (id 0/1/2) and hooking it double-keyed the radio.
-    _FlexVitaSetPtt_(f);
     THvRigControl->SetPtt(f,0);//id 0=All 1=p1 2=p2
     THvTxW->SetTxRxCountAutoSeq(f);
     if (f)

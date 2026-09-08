@@ -3,8 +3,9 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "flexpanel.h"
-#include "../network/flexvita.h"
+#include "../network/network.h"
 
+#include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -66,9 +67,30 @@ FlexPanel::FlexPanel(bool dark, QWidget *parent)
     gb_c->setLayout(C);
     V->addWidget(gb_c);
 
+    // Working the radio through MSHV otherwise means hearing it twice: once
+    // from the decoded DAX stream and once out of the radio's own speaker.
+    QGroupBox *gb_a = new QGroupBox(tr("Local audio"));
+    QVBoxLayout *A = new QVBoxLayout();
+    A->setContentsMargins(8, 6, 8, 6);
+    A->setSpacing(5);
+    // Keep this label SHORT: it is the widest thing in the group and the
+    // panel sizes itself to it. The detail belongs in the tooltip.
+    cb_localmute = new QCheckBox(tr("Mute front speaker"));
+    cb_localmute->setToolTip(tr("Mutes the speaker in the radio's front panel.\n"
+                                "M series only - other models have no front speaker.\n"
+                                "Line-out and headphones are left alone, and the\n"
+                                "DAX audio MSHV decodes is unaffected."));
+    A->addWidget(cb_localmute);
+    l_model = new QLabel();
+    l_model->setAlignment(Qt::AlignLeft);
+    A->addWidget(l_model);
+    gb_a->setLayout(A);
+    V->addWidget(gb_a);
+
     connect(cb_rxant, SIGNAL(currentIndexChanged(int)), this, SLOT(RxAntChanged(int)));
     connect(cb_txant, SIGNAL(currentIndexChanged(int)), this, SLOT(TxAntChanged(int)));
     connect(cb_mode,  SIGNAL(currentIndexChanged(int)), this, SLOT(ModeChanged(int)));
+    connect(cb_localmute, SIGNAL(toggled(bool)), this, SLOT(LocalMuteToggled(bool)));
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(Refresh()));
@@ -128,6 +150,35 @@ void FlexPanel::Refresh()
     FillCombo(cb_rxant, _FlexVitaAntList_(false), _FlexVitaAnt_(false));
     FillCombo(cb_txant, _FlexVitaAntList_(true),  _FlexVitaAnt_(true));
     FillCombo(cb_mode,  _FlexVitaModeList_(),     _FlexVitaMode_());
+
+    // Only an M series radio has a front speaker; on anything else the
+    // command does not exist, so grey the control rather than offer one that
+    // silently does nothing.
+    const bool has_spkr = _FlexVitaHasFrontSpeaker_();
+    if (cb_localmute->isEnabled() != has_spkr) cb_localmute->setEnabled(has_spkr);
+
+    const bool muted = _FlexVitaFrontSpeakerMute_();
+    if (cb_localmute->isChecked() != muted)
+    {
+        filling = true;
+        cb_localmute->setChecked(muted);
+        filling = false;
+    }
+
+    // Model only -- no explanatory suffix. Why the box is greyed goes in the
+    // tooltip, which costs no width; a sentence here stretched the whole
+    // panel to fit it.
+    const QString model = _FlexVitaRadioModel_();
+    if (!model.isEmpty() && l_model->text().isEmpty())
+    {
+        l_model->setText(tr("Radio: %1").arg(model));
+        cb_localmute->setToolTip(has_spkr
+            ? tr("Mutes the speaker in the radio's front panel.\n"
+                 "Line-out and headphones are left alone, and the\n"
+                 "DAX audio MSHV decodes is unaffected.")
+            : tr("%1 has no front panel speaker.\n"
+                 "This control is for M series radios.").arg(model));
+    }
 }
 
 void FlexPanel::RxAntChanged(int)
@@ -146,4 +197,12 @@ void FlexPanel::ModeChanged(int)
 {
     if (filling) return;
     _FlexVitaSetMode_(cb_mode->currentText());
+}
+
+void FlexPanel::LocalMuteToggled(bool on)
+{
+    // Refresh() sets this box from the backend's own state; without the guard
+    // that would bounce straight back at the radio as a fresh command.
+    if (filling) return;
+    _FlexVitaSetFrontSpeakerMute_(on);
 }

@@ -97,7 +97,7 @@ public:
 signals:
     void InDevChanged(QString,int,int,int,int,int,int);//QString rate, 
     void OutDevChanged(QString dev,int,int buf);
-    void EmitTciSelect(int);//tci
+    void EmitTciSelect(int,int,bool);//tci
 
 private slots:
     void InChannelChanget(bool);
@@ -139,9 +139,6 @@ private:
     QRadioButton *rb_right_ch;
     int f_tci_restr;//tci
     void TciDevSelectAndRestr();//tci
-    void FlexDevSelectAndRestr();//flex native vita-49
-    static QString FlexNativeInputName(int ch);
-    static int FlexNativeChannelOf(QString name);
 
 };
 #endif

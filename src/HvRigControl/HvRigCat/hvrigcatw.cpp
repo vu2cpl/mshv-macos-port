@@ -76,6 +76,8 @@ HvRigCat::HvRigCat( QWidget *parent )
     c_poll_comm = -1;
     s_port_type = RIG_PORT_NONE;
     s_port_poen = false;
+    vita_rx = 0;
+    vita_tx = false;
 
     f_rig_activ = false;
     QLabel *l_rb = new QLabel("RIG:");
@@ -302,10 +304,12 @@ void HvRigCat::SBPollIntChanged(int i)
     max4min = (POLLMAX*60000)/(i*2); //qDebug()<<"new"<<max4min<<POLLRST;
     if ((s_port_type == RIG_PORT_SERIAL || s_port_type == RIG_PORT_NETWORK) && s_port_poen) polling_timer->start(i);
 }
-void HvRigCat::SetTciSelect(int i)
+void HvRigCat::SetTciSelect(int i,int vr,bool vt)
 {
     tci_select = i;
-    emit EmitTciSelect(tci_select);
+    vita_rx = vr;
+    vita_tx = vt;
+    emit EmitTciSelect(tci_select,vr,vt);
 }
 void HvRigCat::DestroyRig()
 {
@@ -642,8 +646,8 @@ void HvRigCat::SetRig(int index)
         have_read_data_rts_on = 3; //2.56 need to be here
         s_active_model_id = rstruc.model;
         s_active_fact_id = NETWORK_ID;
-        connect(this, SIGNAL(EmitTciSelect(int)), TNetwork, SLOT(SetTciSelect(int)));//2.59 tci
-        SetTciSelect(tci_select);//2.59 tci
+        connect(this, SIGNAL(EmitTciSelect(int,int,bool)), TNetwork, SLOT(SetTciSelect(int,int,bool)));//2.59 tci
+        SetTciSelect(tci_select,vita_rx,vita_tx);//2.59 tci
         if (rstruc.name.contains("FlexRadio SmartSDR Slice ")) f_rig_active_never_stop = true;//2.76.1 Flex Slice
 
         //connect(this, SIGNAL(EmitMode(int)), TNetwork, SLOT(SetMode(int)));//tci

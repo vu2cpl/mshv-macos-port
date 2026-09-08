@@ -24,6 +24,7 @@
 
 class QLabel;
 class QComboBox;
+class QCheckBox;
 class QTimer;
 
 class FlexPanel : public QDialog
@@ -37,6 +38,7 @@ private slots:
     void RxAntChanged(int);
     void TxAntChanged(int);
     void ModeChanged(int);
+    void LocalMuteToggled(bool);
 
 private:
     void FillCombo(QComboBox *box, QStringList items, QString current);
@@ -51,6 +53,8 @@ private:
     QComboBox *cb_rxant;
     QComboBox *cb_txant;
     QComboBox *cb_mode;
+    QCheckBox *cb_localmute;
+    QLabel    *l_model;
     QTimer    *timer;
     bool       filling;   // suppress the change signals while repopulating
 };
