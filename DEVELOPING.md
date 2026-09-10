@@ -14,7 +14,7 @@ to redo any of it.**
 ### Where state lives
 
 `~/Library/Application Support/MSHV/`
-- `settings/{ms_settings, ms_macros, ms_mesages, ms_start, ms_stinfonet, database/}`
+- `settings/{ms_settings, ms_macros, ms_mesages, ms_start, ms_stinfonet, azel.dat, database/}`
 - `log/mshvlog.edim` — QSO log
 - `AllTxtMonthly/ALL_YYYY_MM.TXT` — running decoded-text log
 - `ExportLog/`, `RxWavs/`, `Screenshots/`
@@ -23,6 +23,17 @@ The bundle's `MSHV.app/Contents/Resources/` is a **first-launch seed
 only**. `src/mshv_app_path.h::mshv_app_data_path()` runs at startup,
 mkpaths the Library tree, and `cp -n`-copies any missing files from
 the bundle. After that the app reads/writes Library exclusively.
+
+**Every runtime path goes through `mshv_app_data_path()` — no
+`applicationDirPath()` outside it.** The last stray, `azel.dat` in
+`hvastrodataw.cpp` (built from `applicationDirPath()`, so its write
+failed silently on every Mac and the port never produced the file
+rotator programs read), was fixed 2026-09-10 in the same
+`#if defined _MACOS_` / `#else` shape as `HvCty::ReadCtyDat`. Check:
+`grep -rn applicationDirPath src/` must show only `mshv_app_path.h`
+itself, `#else` (upstream) branches and commented-out code. A live hit
+anywhere else is a bug, not a style choice — it fails from a DMG and
+would break a signed bundle's seal from `/Applications`.
 
 ### What this means in practice
 

@@ -570,6 +570,9 @@ void tmoonsub_(double *day, double *glat, double *glong, double *moonalt,
 #include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
+#if defined _MACOS_
+#include "../../mshv_app_path.h"
+#endif
 //#include <QtGui>
 
 HvAstroDataW::HvAstroDataW(int x,int y,QWidget *parent)
@@ -581,7 +584,22 @@ HvAstroDataW::HvAstroDataW(int x,int y,QWidget *parent)
     setWindowIcon(QPixmap(":pic/ms_ico.png"));
 
 
+#if defined _MACOS_
+    // MAC FIX — applicationDirPath() is MSHV.app/Contents/MacOS/ here, and the
+    // bundle has no settings/ beside the executable, so the QFile open in
+    // astro0() failed silently on every Mac (and could never succeed from a
+    // read-only DMG, or without breaking the seal of a signed bundle in
+    // /Applications): azel.dat, the file rotator / tracking programs read for
+    // Moon and Sun Az/El, was never written by the port. Every other
+    // user-mutable file goes through mshv_app_data_path()
+    // (~/Library/Application Support/MSHV) and the first-run seed already
+    // copies settings/azel.dat there, so write it where the seed put it.
+    // Same fix as HvCty::ReadCtyDat. Upstream's path is right on
+    // Linux/Windows, where the executable sits next to settings/.
+    azel_path = mshv_app_data_path() + "/settings/azel.dat";
+#else
 	azel_path = (QCoreApplication::applicationDirPath())+"/settings/azel.dat";
+#endif
 	f_txrx = false;
 	
     //setFixedSize(240,390);

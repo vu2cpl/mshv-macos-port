@@ -94,6 +94,9 @@ NOT inside the app bundle. This means:
 │   ├── ms_start
 │   ├── ms_stinfonet       ← UDP broadcast / per-band antenna /
 │   │                        DAX TX buffer
+│   ├── azel.dat           ← Moon/Sun Az/El + Doppler for rotator /
+│   │                        tracking programs; rewritten every 2 s
+│   │                        while the Astronomical Data window is open
 │   └── database/          ← cty.dat, msloc_db, msbcn_db, mstn_db
 ├── log/mshvlog.edim       ← QSO log
 ├── AllTxtMonthly/         ← ALL_YYYY_MM.TXT — running text log
