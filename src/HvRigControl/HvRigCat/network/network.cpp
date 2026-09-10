@@ -2930,6 +2930,19 @@ void Network::set_ptt(ptt_t ptt)
     else if (fsdrs)//FlexRadio SmartSDR Slice A-H
     {
         QString ptt_cmd = "0";//"dax audio set %d tx=1"  "slice set %d tx=1" "xmit %d"
+        //There is deliberately NO duplicate-key guard here.  A second PTT-ON
+        //inside one transmission is worse on a Flex than on a rig with a plain
+        //PTT line: this branch does not send a bare "xmit", it sends
+        //"slice set <n> tx=1" first, and re-designating the transmit slice while
+        //the radio is ALREADY transmitting makes it drop and re-engage its T/R
+        //and band relays -- an audible double click, measured on a FLEX-6600
+        //2026-09-08 at 51 of 335 transmissions.  The cause is stopped one level
+        //up, by `if (f_tx_busy == f) return;` at the top of
+        //Main_Ms::SetRigTxRx() (LZ2HV, 2026-09-10), which makes the TX
+        //transition idempotent for EVERY rig rather than protecting one.
+        //Verified over 107 transmissions that day: six second requests arrived,
+        //none reached SetPtt(), and the radio saw 107 keys and 107 unkeys.
+        //Guard the transition, not this branch.
         //flex native vita-49: the DAX channel is independent of the slice
         //number (channel 3 can be fed by slice A).  While the audio backend is
         //up, key the channel it actually created; slice+1 is only the default.
