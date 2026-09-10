@@ -273,6 +273,9 @@ HvTxW::HvTxW(QString inst,QString path,int lid,bool f,int x,int y,QWidget * pare
     connect(TRadioAndNetW,SIGNAL(EmitUdpCmdDl(QStringList)),this,SIGNAL(EmitUdpCmdDl(QStringList)));
     connect(TRadioAndNetW,SIGNAL(EmitUdpCmdStop(bool)),this,SIGNAL(EmitUdpCmdStop(bool)));
     connect(TRadioAndNetW,SIGNAL(EmitOpenRadNetWToRecon()),this,SLOT(NetW_exec()));
+#if MSHV_USER_BANDS > 0
+    connect(TRadioAndNetW,SIGNAL(EmitUserBandSlotCleared(int)),this,SLOT(ResetUserBandSlot(int)));//F2
+#endif
     connect(TRadioAndNetW,SIGNAL(EmitOtpTxKey(QString)),this,SIGNAL(EmitOtpTxKey(QString)));//2.76sf
     connect(TRadioAndNetW,SIGNAL(EmitOtpRxMsg(bool)),this,SIGNAL(EmitOtpRxMsg(bool)));//2.76sf
     connect(TRadioAndNetW,SIGNAL(EmitOtpVerif(QString,uint8_t)),this,SIGNAL(EmitOtpVerif(QString,uint8_t)));//2.76sf
@@ -1644,6 +1647,19 @@ void HvTxW::SetOutLevel(QString out_level_cor)
     }
     Slider_Tx_level->SetValue(s_tx_level[s_iband]);
 }
+#if MSHV_USER_BANDS > 0
+void HvTxW::ResetUserBandSlot(int k)
+{
+    // k is a band index (COUNT_BANDS_STD + slot). Reset its per-band TX drive
+    // to the same default the constructor uses (95) so a reused slot doesn't
+    // inherit the removed band's level. The value is persisted by index via
+    // default_out_lev_cor() on the next settings save, so it survives the
+    // restart the Add/Remove flow requires (F2).
+    if (k < COUNT_BANDS_STD || k >= COUNT_BANDS) return;
+    s_tx_level[k] = 95;//2.54 — same default as the constructor
+    if (k == s_iband) Slider_Tx_level->SetValue(s_tx_level[k]);
+}
+#endif
 void HvTxW::SetInLevel(QString in_level_cor)
 {
     Slider_Rx_level->SetValue(in_level_cor.toInt());
@@ -1755,6 +1771,11 @@ void HvTxW::SetAutoLogInfo()//2.75
 }
 void HvTxW::CBEnableAliChanged(bool f)//2.75
 {
+    /* macOS port -- tint the Add To Log button by EFFECTIVE state, not just by
+     * the checkbox. With a band scope set, Auto Logging Info can be armed and
+     * still not apply to the band you're on, and the operator needs to see
+     * that without opening the dialog. */
+    if (f) f = THvLogW->AliActiveForBand(s_band);
     if (f)
     {
         if (dsty) b_add_to_log->setStyleSheet("QPushButton{background-color:rgb(155,90,90);}");
@@ -2861,7 +2882,22 @@ bool HvTxW::FindRigBandFromFreq(QString f)
     unsigned long long f_int = f.toLongLong();
     QString band;
     int idband = -1;
-    for (int i = 0; i<COUNT_BANDS; ++i)
+    // macOS port -- user-defined bands are probed first. A user band typically
+    // carves a narrow window out of a standard one (QO-100's downlink sits
+    // inside the 10 GHz range), and the scan below takes the first match, so
+    // probing the standard table first would make such a band undetectable.
+    // An unconfigured slot has a 0/0 window and can never match.
+    for (int i = COUNT_BANDS_STD; i<COUNT_BANDS; ++i)
+    {
+        if (lst_bands[i].isEmpty()) continue;
+        if (f_int>=freq_min_max[i].min && f_int<=freq_min_max[i].max)
+        {
+            idband = i;
+            isStdBand = true;
+            break;
+        }
+    }
+    for (int i = 0; !isStdBand && i<COUNT_BANDS_STD; ++i)
     {
         if (f_int>=freq_min_max[i].min && f_int<=freq_min_max[i].max)
         {
@@ -2872,7 +2908,10 @@ bool HvTxW::FindRigBandFromFreq(QString f)
     }
     if (!isStdBand) //2.68 new
     {
-        for (int i = 1; i<COUNT_BANDS; ++i)//find closer std band
+        // Nearest-band fallback stays over the standard table only: the user
+        // slots live at the end of the array and so break the ascending-order
+        // assumption this scan relies on.
+        for (int i = 1; i<COUNT_BANDS_STD; ++i)//find closer std band
         {
             if (f_int<freq_min_max[i].min)
             {
@@ -2886,7 +2925,7 @@ bool HvTxW::FindRigBandFromFreq(QString f)
                 break;
             }
         }
-        if (idband<0) idband = COUNT_BANDS-1;//very hight
+        if (idband<0) idband = COUNT_BANDS_STD-1;//very hight
     }
     band = lst_bands[idband];
     if (s_band!=band && idband>=0) emit EmitRigBandFromFreq(idband);
@@ -3229,6 +3268,9 @@ void HvTxW::SetBand(QString s,int id)
     if (s_band==s) return;//only once because is radio buttons
 
     s_band = s;
+    // macOS port -- the Auto Logging Info band scope is evaluated against the
+    // current band, so the button tint has to be re-checked on every change.
+    CBEnableAliChanged(true);
     if (s_mode==11 || s_mode==13 || s_mode==18 || allq65) fpsk_restrict = true; //only ft8 ft4  || allq65
 
     //l_mycall_loc->setText(list_macros.at(0)+" "+list_macros.at(1)+"   Band "+s_band);
@@ -5493,3 +5535,21 @@ void HvTxW::ExternalFindLocFromDB(QString call)
 }
 
 
+
+/* macOS port -- copy the operator's user-defined bands into THIS translation
+ * unit's private copy of the band tables. config_band_all.h declares them
+ * `static`, so every .cpp that defines the guards gets its own set and each
+ * has to be patched separately. Called from main() before any UI is built.
+ * A no-op when MSHV_USER_BANDS is 0 (non-macOS builds). */
+#include "../mshv_userbands.h"
+void MshvApplyUserBands_hvtxw()
+{
+    for (int i = 0; i < MSHV_USER_BANDS; ++i)
+    {
+        const MshvUserBand &b = MshvUserBands::Inst().At(i);
+        const int k = COUNT_BANDS_STD + i;
+        lst_bands[k]        = b.name;
+        freq_min_max[k].min = b.fmin;
+        freq_min_max[k].max = b.fmax;
+    }
+}

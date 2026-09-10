@@ -352,6 +352,12 @@ public slots:
     void SetMaManAdding(bool);
     void CBEnableAliChanged(bool);//2.75
     void SetAutoLogInfo();//2.75
+#if MSHV_USER_BANDS > 0
+    // macOS port — reset a user band slot's per-band TX drive to the default
+    // when it is (re)used, so a reused slot doesn't inherit a removed band's
+    // level. Connected to RadioAndNetW::EmitUserBandSlotCleared (F2).
+    void ResetUserBandSlot(int band_index);
+#endif
 
 signals:
 	void EmitMacros(int,QString);

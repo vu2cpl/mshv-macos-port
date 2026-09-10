@@ -8,6 +8,7 @@ Copyright (c) 2017 Expert Electronics
 Distributed under the MIT software license, see the accompanying
 file COPYING or http://www.opensource.org/licenses/mit-license.php.
 TCI Client modified by Hrisimir Hristov, LZ2HV 2021
+MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ramawarrier, VU2CPL 2026
 */
 
 #ifndef NETWORK_H
@@ -105,6 +106,12 @@ extern bool        _FlexVitaFrontSpeakerMute_();
 extern void        _FlexVitaSetFrontSpeakerMute_(bool on);
 extern bool        _FlexVitaHasFrontSpeaker_();
 extern QString     _FlexVitaRadioModel_();   // e.g. "FLEX-6600M"
+// Radio-global transmit settings.  Getters return -1 until the radio reports.
+extern int         _FlexVitaRfPower_();
+extern int         _FlexVitaTunePower_();
+extern int         _FlexVitaMaxPower_();
+extern bool        _FlexVitaHwAlc_();
+extern void        _FlexVitaSetTransmit_(QString key, int value);
 
 // Native FlexRadio VITA-49 DAX audio -- the UDP half only.
 //
@@ -178,6 +185,7 @@ signals:
     void EmitReadedInfo(CmdID,QString);
     void EmitNetConnInfo(QString,bool,bool);//info,connect,ready to use
     void EmitFullRigInfo(QString);//2.76.1 for pskreporter
+    void EmitFlexSliceReady();     //flex native vita-49: our slice exists and is ours -- app asserts frequency
  
 public slots:
 	void ConnectNet(QString);	
@@ -273,6 +281,7 @@ private:
 	bool vita_rx_active;
 	bool vita_tx_active;
 	bool vita_want_tx;
+	unsigned long long vita_last_freq_hz; //last set_freq() for this rig, for "slice create freq="; 0 = none yet
 	int  vita_rig_slice;         //Rig Control's slice when we started, for the restart test
 	bool vita_gui_done;          //"client gui" already sent on this connection
 	QString vita_last_slice_line;//this chunk's status line for OUR slice, for the CAT parser
@@ -281,6 +290,7 @@ private:
 	QTimer *vita_timer;          //step time-outs and the retry
 public:
 	void VitaSetSlice(QString key,QString value);//flex native vita-49: rxant/txant/mode from the panel
+	void VitaSetTransmit(QString key,int value);  //flex native vita-49: rfpower/tunepower/max_power_level/hwalc from the panel
 	void VitaSetFrontSpeaker(bool mute);          //flex native vita-49: M-series speaker
 	FlexVita *VitaAudio();                        //flex native vita-49: the UDP side, for _SetTxAudioFlex_()
 private:

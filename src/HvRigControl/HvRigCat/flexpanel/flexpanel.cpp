@@ -10,6 +10,7 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
+#include <QSpinBox>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -31,6 +32,8 @@ FlexPanel::FlexPanel(bool dark, QWidget *parent)
     // Non-modal: the operator keeps working with this open.
     setModal(false);
     filling = false;
+    // -1 = the radio has told us nothing yet, so nothing may be sent back.
+    shown_rf = shown_tune = shown_max = -1;
 
     QVBoxLayout *V = new QVBoxLayout(this);
     V->setContentsMargins(8, 8, 8, 8);
@@ -67,6 +70,45 @@ FlexPanel::FlexPanel(bool dark, QWidget *parent)
     gb_c->setLayout(C);
     V->addWidget(gb_c);
 
+    // Transmit power.  These are radio-global, not slice properties, hence a
+    // group of their own rather than sitting under "Slice" above.
+    //
+    // Spinboxes, committing on Enter or focus-out (editingFinished) rather
+    // than on every keystroke or arrow-click: an amplifier is downstream, and
+    // a control that fires on valueChanged would both spam the radio and let a
+    // stray drag walk the drive up while you watched.
+    QGroupBox *gb_p = new QGroupBox(tr("Transmit power"));
+    QGridLayout *P = new QGridLayout();
+    P->setContentsMargins(8, 6, 8, 6);
+    P->setSpacing(5);
+    sb_rfpower   = new QSpinBox();
+    sb_tunepower = new QSpinBox();
+    sb_maxpower  = new QSpinBox();
+    QSpinBox *pw[3] = { sb_rfpower, sb_tunepower, sb_maxpower };
+    for (int i = 0; i < 3; i++)
+    {
+        pw[i]->setRange(0, 100);
+        pw[i]->setSuffix(" %");
+        pw[i]->setKeyboardTracking(false);// do not emit per keystroke
+    }
+    sb_rfpower->setToolTip(tr("RF drive for normal transmit (transmit set rfpower).\n"
+                              "Takes effect on Enter or when the field loses focus."));
+    sb_tunepower->setToolTip(tr("RF drive for TUNE only (transmit set tunepower).\n"
+                                "Kept separate so a tune-up does not hit the\n"
+                                "amplifier at full transmit drive."));
+    sb_maxpower->setToolTip(tr("Ceiling the radio enforces on the two above\n"
+                               "(transmit set max_power_level)."));
+    cb_hwalc = new QCheckBox(tr("Hardware ALC"));
+    cb_hwalc->setToolTip(tr("Let an external amplifier's ALC line control drive\n"
+                            "(transmit set hwalc_enabled)."));
+    int pr = 0;
+    P->addWidget(new QLabel(tr("RF power")),   pr, 0); P->addWidget(sb_rfpower,   pr++, 1);
+    P->addWidget(new QLabel(tr("Tune power")), pr, 0); P->addWidget(sb_tunepower, pr++, 1);
+    P->addWidget(new QLabel(tr("Max power")),  pr, 0); P->addWidget(sb_maxpower,  pr++, 1);
+    P->addWidget(cb_hwalc, pr, 0, 1, 2);
+    gb_p->setLayout(P);
+    V->addWidget(gb_p);
+
     // Working the radio through MSHV otherwise means hearing it twice: once
     // from the decoded DAX stream and once out of the radio's own speaker.
     QGroupBox *gb_a = new QGroupBox(tr("Local audio"));
@@ -91,6 +133,10 @@ FlexPanel::FlexPanel(bool dark, QWidget *parent)
     connect(cb_txant, SIGNAL(currentIndexChanged(int)), this, SLOT(TxAntChanged(int)));
     connect(cb_mode,  SIGNAL(currentIndexChanged(int)), this, SLOT(ModeChanged(int)));
     connect(cb_localmute, SIGNAL(toggled(bool)), this, SLOT(LocalMuteToggled(bool)));
+    connect(sb_rfpower,   SIGNAL(editingFinished()), this, SLOT(RfPowerEdited()));
+    connect(sb_tunepower, SIGNAL(editingFinished()), this, SLOT(TunePowerEdited()));
+    connect(sb_maxpower,  SIGNAL(editingFinished()), this, SLOT(MaxPowerEdited()));
+    connect(cb_hwalc,     SIGNAL(toggled(bool)),     this, SLOT(HwAlcToggled(bool)));
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(Refresh()));
@@ -111,6 +157,50 @@ void FlexPanel::FillCombo(QComboBox *box, QStringList items, QString current)
     const int at = items.indexOf(current);
     if (at >= 0) box->setCurrentIndex(at);
     filling = false;
+}
+
+// Mirror the radio's value into a spinbox without it echoing straight back,
+// and without overwriting a number the operator is in the middle of typing --
+// the poll runs every 400 ms, which is easily inside a two-keystroke edit.
+void FlexPanel::FillSpin(QSpinBox *box, int value, int &shown)
+{
+    if (value < 0) return;              // radio has not reported it yet
+    if (box->hasFocus()) return;        // being edited right now: leave alone
+    shown = value;                      // remember what the radio told us
+    if (box->value() == value) return;
+    filling = true;
+    box->setValue(value);
+    filling = false;
+}
+
+// Send a power setting ONLY when the operator actually changed the number.
+//
+// editingFinished() fires on plain focus-out with nothing edited, so the test
+// for "did this change?" carries the whole weight.  The first version compared
+// the box against the RADIO's current value, which is the wrong reference in
+// two reachable cases:
+//
+//  * at startup the box reads 0 while the radio has reported nothing (-1), so
+//    "different" is true and a focus-out would push 0 at the radio;
+//  * Flex RF power is PER BAND.  Change band while the box has focus and the
+//    radio reports a new rfpower that FillSpin declines to write; the box then
+//    holds the PREVIOUS band's number, looks "different", and a focus-out
+//    sends it -- silently retuning the operator's power on the new band.
+//
+// Neither has been observed on the air; both fall straight out of reading the
+// code, and with an amplifier downstream an unasked-for power change is worth
+// designing out rather than arguing about the odds.
+//
+// Comparing against `shown` -- the last value WE put in the box -- makes an
+// untouched box a no-op by construction, whatever the radio does meanwhile.
+void FlexPanel::SendIfEdited(QSpinBox *box, int &shown, int radio_value, const char *key)
+{
+    if (filling) return;
+    if (radio_value < 0) return;        // radio has not reported: never push a guess
+    if (shown < 0) return;              // we have never displayed a real value
+    if (box->value() == shown) return;  // operator did not change it
+    shown = box->value();               // so a second focus-out does not resend
+    _FlexVitaSetTransmit_(QString(key), shown);
 }
 
 void FlexPanel::Refresh()
@@ -150,6 +240,17 @@ void FlexPanel::Refresh()
     FillCombo(cb_rxant, _FlexVitaAntList_(false), _FlexVitaAnt_(false));
     FillCombo(cb_txant, _FlexVitaAntList_(true),  _FlexVitaAnt_(true));
     FillCombo(cb_mode,  _FlexVitaModeList_(),     _FlexVitaMode_());
+
+    FillSpin(sb_rfpower,   _FlexVitaRfPower_(),   shown_rf);
+    FillSpin(sb_tunepower, _FlexVitaTunePower_(), shown_tune);
+    FillSpin(sb_maxpower,  _FlexVitaMaxPower_(),  shown_max);
+    const bool hwalc = _FlexVitaHwAlc_();
+    if (cb_hwalc->isChecked() != hwalc)
+    {
+        filling = true;
+        cb_hwalc->setChecked(hwalc);
+        filling = false;
+    }
 
     // Only an M series radio has a front speaker; on anything else the
     // command does not exist, so grey the control rather than offer one that
@@ -197,6 +298,30 @@ void FlexPanel::ModeChanged(int)
 {
     if (filling) return;
     _FlexVitaSetMode_(cb_mode->currentText());
+}
+
+// editingFinished() also fires on focus-out with the value unchanged, so each
+// of these would re-send the radio its own setting every time the panel lost
+// focus. Harmless but noisy on the CAT link, so send only a real change.
+void FlexPanel::RfPowerEdited()
+{
+    SendIfEdited(sb_rfpower, shown_rf, _FlexVitaRfPower_(), "rfpower");
+}
+
+void FlexPanel::TunePowerEdited()
+{
+    SendIfEdited(sb_tunepower, shown_tune, _FlexVitaTunePower_(), "tunepower");
+}
+
+void FlexPanel::MaxPowerEdited()
+{
+    SendIfEdited(sb_maxpower, shown_max, _FlexVitaMaxPower_(), "max_power_level");
+}
+
+void FlexPanel::HwAlcToggled(bool on)
+{
+    if (filling) return;
+    _FlexVitaSetTransmit_("hwalc_enabled", on ? 1 : 0);
 }
 
 void FlexPanel::LocalMuteToggled(bool on)

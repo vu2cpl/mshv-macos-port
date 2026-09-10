@@ -1633,7 +1633,8 @@ void DecodeList::InsertItem_hv(QStringList list,bool ffopen,bool forme)
             list.insert(8,CalcDistance(list.at(4),list.at(6)));
             falltxt[0] = 7;
             falltxt[1] = 8;
-        }        
+        }
+
 
         for (QStringList::iterator it =  list.begin(); it != list.end(); ++it)
         {
@@ -1748,7 +1749,7 @@ void DecodeList::InsertItem_hv(QStringList list,bool ffopen,bool forme)
                 {
                 	if (dsty) item->setBackground(QColor(130,10,10));
                 	else item->setBackground(QColor(250,200,200));
-               	} 
+               	}
                	              	
                 qlsi.append(item);
             }

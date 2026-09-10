@@ -631,6 +631,7 @@ void HvRigCat::SetRig(int index)
         connect(this, SIGNAL(EmitNetSP(QString)), TNetwork, SLOT(ConnectNet(QString)));
         connect(TNetwork, SIGNAL(EmitNetConnInfo(QString,bool,bool)), this, SIGNAL(EmitNetConnInfo(QString,bool,bool)));
         connect(TNetwork,SIGNAL(EmitFullRigInfo(QString)),this,SIGNAL(EmitFullRigInfo(QString)));//2.76.1 for pskreporter
+        connect(TNetwork,SIGNAL(EmitFlexSliceReady()),this,SIGNAL(EmitFlexSliceReady()));//flex native vita-49
 
         connect(this, SIGNAL(SetCmd(CmdID,ptt_t,QString)), TNetwork, SLOT(SetCmd(CmdID,ptt_t,QString)));
         connect(TNetwork, SIGNAL(EmitRigSet(RigSet)), this, SLOT(SetRigSet(RigSet)));

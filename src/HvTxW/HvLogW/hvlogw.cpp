@@ -1233,10 +1233,33 @@ HvLogW::HvLogW(QString inst,QString app_path, bool indsty,int x,int y,QWidget *w
     cb_enable_ali = new QCheckBox(tr("Enable Auto Logging Info"));
     connect(cb_enable_ali,SIGNAL(toggled(bool)),this,SIGNAL(EmitCBEnableAliChanged(bool)));//clicked 2.75
 
+    /* macOS port -- band scope for Auto Logging Info.
+     *
+     * Without this the stamp is unconditional: tick the box for a QO-100
+     * session and every HF QSO logged afterwards also gets PROP_MODE=SAT with
+     * the satellite name and mode, which files it under satellite at LoTW /
+     * Club Log and stops it matching your HF DXCC. Index 0 is "Any band",
+     * which reproduces the old behaviour, so nothing changes for anyone who
+     * doesn't pick a band. */
+    QLabel *l_ali_band = new QLabel(tr("Apply on")+":");
+    cb_ali_band = new QComboBox();
+    cb_ali_band->setMinimumWidth(90);
+    cb_ali_band->addItem(tr("Any band"));
+    for (int i = 0; i<COUNT_BANDS; ++i)
+    {
+        if (lst_bands[i].isEmpty()) continue;//unconfigured user slot
+        cb_ali_band->addItem(lst_bands[i]);
+    }
+    cb_ali_band->setCurrentIndex(0);
+    connect(cb_ali_band,SIGNAL(currentIndexChanged(int)),this,SLOT(AliBandScopeChanged(int)));
+
     QHBoxLayout *H_p= new QHBoxLayout();
     H_p->setContentsMargins(0,0,0,0);
     H_p->setSpacing(4);
     H_p->addWidget(cb_enable_ali);
+    H_p->addWidget(l_ali_band);
+    H_p->setAlignment(l_ali_band,Qt::AlignRight);
+    H_p->addWidget(cb_ali_band);
     H_p->addWidget(l_prop);
     H_p->setAlignment(l_prop,Qt::AlignRight);
     H_p->addWidget(add_to_log_cb_prop);
@@ -3672,7 +3695,10 @@ bool HvLogW::Insert(QStringList lst, bool save_changes,bool warning_msg,int show
         else return false;
     }
 
-    if (add_prop_info && cb_enable_ali->isChecked() && !warning_msg)//2.75
+    // macOS port -- AliActiveForBand() adds the band scope test; lst.at(9) is
+    // the QSO's band (HvTxW fills it from s_band). "Any band" keeps the
+    // original unconditional behaviour.
+    if (add_prop_info && AliActiveForBand(lst.at(9)) && !warning_msg)//2.75
     {
         int id = add_to_log_cb_prop->currentIndex();
         lst[11] = s_id_prop_mod[id];//prop
@@ -4288,6 +4314,10 @@ QString HvLogW::GetPropSettings()//2.75
     str.append(QString("%1").arg(cb_enable_ali->isChecked()));
     str.append("#");
     str.append(add_to_log_le->text());//2.76.3
+    // macOS port -- band scope appended last so a save written here still
+    // satisfies the ls.count()>5 gate in a build without the field.
+    str.append("#");
+    str.append(cb_ali_band->currentText());
     return str;
 }
 void HvLogW::SetPropSettings(QString s)
@@ -4305,6 +4335,27 @@ void HvLogW::SetPropSettings(QString s)
         if (ls.at(4)=="1") cb_enable_ali->setChecked(true);
         add_to_log_le->setText(ls.at(5));//2.76.3 
     }
+    // macOS port -- absent in saves written before the band scope existed, and
+    // in public builds; absent means "Any band", which is index 0 already set.
+    if (ls.count()>6)
+    {
+        const int index = cb_ali_band->findText(ls.at(6),Qt::MatchCaseSensitive);
+        if (index >= 0) cb_ali_band->setCurrentIndex(index);
+    }
+}
+/* macOS port -- is Auto Logging Info armed and in scope for this band?
+ * Called at log time with the QSO's band, and by HvTxW to colour the Add To
+ * Log button so the operator can see at a glance whether the current band
+ * will be stamped. */
+void HvLogW::AliBandScopeChanged(int)
+{
+    emit EmitCBEnableAliChanged(cb_enable_ali->isChecked());
+}
+bool HvLogW::AliActiveForBand(QString band)
+{
+    if (!cb_enable_ali->isChecked()) return false;
+    if (cb_ali_band->currentIndex()==0) return true;//Any band
+    return (cb_ali_band->currentText()==band);
 }
 void HvLogW::RefreshCbTrmN(int i)
 {
@@ -4775,4 +4826,24 @@ void HvLogW::ExportToCabr()
 
     QMessageBox::information(this, "MSHV", tr("Successfully Exported")+" "+QString("%1").arg(j)+" "+tr("QSOs In Cabrillo Format.")+"\n"+
                              tr("Full Path And File Name is")+":\n"+file_Path_Name, QMessageBox::Ok);
+}
+
+/* macOS port -- copy the operator's user-defined bands into THIS translation
+ * unit's private copy of the band tables. config_band_all.h declares them
+ * `static`, so every .cpp that defines the guards gets its own set and each
+ * has to be patched separately. Called from main() before any UI is built.
+ * A no-op when MSHV_USER_BANDS is 0 (non-macOS builds). */
+#include "../../mshv_userbands.h"
+void MshvApplyUserBands_hvlogw()
+{
+    for (int i = 0; i < MSHV_USER_BANDS; ++i)
+    {
+        const MshvUserBand &b = MshvUserBands::Inst().At(i);
+        const int k = COUNT_BANDS_STD + i;
+        lst_bands[k]        = b.name;
+        lst_lambda[k]       = b.lambda;
+        lst_bandtofrq[k]    = b.bandtofrq;
+        freq_min_max[k].min = b.fmin;
+        freq_min_max[k].max = b.fmax;
+    }
 }

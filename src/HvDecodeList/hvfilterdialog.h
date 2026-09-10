@@ -93,7 +93,7 @@ private:
     QCheckBox *cb_gonoff;
     QCheckBox *cb_usefudpdectxt; 
     QCheckBox *cb_filtered_answer;
-    QCheckBox *cb_usebtflonoff;       
+    QCheckBox *cb_usebtflonoff;
     void RefrCountrys();
     void RefrHidCountrys();
     QStringList GetLineParms(HvLeWithSpace *le);

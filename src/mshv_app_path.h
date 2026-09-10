@@ -59,14 +59,19 @@ static inline QString mshv_app_data_path()
     // The seed walk below (one mkpath plus six recursive scans of the bundle's
     // Resources/, QFile::exists()-ing every destination) produces the same
     // answer every time and only needs to run once per process. It used to run
-    // on every call — so cache it in a function-local static computed on first
-    // use (F6). cp -n semantics are preserved: the seeding still happens
-    // exactly once, at the first call, and never overwrites existing Library
-    // data. The magic-static init is thread-safe under C++11.
+    // on every call — and there are four call sites, one of which fires on
+    // every Add/Remove Band — so cache it in a function-local static computed
+    // on first use (F6). cp -n semantics are preserved: the seeding still
+    // happens exactly once, at the first call, and never overwrites existing
+    // Library data. The magic-static init is thread-safe under C++11.
     static const QString cached = []() -> QString {
         // Data-directory name is overridable at build time so a second,
         // differently-named build can run ALONGSIDE the normal one without
-        // both writing the same ms_settings. Defaults to "MSHV".
+        // both writing the same ms_settings. MSHV's --inst-name= does not
+        // separate settings -- Read_Settings() uses App_Path directly -- so
+        // two concurrent instances sharing this path clobber each other's
+        // device selection and log. Defaults to "MSHV", so a normal build is
+        // byte-identical in behaviour to before.
 #ifndef MSHV_DATA_DIR_NAME
 #define MSHV_DATA_DIR_NAME "MSHV"
 #endif

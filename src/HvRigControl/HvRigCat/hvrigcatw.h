@@ -126,6 +126,7 @@ signals:
     void EmitPttDtr(bool);// sea-235
     void EmitTciSelect(int,int,bool);
     void EmitFullRigInfo(QString);//2.76.1
+    void EmitFlexSliceReady();     //flex native vita-49: forwarded from Network
 
 private slots:
 ////// omnirig /////////////

@@ -1,9 +1,34 @@
 #ifndef _CONFIG_BAND_ALL_H_
 #define _CONFIG_BAND_ALL_H_
 
-#define COUNT_BANDS 33
+/* Band tables.
+ *
+ * COUNT_BANDS_STD are the standard bands shipped by upstream. The macOS port
+ * reserves MSHV_USER_BANDS extra slots at the END of every table for bands the
+ * operator defines at runtime (Radio And Frequencies -> Add Band). They must be
+ * appended, never inserted: default_band (main_ms), the per-band TX levels
+ * (hvtxw) and the band-switcher selection (def_band_bt_sw) all persist a band
+ * INDEX, so inserting mid-array would silently move the operator to a different
+ * band with different TX drive on the next launch.
+ *
+ * Unused slots stay empty (name "", freq window 0/0) and are hidden from the
+ * band menu and switcher. On non-macOS builds MSHV_USER_BANDS is 0, so
+ * COUNT_BANDS is 33 and every loop below behaves exactly as upstream.
+ *
+ * The tables are deliberately NOT const: they are patched in place at startup
+ * from MshvUserBands. Each translation unit that #defines one of the guards
+ * below carries its own static copy, so each patches its own -- see
+ * mshv_userbands.h.
+ */
+#define COUNT_BANDS_STD 33
+#if defined _MACOS_
+#define MSHV_USER_BANDS 4
+#else
+#define MSHV_USER_BANDS 0
+#endif
+#define COUNT_BANDS (COUNT_BANDS_STD + MSHV_USER_BANDS)
 #if defined _BANDS_H_
-static const QString lst_bands[COUNT_BANDS] =
+static QString lst_bands[COUNT_BANDS] =
     {"135 kHz","472 kHz","501 kHz",
      "1.8 MHz","3.5 MHz","5 MHz","7 MHz","10 MHz","14 MHz","18 MHz","21 MHz","24 MHz","27 MHz","28 MHz","40 MHz","50 MHz","60 MHz",
      "70 MHz","144 MHz","222 MHz","432 MHz","902 MHz","1296 MHz","2320 MHz","3.4 GHz","5.65 GHz","10 GHz",
@@ -11,14 +36,14 @@ static const QString lst_bands[COUNT_BANDS] =
     };
 #endif
 #if defined _LAMBDA_H_
-static const QString lst_lambda[COUNT_BANDS] =
+static QString lst_lambda[COUNT_BANDS] =
     {"2190M","630M","560M",
      "160M","80M","60M","40M","30M","20M","17M","15M","12M","11M","10M","8M","6M","5M","4M","2M","1.25M","70CM","33CM","23CM",
      "13CM","9CM","6CM","3CM","1.25CM","6MM","4MM","2.5MM","2MM","1MM"
     };
 #endif
 #if defined _BCNBAND_H_
-static const QString lst_bcnband[COUNT_BANDS] =
+static QString lst_bcnband[COUNT_BANDS] =
     {"137K","472K","501K",
      "1.8M","3.5M","5M","7M","10M","14M","18M","21M","24M","27M","28M","40M","50M","60M","70M","144M","222M","432M","902M","1G3",
      "2G3","3G4","5G7","10G",
@@ -70,7 +95,7 @@ frq_min_max_;
         //{241000000000,250000000000},//248
     };*/
     // -2000Hz / +2000Hz v.2.68
-static const frq_min_max_ freq_min_max[COUNT_BANDS] =
+static frq_min_max_ freq_min_max[COUNT_BANDS] =
     {
         {133000,       140000},
         {470000,       481000},
@@ -109,7 +134,7 @@ static const frq_min_max_ freq_min_max[COUNT_BANDS] =
     };
 #endif
 #if defined _BANDTOFREQ_H_
-static const QString lst_bandtofrq[COUNT_BANDS] =
+static QString lst_bandtofrq[COUNT_BANDS] =
     {"136","474","501",
      "1800","3500","5300","7000","10100","14000","18100","21000","24900","27000","28000","40000","50000",
      "60000","70000","144000","220000","432000","902000","1240000","2400000","3300000","5650000",
@@ -124,7 +149,7 @@ static const uint8_t pos_mod_sav_frq[COUNT_FREQ_MODES]={0,1,3,4,5,6,2};
 static const QString ModeStrForFerq[COUNT_FREQ_MODES]={"MSK","FSK","FT4","FT8","JT65","Q65","FT2"};
 #endif
 #if defined _ALLBANDSMODSFRQ_H_
-static const char *all_bands_mods_frq[COUNT_BANDS][COUNT_FREQ_MODES] =
+static QString all_bands_mods_frq[COUNT_BANDS][COUNT_FREQ_MODES] =
     {
         //  MSK144            FSK               FT4             FT8       		JT65			Q65 			 FT2 
         {"136.130",       "136.130",       "136.130",       "136.130",       "136.130",       "136.130",       "136.130"},        //137k

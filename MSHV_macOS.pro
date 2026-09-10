@@ -79,6 +79,42 @@ QMAKE_POST_LINK += mkdir -p $$RES_DIR/settings && \
     cp $$PWD/macos/MSHV.icns $$RES_DIR/MSHV.icns; \
     true
 
+# De-standalone the bundle after a plain `make`.
+#
+# The binary this target just linked resolves Qt through absolute
+# /opt/homebrew install names. If a previous `make standalone` left its
+# deployment behind — Contents/Frameworks, the Qt plugins, and the qt.conf
+# that points Qt at them — the process ends up loading BOTH copies:
+#
+#     objc: Class QMacAutoReleasePoolTracker is implemented in both
+#           /opt/homebrew/.../QtCore and .../MSHV.app/.../QtCore
+#     qt.qpa.plugin: Could not load the Qt platform plugin "cocoa"
+#
+# ...and the app dies before it draws a window. The stale _CodeSignature is
+# the same problem in a different coat: it describes the *old* binary, so
+# `open` refuses the bundle silently, with the failure only visible when the
+# executable is run straight from a shell.
+#
+# So a plain build now removes the deployment it invalidated. The rule that
+# falls out is simple and has no fragile middle state:
+#
+#     make              -> developer bundle, resolves Qt from Homebrew
+#     make standalone   -> shippable bundle, Qt embedded and signed
+#
+# Both are runnable at any time. build-standalone.sh already knows how to
+# deploy over a rebuilt binary, so `make standalone` after this is a normal
+# redeploy, not a repair.
+BUNDLE_DIR = $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app/Contents
+QMAKE_POST_LINK += ; \
+    if [ -d $$BUNDLE_DIR/Frameworks ] || [ -e $$BUNDLE_DIR/Resources/qt.conf ] || \
+       [ -d $$BUNDLE_DIR/_CodeSignature ]; then \
+        echo \"==> plain build: dropping the standalone deployment; run make standalone to restore it\"; \
+        rm -rf $$BUNDLE_DIR/Frameworks $$BUNDLE_DIR/PlugIns \
+               $$BUNDLE_DIR/Resources/qt.conf \
+               $$BUNDLE_DIR/_CodeSignature $$BUNDLE_DIR/CodeResources; \
+    fi; \
+    true
+
 # `make standalone` — embed Qt + PortAudio + FFTW into the bundle and code
 # sign (Developer ID if available in the keychain, otherwise ad-hoc) so the
 # .app runs on a Mac without Homebrew installed. See
@@ -100,6 +136,8 @@ QMAKE_EXTRA_TARGETS += notarize
 
 
 HEADERS = src/main_ms.h \
+ src/mshv_userbands.h \
+ src/mshv_txtrace.h \
  src/config.h \
  src/config_msg_all.h \
  src/config_str_all.h \
@@ -205,6 +243,7 @@ HEADERS = src/main_ms.h \
  src/HvSlider_H/hvslider_h.h \
  src/HvAggressiveW/aggressiv_d.h
 SOURCES = src/main.cpp \
+ src/mshv_userbands.cpp \
  src/main_ms.cpp \
  src/nhash.cpp \
  src/DisplayMs/display_ms.cpp \

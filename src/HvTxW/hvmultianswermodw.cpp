@@ -1977,13 +1977,17 @@ void MultiAnswerModW::ConfigRestrictW()
     else if (!g_block_setx || !g_hf_b) SBslots->setEnabled(true);//2.71 added g_block_setx
     else if (g_hf_b && g_block_setx) SBslots->setEnabled(false);
 
+
+    const bool as_std_override = false;
+
     if (s_mode!=11 && s_mode!=13 && s_mode!=18 && !allq65) emit EmitMAFirstTX(false);//2.76.4
     else
     {//2.71
-        if (g_hf_b && g_block_setx && f_multi_answer_mod_std && SBslots->valueS()>1) SBslots->setValue(1);
-        else if (g_hf_b && f_multi_answer_mod_std && SBslots->valueS()>1/*||LsNow->GetRowCount()>1*/) emit EmitMAFirstTX(true);
+        if (g_hf_b && g_block_setx && f_multi_answer_mod_std && SBslots->valueS()>1 && !as_std_override) SBslots->setValue(1);
+        else if (g_hf_b && f_multi_answer_mod_std && SBslots->valueS()>1/*||LsNow->GetRowCount()>1*/ && !as_std_override) emit EmitMAFirstTX(true);
         else if (f_multi_answer_mod_std && LsNow->GetRowCount()<2) emit EmitMAFirstTX(false);
-        else emit EmitMAFirstTX(true);
+        else if (!as_std_override) emit EmitMAFirstTX(true);
+        // when as_std_override: leave TX FIRST/SECOND state alone, don't clamp slots back to 1
     }
     //qDebug()<<g_hf_b<<g_block_setx<<f_multi_answer_mod_std<<SBslots->valueS();
     //qDebug()<<"valueS="<<SBslots->valueS()<<"value="<<SBslots->value();

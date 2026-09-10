@@ -201,6 +201,7 @@ HvFilterDialog::HvFilterDialog(bool f,QWidget *parent)
     connect(cb_usebtflonoff, SIGNAL(toggled(bool)), this, SLOT(CbHidFLBtOnOff(bool)));
     //qDebug()<<"Connecttttttttttt";
 
+
     SetDefaultFilter();
 
     QHBoxLayout *hbcq = new QHBoxLayout();
@@ -264,6 +265,7 @@ HvFilterDialog::HvFilterDialog(bool f,QWidget *parent)
     //hb02->setAlignment(b_apply_filter,Qt::AlignLeft);
     hb02->addWidget(b_set_default_filter);
     //hb02->setAlignment(Qt::AlignHCenter);
+
 
     ltext->setContentsMargins(0,0,0,2);
     LV->addWidget(ltext);

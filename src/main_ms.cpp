@@ -8,6 +8,8 @@
 #define _BANDS_H_
 #include "main_ms.h"
 #include "mshv_app_path.h"
+#include "mshv_userbands.h"
+#include "mshv_txtrace.h"
 
 #include <QScreen>
 #include <QWindow>
@@ -120,6 +122,8 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     //printf("--");
     InstName = inst0;
     s_id_set_to_rig = 0;//0<-from App 1<-from Rig
+    flex_rig_active = false;
+    flex_push_pending = false;
     f_is_d1_data_todec65 = false;
     f_is_d2_data_todec65 = false;
     is_active_astro_w = false;
@@ -333,6 +337,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
 
     TDecodeList1 = new DecodeList(1,dsty);
     TDecodeList2 = new DecodeList(2,dsty);
+
     FilterDialog = new HvFilterDialog(dsty,this);//(0) and open() no modal
     connect(FilterDialog, SIGNAL(EmitSetFilter(QStringList,bool*,QStringList,QStringList,QStringList,QStringList,QStringList,QStringList)),
             TDecodeList1, SLOT(SetFilter(QStringList,bool*,QStringList,QStringList,QStringList,QStringList,QStringList,QStringList)));
@@ -659,12 +664,20 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
 
     QString str_bt1[COUNT_BANDS];//2.74
     int btid1[COUNT_BANDS];
+    int c_bt1 = 0;//2.74
     for (int i = 0; i < COUNT_BANDS; ++i)
     {
-        str_bt1[i] = lst_bands[i];
-        btid1[i]   = i;
+        // macOS port -- skip unconfigured user slots so they don't show as
+        // blank buttons / blank checkboxes in "Choose Bands". The button id
+        // stays the real band index and HvWBtSw matches on id everywhere
+        // (SetSettings, GetSettings, SetActiveBt), so def_band_bt_sw keeps
+        // round-tripping unchanged.
+        if (lst_bands[i].isEmpty()) continue;
+        str_bt1[c_bt1] = lst_bands[i];
+        btid1[c_bt1]   = i;
+        ++c_bt1;
     }
-    W_band_bt_sw = new HvWBtSw(this,COUNT_BANDS,btid1,str_bt1,tr("Band Switcher Buttons"),tr("Choose Bands")+":",
+    W_band_bt_sw = new HvWBtSw(this,c_bt1,btid1,str_bt1,tr("Band Switcher Buttons"),tr("Choose Bands")+":",
                                tr("USE BAND SWITCHER"),"3#4#5#6#7#8#9#10#11#13#15#18#20#222",dsty);
     //connect(W_band_bt_sw,SIGNAL(clicked(int)),this,SLOT(BandBtSwClicked(int)));move down when ListBands is created
     QAction *ac_bt_band = new QAction(tr("Band Switcher Buttons"),this);
@@ -818,6 +831,11 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvRigControl, SIGNAL(EmitGetedMode(QString)), THvTxW, SLOT(SetModeGlobalFromRigCat(QString)));//1.61=
     connect(THvRigControl, SIGNAL(EmitTxActive(int)), THvTxW, SLOT(SetTxActive(int)));//2.21
     connect(THvRigControl, SIGNAL(EmitRigCatActiveAndRead(bool,QString)), THvTxW, SLOT(SetRigCatActiveAndRead(bool,QString)));//2.53 //2.76.1
+    // Native Flex VITA-49: MSHV leads the radio once, when the slice is ours.
+    // Both readiness signals feed one gate -- see FlexSliceReady().
+    connect(THvRigControl, SIGNAL(EmitFlexSliceReady()), this, SLOT(FlexSliceReady()));
+    connect(THvRigControl, SIGNAL(EmitRigCatActiveAndRead(bool,QString)), this, SLOT(FlexRigActive(bool,QString)));
+    connect(THvTxW, SIGNAL(EmitFreqGlobalToDec(QString)), this, SLOT(FlexTrackFreq(QString)));
 
     connect(THvTxW, SIGNAL(EmitQSOProgress(int)), TDecoderMs, SLOT(SetQSOProgress(int)));
     connect(THvTxW, SIGNAL(EmitQSOProgress(int)), THvRigControl, SLOT(SetQSOProgress(int)));//2.45
@@ -928,6 +946,14 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     QMenu *B3_m = new QMenu("SHF/EHF  ");
     B3_m->setIcon(QPixmap(":pic/smenu.png"));
     Band_m->addMenu(B3_m);
+#if MSHV_USER_BANDS > 0
+    // macOS port -- operator-defined bands get their own submenu rather than
+    // being filed under SHF/EHF by index; a user band can sit anywhere.
+    QMenu *BU_m = new QMenu(tr("User Bands")+"  ");
+    BU_m->setIcon(QPixmap(":pic/smenu.png"));
+    Band_m->addMenu(BU_m);
+    BU_m->menuAction()->setVisible(MshvUserBands::Inst().Count() > 0);
+#endif
     QActionGroup *ac_gr_band = new QActionGroup(this);
     for (int i = 0; i<COUNT_BANDS; ++i)
     {
@@ -937,7 +963,17 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
         ac_gr_band->addAction(rb_t);
         ListBands.append(rb_t);
         connect(rb_t, SIGNAL(toggled(bool)), this, SLOT(BandChanged(bool)));
-        if (i<3)       B0_m->addAction(rb_t);
+        if (i>=COUNT_BANDS_STD)
+        {
+            // macOS port -- ListBands must stay COUNT_BANDS long because band
+            // index is the key everywhere, so an unconfigured user slot gets a
+            // hidden action rather than being skipped.
+#if MSHV_USER_BANDS > 0
+            BU_m->addAction(rb_t);
+#endif
+            rb_t->setVisible(!lst_bands[i].isEmpty());
+        }
+        else if (i<3)  B0_m->addAction(rb_t);
         else if (i<16) B1_m->addAction(rb_t);
         else if (i<24) B2_m->addAction(rb_t);
         else B3_m->addAction(rb_t);
@@ -1668,6 +1704,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     H_dlist->setSpacing(0);
     H_dlist->addWidget(TDecodeList1);
     H_dlist->addWidget(TDecodeList2);
+
 
     QVBoxLayout *V_l = new QVBoxLayout(this);
     setLayout(V_l);
@@ -2611,8 +2648,25 @@ void Main_Ms::SkUpDownBandChanged(bool f_up_down)
     }
     if (ib>-1)// band is exit
     {
-        if (f_up_down && ib+1<COUNT_BANDS) ListBands.at(ib+1)->setChecked(true);
-        else if (!f_up_down && ib-1>-1) ListBands.at(ib-1)->setChecked(true);
+        // macOS port -- step over unconfigured user slots (empty name).
+        if (f_up_down)
+        {
+            for (int i = ib+1; i<COUNT_BANDS; ++i)
+            {
+                if (lst_bands[i].isEmpty()) continue;
+                ListBands.at(i)->setChecked(true);
+                break;
+            }
+        }
+        else
+        {
+            for (int i = ib-1; i>-1; --i)
+            {
+                if (lst_bands[i].isEmpty()) continue;
+                ListBands.at(i)->setChecked(true);
+                break;
+            }
+        }
     }
 }
 void Main_Ms::BandChanged(bool)
@@ -2696,8 +2750,105 @@ void Main_Ms::ShowFlexPanel()
     flex_panel->activateWindow();
 }
 
+// ---- Native Flex VITA-49: MSHV leads the radio once, when the slice is ours.
+//
+// MSHV FOLLOWS the rig.  It polls the radio, derives its band from what it
+// reads, and the "from Rig" path (SetBandFromRigFreq -> s_id_set_to_rig=1)
+// deliberately never pushes a frequency back -- right for a conventional CAT
+// rig, whose VFO holds the operator's last frequency.  It is wrong for the
+// native Flex backend: the radio hands a fresh GUI client a slice at its own
+// default (14.100 USB on the 6600 -- observed, the API documents no default),
+// so there is nothing worth following.  MSHV adopted 20m from the radio and
+// sat on a non-FT8 frequency until a band button was pressed; measured
+// 2026-09-09, three minutes untouched, never tuned.  And because default_band
+// is written from that rig-derived band on exit, the "band memory" recorded
+// whatever the radio last had, not what the operator chose.
+//
+// So for THIS backend only, once the slice is ours, push the last frequency
+// MSHV was on -- remembered across runs as flex_native_last_freq -- or, with
+// nothing remembered, 14.074 MHz.  Manoj's spec, 2026-09-09: "remember last
+// freq and if not available, go to 14074 ft8".  The push is
+// HvTxW::SetDefFreqGlobal(2, hz), the from-App path a band button takes: it
+// re-syncs the band button to that frequency and sets the mode as well
+// (DIGU for FT8), given Interface Control's mode-set option is on.
+//
+// Two readiness conditions, in either order: the slice must exist
+// (EmitFlexSliceReady) AND the rig must be "active and read", because
+// HvRigControl::SetFreq pushes the MODE only once that flag is up.  Push too
+// early and the frequency lands but the slice stays USB.
+//
+// The vendor's own restore -- "client start_persistence" -- was tried first
+// and is rejected by this radio (0x50001000, any ordering, either value).
+void Main_Ms::FlexTrackFreq(QString hz)
+{
+    // Remember only while the backend is RUNNING.  The fresh slice's 14.100
+    // arrives before the streams are up -- at startup and on every reconnect
+    // -- so this filter is what keeps it out of the memory, and a session in
+    // which the backend never came up leaves the last good value alone.
+    if (!(_FlexVitaRxActive_() || _FlexVitaTxActive_())) return;
+    if (hz.toLongLong() < 100000) return;
+    flex_native_last_freq = hz;
+}
+void Main_Ms::FlexRigActive(bool f, QString)
+{
+    flex_rig_active = f;
+    if (f && flex_push_pending) FlexPushStartFreq();
+}
+void Main_Ms::FlexSliceReady()
+{
+    if (flex_rig_active) FlexPushStartFreq();
+    else flex_push_pending = true;   // FlexRigActive() finishes the job
+}
+void Main_Ms::FlexPushStartFreq()
+{
+    flex_push_pending = false;
+    QString hz = flex_native_last_freq;
+    if (hz.toLongLong() < 100000) hz = "14074000";   // nothing remembered: 20m FT8
+    flex_native_last_freq = hz;                       // this IS where we are now
+    // SetDefFreqGlobal is a private slot in upstream hvtxw.h.  Reach it
+    // through the meta-object rather than widening its access -- the same
+    // way the connect() to its private SetRigCatActiveAndRead already does --
+    // so LZ2HV's header stays untouched.  Direct: same thread, synchronous.
+    QMetaObject::invokeMethod(THvTxW, "SetDefFreqGlobal", Qt::DirectConnection,
+                              Q_ARG(int, 2), Q_ARG(QString, hz));//2=frq,mod -- the band-button path
+}
+
 void Main_Ms::SetRigTxRx(bool f)
 {
+#if defined _MACOS_
+    // DIAGNOSTIC (2026-09-08), inert unless MSHV_TXTRACE is set.
+    // Finds what asks for TX a second time inside one transmission -- the
+    // duplicate PTT-ON behind the Flex double relay click.  The click is
+    // already fixed downstream (hvrigcontrol.cpp + network.cpp), but the
+    // duplicate REQUEST is still generated; this names its caller.
+    // Must run BEFORE f_tx_busy is assigned, since that is the flag the
+    // duplicate is detected against.
+    // 2026-09-10: LZ2HV's own guard now follows this block, so a duplicate
+    // is logged here and then returns -- the DUPLICATE count is what his
+    // guard absorbed.
+    if (MshvTxTraceOn())
+    {
+        static int calls = 0;
+        const bool dup = (f && f_tx_busy);   // asked to key while already keyed
+        const QString when = QDateTime::currentDateTime().toString("HH:mm:ss.zzz");
+        if (dup)
+        {
+            fprintf(stderr, "[MSHV TX] %s  DUPLICATE SetRigTxRx(true) -- already f_tx_busy\n%s",
+                    when.toUtf8().constData(), MshvBacktrace().toUtf8().constData());
+        }
+        else if (++calls <= 6)
+        {
+            // the first few normal transitions, to diff a clean path against a duplicate
+            fprintf(stderr, "[MSHV TX] %s  SetRigTxRx(%d) normal\n%s",
+                    when.toUtf8().constData(), (int)f, MshvBacktrace().toUtf8().constData());
+        }
+        else
+        {
+            fprintf(stderr, "[MSHV TX] %s  SetRigTxRx(%d)\n", when.toUtf8().constData(), (int)f);
+        }
+        fflush(stderr);
+    }
+#endif
 	if (f_tx_busy == f) return;//2.76.7 Protection MAC and PC from bad Machine Clock
     f_tx_busy = f;//2.47  //if (f_tx_busy == f) return;
     THvRigControl->SetPtt(f,0);//id 0=All 1=p1 2=p2
@@ -4084,7 +4235,7 @@ void Main_Ms::SetQActionCb(QString s, bool idp, QAction *ac)//idp priority of pr
 }
 void Main_Ms::Read_Settings(QString path)
 {
-    const int c_st_id = 110;//92  89
+    const int c_st_id = 113;//92  89
     //dopalva se tuk v kraia
     const QString st_id[c_st_id]=
         {
@@ -4111,7 +4262,20 @@ void Main_Ms::Read_Settings(QString path)
             "def_filter_list4","def_filter_list5","def_adle_vdsp","def_areset_qso","def_1_dec_sig_q65",
             "def_auto_clr_avg_afdec","def_dec_aft_eme_delay","def_max_drift","def_use_queue_cont","def_filter_list6",
             "use_aseq_max_dist","def_mod_bt_sw","def_show_lcols","vd_bw_lines_draw","def_band_bt_sw",
-            "def_show_hide_wf_tx","def_var_dec_parr"
+            "def_show_hide_wf_tx","def_var_dec_parr",
+            // Indices 110 and 111 are parsed and then ignored.  This build
+            // does nothing with either, and keeping them in the table is
+            // deliberate: Save_Settings() rewrites ms_settings from this
+            // array, so a key left out here would be DELETED from the file.
+            // Listing them means a settings file written elsewhere survives a
+            // round trip through this build untouched.  Do not remove them to
+            // "tidy up" -- that silently destroys somebody's settings.
+            "priority_calls_config",
+            "dxcc_new_only",
+            // index 112 — flex_native_last_freq (macOS port, native Flex
+            // backend): the last frequency MSHV was on with the backend
+            // running, in Hz.  Missing = nothing remembered.
+            "flex_native_last_freq"
         };
 
     QString st_res[c_st_id];
@@ -4174,6 +4338,11 @@ void Main_Ms::Read_Settings(QString path)
     }
     file.close();
     //qDebug()<<"1Time="<<ttt.elapsed();//2297 ms   down 2813 ms
+
+    // macOS port -- native Flex backend: where to put the radio once it hands
+    // us a slice.  Missing (older save, first run) leaves this empty, and
+    // FlexPushStartFreq() falls back to 14.074 MHz.
+    if (!st_res[112].isEmpty()) flex_native_last_freq = st_res[112].trimmed();
 
     if (!st_res[84].isEmpty())
     {
@@ -4792,6 +4961,11 @@ void Main_Ms::Save_Settings(QString path)
     }
     out << "def_var_dec_parr=" << dd << "\n";
 
+    // macOS port -- native Flex backend: the last frequency with the backend
+    // running, so the next start goes back there.  Empty is valid and means
+    // "nothing remembered".
+    out << "flex_native_last_freq=" << flex_native_last_freq << "\n";
+
     file.close();
 }
 void Main_Ms::SetBS1Text(QString s)
@@ -5332,4 +5506,19 @@ void Main_Ms::keyPressEvent(QKeyEvent* event)
         QWidget::keyPressEvent(event);
     }
     //qDebug()<<"KeyHex="<<QString::number(event->key(),16);
+}
+
+/* macOS port -- copy the operator's user-defined bands into THIS translation
+ * unit's private copy of the band tables. config_band_all.h declares them
+ * `static`, so every .cpp that defines the guards gets its own set and each
+ * has to be patched separately. Called from main() before any UI is built.
+ * A no-op when MSHV_USER_BANDS is 0 (non-macOS builds). */
+#include "mshv_userbands.h"
+void MshvApplyUserBands_main_ms()
+{
+    for (int i = 0; i < MSHV_USER_BANDS; ++i)
+    {
+        const MshvUserBand &b = MshvUserBands::Inst().At(i);
+        lst_bands[COUNT_BANDS_STD + i] = b.name;
+    }
 }

@@ -1608,8 +1608,27 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     H_bb->addWidget(b_reset_default_freqs);
     H_bb->addWidget(b_reset_default_freqs_cont);
     V_rlw->addLayout(H_bb);
+#if MSHV_USER_BANDS > 0
+    // macOS port -- operator-defined bands. See mshv_userbands.h for why they
+    // occupy reserved slots at the end of the band tables.
+    b_add_user_band = new QPushButton(tr("Add Band")+"...");
+    b_add_user_band->setFixedHeight(20);
+    connect(b_add_user_band, SIGNAL(clicked(bool)), this, SLOT(AddUserBandBut()));
+    b_del_user_band = new QPushButton(tr("Remove Band"));
+    b_del_user_band->setFixedHeight(20);
+    connect(b_del_user_band, SIGNAL(clicked(bool)), this, SLOT(RemoveUserBandBut()));
+    QHBoxLayout *H_ub = new QHBoxLayout();
+    H_ub->setContentsMargins(0,0,0,0);
+    H_ub->setSpacing(2);
+    H_ub->addWidget(b_add_user_band);
+    H_ub->addWidget(b_del_user_band);
+    V_rlw->addLayout(H_ub);
+#endif
     TRadListW->setLayout(V_rlw);
     SetDefaultFreqs(true);//true all default
+#if MSHV_USER_BANDS > 0
+    RefreshUserBandRows();
+#endif
 
     //V_l->addLayout(H_bb);
 	//V_l->setAlignment(Qt::AlignTop);
@@ -1725,14 +1744,14 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     V_2->setAlignment(Qt::AlignTop);
     T1->setLayout(V_2);
     TW->addTab(T0," "+tr("Page")+"  1");
-    TW->addTab(T1," "+tr("Page")+"  2");    
-    
+    TW->addTab(T1," "+tr("Page")+"  2");
+
     QVBoxLayout *V_0 = new QVBoxLayout(this);
     V_0->setContentsMargins(2,2,2,2);
     V_0->setSpacing(0);
     V_0->addWidget(TW);
     setLayout(V_0);
-    
+
 }
 RadioAndNetW::~RadioAndNetW()
 {
@@ -2939,6 +2958,191 @@ void RadioAndNetW::ResetDefaultFreqsBut()
 {
     SetDefaultFreqs(false);
 }
+#if MSHV_USER_BANDS > 0
+/* macOS port -- operator-defined bands.
+ *
+ * Rows in THvRadList are indexed by band index (SetItem_hv and the
+ * st_info_all reader both address rows as model.item(band,..)), so an
+ * unconfigured user slot is hidden rather than skipped.
+ */
+void RadioAndNetW::RefreshUserBandRows()
+{
+    for (int i = COUNT_BANDS_STD; i < COUNT_BANDS; ++i)
+        THvRadList->setRowHidden(i, QModelIndex(), lst_bands[i].isEmpty());
+    b_del_user_band->setEnabled(MshvUserBands::Inst().Count() > 0);
+    b_add_user_band->setEnabled(MshvUserBands::Inst().FreeSlot() >= 0);
+}
+void RadioAndNetW::AddUserBandBut()
+{
+    const int slot = MshvUserBands::Inst().FreeSlot();
+    if (slot < 0)
+    {
+        QMessageBox::information(this,"MSHV","<p align='center'>"+
+                                 tr("All user band slots are in use")+" ("+
+                                 QString("%1").arg(MSHV_USER_BANDS)+").</p>",QMessageBox::Close);
+        return;
+    }
+
+    QDialog d(this);
+    d.setWindowTitle(tr("Add Band"));
+    d.setWindowFlags(d.windowFlags() ^ Qt::WindowContextHelpButtonHint);
+
+    QLineEdit *le_name = new QLineEdit();
+    le_name->setMaxLength(16);
+    QLineEdit *le_adif = new QLineEdit();
+    le_adif->setMaxLength(10);
+    QLineEdit *le_bcn  = new QLineEdit();
+    le_bcn->setMaxLength(8);
+    QLineEdit *le_frq  = new QLineEdit();
+    QLineEdit *le_min  = new QLineEdit();
+    QLineEdit *le_max  = new QLineEdit();
+    QRegExp rxd("^[0-9]*$");
+    QValidator *vd = new QRegExpValidator(rxd,&d);
+    le_frq->setValidator(vd);
+    le_min->setValidator(vd);
+    le_max->setValidator(vd);
+
+    QGridLayout *G = new QGridLayout();
+    G->setContentsMargins(8,6,8,6);
+    G->setSpacing(4);
+    int r = 0;
+    G->addWidget(new QLabel(tr("Band")+":"),r,0);        G->addWidget(le_name,r++,1);
+    G->addWidget(new QLabel(tr("ADIF Band")+":"),r,0);   G->addWidget(le_adif,r++,1);
+    G->addWidget(new QLabel(tr("Beacon Tag")+":"),r,0);  G->addWidget(le_bcn,r++,1);
+    G->addWidget(new QLabel(tr("Frequency In")+" Hz:"),r,0); G->addWidget(le_frq,r++,1);
+    G->addWidget(new QLabel(tr("From")+" Hz:"),r,0);     G->addWidget(le_min,r++,1);
+    G->addWidget(new QLabel(tr("To")+" Hz:"),r,0);       G->addWidget(le_max,r++,1);
+
+    QLabel *l_hint = new QLabel(
+        "<p><small>"+tr("ADIF Band is what gets written to your log and matched by Club Log")+
+        " (3CM, 13CM, 70CM ...).<br>"+
+        tr("From/To is the dial frequency window used to recognise this band; leave empty for +/-500 kHz around the frequency")+
+        ".</small></p>");
+    l_hint->setWordWrap(true);
+
+    QPushButton *b_ok = new QPushButton("OK");
+    QPushButton *b_ca = new QPushButton(tr("Cancel"));
+    connect(b_ok,SIGNAL(released()),&d,SLOT(accept()));
+    connect(b_ca,SIGNAL(released()),&d,SLOT(reject()));
+    QHBoxLayout *Hb = new QHBoxLayout();
+    Hb->setContentsMargins(0,0,0,0);
+    Hb->addWidget(b_ok);
+    Hb->addWidget(b_ca);
+    Hb->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout *V = new QVBoxLayout(&d);
+    V->addLayout(G);
+    V->addWidget(l_hint);
+    V->addLayout(Hb);
+    d.setLayout(V);
+
+    while (true)
+    {
+        if (d.exec()!=QDialog::Accepted) return;
+
+        const QString name = le_name->text().trimmed();
+        const QString adif = le_adif->text().trimmed().toUpper();
+        const QString frq  = le_frq->text().trimmed();
+        QString err;
+        if (name.isEmpty() || adif.isEmpty() || frq.isEmpty())
+            err = tr("Band, ADIF Band and Frequency are required");
+        else if (name == "-")
+            // "-" is the empty-slot placeholder sentinel in user_bands.txt
+            // (see MshvUserBands::LoadFile). A band literally named "-" saves
+            // fine but is read back as an empty slot on the next launch, so it
+            // silently vanishes and orphans its st_info_all entry (F9).
+            err = tr("Band name cannot be just")+" \"-\"";
+        else if (name.contains("|") || name.contains("#") || name.contains("="))
+            err = tr("Band name cannot contain")+"  |  #  =";
+        else
+        {
+            // st_info_all and the transverter offsets are keyed on the band
+            // NAME, so a duplicate would make two rows collide on load.
+            for (int i = 0; i < COUNT_BANDS; ++i)
+            {
+                if (!lst_bands[i].isEmpty() && lst_bands[i]==name)
+                {
+                    err = tr("A band with this name already exists");
+                    break;
+                }
+            }
+        }
+        if (!err.isEmpty())
+        {
+            QMessageBox::warning(this,"MSHV","<p align='center'>"+err+"</p>",QMessageBox::Close);
+            continue;
+        }
+
+        MshvUserBand b;
+        b.name   = name;
+        b.lambda = adif;
+        b.bcn    = le_bcn->text().trimmed().toUpper();
+        const unsigned long long f = frq.toULongLong();
+        b.fmin = le_min->text().trimmed().isEmpty()
+                 ? (f > 500000ULL ? f-500000ULL : 0ULL) : le_min->text().trimmed().toULongLong();
+        b.fmax = le_max->text().trimmed().isEmpty()
+                 ? f+500000ULL : le_max->text().trimmed().toULongLong();
+        b.bandtofrq = QString("%1").arg(f/1000ULL);// kHz, as lst_bandtofrq
+        MshvUserBands::FillModes(b,frq);
+
+        MshvUserBands::Inst().Set(slot,b);
+        if (!MshvUserBands::Inst().SaveFile(MshvUserBands::DefaultPath()))
+        {
+            MshvUserBands::Inst().Clear(slot);
+            QMessageBox::warning(this,"MSHV","<p align='center'>"+tr("Cannot write")+"<br>"+
+                                 MshvUserBands::DefaultPath()+"</p>",QMessageBox::Close);
+            return;
+        }
+        // Reset this slot's per-band TX drive to the default. The level is a
+        // positional array persisted by band index; if this slot previously
+        // held a removed band, its old drive is still saved and would carry
+        // over to the new band with nothing in the UI hinting why (F2).
+        // Emitting on Add (rather than Remove) also covers a slot freed by
+        // hand-editing user_bands.txt.
+        emit EmitUserBandSlotCleared(COUNT_BANDS_STD + slot);
+        // Deliberately NOT patched into the live tables: the band menu actions
+        // and the switcher buttons are built once at startup, so a live patch
+        // would leave a band that rig-frequency detection can select but the
+        // menu cannot show. Restart keeps every view consistent.
+        QMessageBox::information(this,"MSHV","<p align='center'>"+
+                                 tr("Band added")+": <strong>"+name+"</strong><br>"+
+                                 tr("Restart MSHV to use it")+".</p>",QMessageBox::Close);
+        return;
+    }
+}
+void RadioAndNetW::RemoveUserBandBut()
+{
+    const int row = THvRadList->currentIndex().row();
+    if (row < COUNT_BANDS_STD || row >= COUNT_BANDS || lst_bands[row].isEmpty())
+    {
+        QMessageBox::information(this,"MSHV","<p align='center'>"+
+                                 tr("Select a user band row first")+".</p>",QMessageBox::Close);
+        return;
+    }
+    const QString name = lst_bands[row];
+    if (QMessageBox::question(this,"MSHV","<p align='center'>"+tr("Remove")+
+                              " <strong>"+name+"</strong>?</p>",
+                              QMessageBox::Yes|QMessageBox::No,QMessageBox::No)!=QMessageBox::Yes) return;
+
+    const int slot = row - COUNT_BANDS_STD;
+    const MshvUserBand keep = MshvUserBands::Inst().At(slot);
+    MshvUserBands::Inst().Clear(slot);
+    if (!MshvUserBands::Inst().SaveFile(MshvUserBands::DefaultPath()))
+    {
+        MshvUserBands::Inst().Set(slot,keep);
+        QMessageBox::warning(this,"MSHV","<p align='center'>"+tr("Cannot write")+"<br>"+
+                             MshvUserBands::DefaultPath()+"</p>",QMessageBox::Close);
+        return;
+    }
+    // The cleared slot is written back as a placeholder line, so every other
+    // user band keeps its slot -- and therefore its band index. That matters:
+    // default_band, the per-band TX levels and def_band_bt_sw all persist an
+    // index, so repacking the list would move the operator to another band.
+    QMessageBox::information(this,"MSHV","<p align='center'>"+
+                             tr("Band removed")+": <strong>"+name+"</strong><br>"+
+                             tr("Restart MSHV to apply")+".</p>",QMessageBox::Close);
+}
+#endif
 //static const QString all_bands_mods_frq5[5][COUNT_BANDS][COUNT_FREQ_MODES];
 void RadioAndNetW::SetDefaultFreqs(bool f)
 {
@@ -3750,14 +3954,24 @@ void RadioAndNetW::SaveSettings()
 {
     // PRESERVE-UNKNOWN-LINES (2026-09-02). Before truncating ms_stinfonet,
     // capture every key=value line this build does NOT itself write, and
-    // re-append it verbatim at the very end (below). A settings writer must
-    // never delete keys it doesn't understand: a data dir may have been
-    // written by a build carrying a wider settings schema (extra keys this
-    // build has no widgets for), and rewriting the file without preserving
-    // those lines would destroy that data. Carry-over lines are appended
-    // AFTER all known keys, which keeps the order-sensitive ReadSettings()
-    // parser correct (a wider schema only ever appends its extra keys at the
-    // end, so their file position round-trips).
+    // re-append it verbatim at the very end (below). Rationale: the private
+    // and public MSHV builds share one data dir (~/Library/Application
+    // Support/MSHV) but carry different settings schemas. The public build
+    // has no Club Log DXCC / Alerts widgets, so its SaveSettings never emits
+    // tcps_club_log_dxcc / alerts_config — and, before this fix, rewriting the
+    // file simply dropped those lines, destroying the operator's private
+    // credentials (the private build then regenerated them blank). A settings
+    // writer must never delete keys it doesn't understand.
+    //
+    // knownKeys is gated identically to the write statements below, so:
+    //   - private build: writes the private lines itself; they ARE in
+    //     knownKeys, so they are NOT also carried over (no duplication).
+    //   - public build (or a non-private build of this tree): the private
+    //     lines are NOT in knownKeys, so they are carried through untouched.
+    // Carry-over lines are appended AFTER all known keys, which keeps the
+    // order-sensitive ReadSettings() parser correct: an unknown key only ever
+    // belongs to a richer/newer schema, which always appends its extra keys
+    // at the end, so their file position is preserved on round-trip.
     static const QStringList knownKeys = {
         "udp_server","udp_port","psk_spot_val","st_info_all","dx_spot_telnet_val",
         "tcp_server","tcp_port","udp_broad_server","udp_broad_port","udp_broad_log_all",
@@ -3822,6 +4036,10 @@ void RadioAndNetW::SaveSettings()
     << QString("%1").arg(cb_tcp_broad_log_adif->isChecked()) << "\n";
     out<<"tcps_club_log_all="<<LeClubLogServer->text()<<"#"<<LeClubLogPort->text()<<"#"<<LeClubLogPost0->text()<<"#"<<LeClubLogPost1->text()<<"#"
     <<LeClubLogMail->text()<<"#"<<LeClubLogPass->text()<<"#"<<QString("%1").arg(cb_clublog->isChecked())<<"\n";
+    // NOTE: the private-feature lines (tcps_club_log_dxcc / alerts_config,
+    // st_id[20]/[21]) are written at the END of this function, after
+    // tcp_pass — NOT here — so the on-disk line order matches the st_id[]
+    // order ReadSettings() relies on. See the block below file's tcp_pass.
     out <<"udp2_broad_all="<<udp2_Server->text()<<"#"<<udp2_Port->text()<<"#"<<QString("%1").arg(cb_udp2adif->isChecked())<<"\n";
     out <<"tcps_qrz_log_all="<<LeQRZLogServer->text()<<"#"<<LeQRZLogPort->text()<<"#"<<LeQRZLogPost->text()<<"#"
     << LeQRZLogApi->text()<<"#"<<QString("%1").arg(cb_qrzlog->isChecked())<<"\n";
@@ -3840,8 +4058,9 @@ void RadioAndNetW::SaveSettings()
     out<<"otp_servers_list="<<sada<<"\n";
     out << "tcp_pass=" << TCPPass->text() << "\n";
 
+
     // PRESERVE-UNKNOWN-LINES: re-emit any lines from a richer/newer schema
-    // untouched, so this build never destroys them. See top of function.
+    // untouched, so a narrower build never destroys them. See top of function.
     for (const QString &l : carryOver) out << l << "\n";
 
     file.close();
@@ -3860,13 +4079,20 @@ bool RadioAndNetW::isFindId(QString id,QString line,QString &res)
 }
 void RadioAndNetW::ReadSettings()
 {
-    const int c_st_id = 20; //dopalva se tuk v kraia
+    const int c_st_id = 22; //dopalva se tuk v kraia
     const QString st_id[c_st_id]=
         {
             "udp_server","udp_port","psk_spot_val","st_info_all","dx_spot_telnet_val","tcp_server","tcp_port",
             "udp_broad_server","udp_broad_port","udp_broad_log_all","psk_udp_tcp","tcp_broad_log_all",
             "tcps_club_log_all","udp2_broad_all","tcps_qrz_log_all","def_wr_status","tcp_eqsl_log_all",
-            "tcp_otp_all","otp_servers_list","tcp_pass"
+            "tcp_otp_all","otp_servers_list","tcp_pass",
+            // index 20 — Club Log DXCC API credentials (private feature).
+            // Format: email#callsign#api_token#app_password#enabled.
+            "tcps_club_log_dxcc",
+            // index 21 — Page 4 Alerts config (private feature).
+            // Format: tg_token#tg_chat#tg_enabled#mac_enabled#
+            // cooldown_min#alert_atno#alert_band#alert_mode.
+            "alerts_config"
         };
     QString st_res[c_st_id];
     for (int i = 0; i < c_st_id; ++i) st_res[i]="";
@@ -4078,3 +4304,21 @@ void RadioAndNetW::ReadSettings()
 
 
 
+
+/* macOS port -- copy the operator's user-defined bands into THIS translation
+ * unit's private copy of the band tables. config_band_all.h declares them
+ * `static`, so every .cpp that defines the guards gets its own set and each
+ * has to be patched separately. Called from main() before any UI is built.
+ * A no-op when MSHV_USER_BANDS is 0 (non-macOS builds). */
+#include "../../mshv_userbands.h"
+void MshvApplyUserBands_radionetw()
+{
+    for (int i = 0; i < MSHV_USER_BANDS; ++i)
+    {
+        const MshvUserBand &b = MshvUserBands::Inst().At(i);
+        const int k = COUNT_BANDS_STD + i;
+        lst_bands[k]   = b.name;
+        lst_bcnband[k] = b.bcn;
+        for (int m = 0; m < COUNT_FREQ_MODES; ++m) all_bands_mods_frq[k][m] = b.frq[m];
+    }
+}

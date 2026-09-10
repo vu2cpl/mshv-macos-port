@@ -8,13 +8,16 @@ Copyright (c) 2017 Expert Electronics
 Distributed under the MIT software license, see the accompanying
 file COPYING or http://www.opensource.org/licenses/mit-license.php.
 TCI Client modified by Hrisimir Hristov, LZ2HV 2021
+MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ramawarrier, VU2CPL 2026
 */
 #define _NETWORK_RIGS_
 #include "network_def.h"
 #include "network.h"
-#include <QCoreApplication> //flex native vita-49: aboutToQuit
 #include <unistd.h>
 #include <QLocale>
+
+//----- vita49 ---------------------------------------------------
+#include <QCoreApplication> //flex native vita-49: aboutToQuit
 #include <QMutex>        //flex native vita-49
 #include <QMutexLocker>  //flex native vita-49
 #include <QRegExp>       //flex native vita-49
@@ -26,10 +29,14 @@ TCI Client modified by Hrisimir Hristov, LZ2HV 2021
 //flex native vita-49: the live Network, for the free-function hooks below.
 //There is one Network per selected rig, made and destroyed with it.
 static Network *g_vita_net = NULL;
-static void VitaRegister(Network *n) { g_vita_net = n; }
+static void VitaRegister(Network *n)
+{
+    g_vita_net = n;
+}
 //flex native vita-49: MSHV_FLEX_TRACE=1 in the environment prints every vita
 //command, reply and state change to stderr.
 static const bool flex_trace = (getenv("MSHV_FLEX_TRACE") != NULL);   // protocol trace to stderr
+//----- end vita49 ---------------------------------------------------
 
 //SdrApplication.exe --serial=EED05101000001
 //SdrApplication.exe --serial=EED05231500040
@@ -175,11 +182,30 @@ void _SetTciBuffReset_()
     _flush_raw_   = 2;
     //qDebug()<<"_SetTciBuffReset_==============="<<STREAM_C<<BUF_OFFSET<<BUF_MAXOFFSET<<BUF_MAX;
 }
+
+//----- vita49 ---------------------------------------------------
+static bool    s_flex_tx_active = false;
+bool _FlexVitaTxActive_()
+{
+    return s_flex_tx_active;
+}
+bool _SetTxAudioFlex_(int *raw)
+{
+    // Rawplayer thread.  PushTxBlock() touches only the atomic ring, so it
+    // is safe to call on an object that lives on another thread.
+    if (!g_vita_net || !s_flex_tx_active) return true;
+    FlexVita *v = g_vita_net->VitaAudio();
+    return v ? v->PushTxBlock(raw) : true;
+}
+//----- end vita49 ---------------------------------------------------
+
 bool _SetTxAudioTci_(int *raw)//, int size
 {
+    //----- vita49 ---------------------------------------------------
     // Rawplayer feeds every network transport through this one entry point;
     // hand the block to the Flex backend when that owns the output device.
     if (_FlexVitaTxActive_()) return _SetTxAudioFlex_(raw);
+    //----- end vita49 ---------------------------------------------------
 
     exit_txaudio = 750;   //2.57 old=800x5000=4,5s old=900x4000=4,5s  max-wait-time ic53=3200 pG10=3900 ic57=3600 ic59=3700
     while (1)  //max-wait-time need to be > max buffer time
@@ -464,6 +490,8 @@ Network::Network(int ModelID,QWidget *parent)
     //tci
     //is_my_trx = false;
     tci_select = 0;
+
+    //----- vita49 ---------------------------------------------------
     vita_rx = 0;
     vita_tx = false;
     //flex native vita-49
@@ -490,6 +518,8 @@ Network::Network(int ModelID,QWidget *parent)
     //is: it fires while the socket is still open.
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(VitaQuit()));
     VitaRegister(this);
+    //----- end vita49 ---------------------------------------------------
+
     tci_trx = "0";//RX1
     if (ModelID==4) tci_trx = "1";//rx2
     is_tci_trx = false;
@@ -530,6 +560,7 @@ Network::Network(int ModelID,QWidget *parent)
 
     seqnum = 0;
     fsdrs_poll = true;
+    vita_last_freq_hz = 0;
     if (s_ModelID>6 && s_ModelID<15)
     {
         fsdrs = true;
@@ -554,6 +585,8 @@ Network::Network(int ModelID,QWidget *parent)
 Network::~Network()
 {
     //qDebug()<<"Delete"<<rigs_network[s_ModelID].name;
+
+    //----- vita49 ---------------------------------------------------
     if (flex_trace) fprintf(stderr, "[MSHV Flex] ~Network: tearing down\n");
     //flex native vita-49: release the streams while the socket still exists,
     //then bring the audio thread down the way the TCI one comes down below.
@@ -567,6 +600,8 @@ Network::~Network()
         is_vita = false;
     }
     VitaRegister(NULL);
+    //----- end vita49 ---------------------------------------------------
+
     if (socket)
     {
         if (socket->state() == QAbstractSocket::ConnectedState)
@@ -589,7 +624,11 @@ Network::~Network()
 void Network::SetOnOffCatCommand(bool f, int model_id, int fact_id)//tci
 {
     if (model_id!=s_ModelID || fact_id!=NETWORK_ID) return;
-    if (!f && fsdrs) VitaStop(true);//flex native vita-49
+
+    //----- vita49 ---------------------------------------------------
+    if (!f && fsdrs) VitaStop(true);//flex native vita-49: CAT off -> release the radio
+    //----- end vita49 ---------------------------------------------------
+
     if (!f && (s_ModelID==3 || s_ModelID==4))
     {
         SetTciStrtStopAudio(false);
@@ -634,11 +673,16 @@ void Network::SetTciSelect(int i,int vr,bool vt)//tci 0=non 1=rx 2=tx 3=rx,tx
         if (tci_select>0) SetTciStrtStopAudio(true);
         else SetTciStrtStopAudio(false);
     }
+
+    //----- vita49 ---------------------------------------------------
     vita_rx = vr;//RX vita 1,2,3,4..8
     vita_tx = vt;//TX vita false,true
     UpdateFlexVita();//flex native vita-49
+    //----- end vita49 ---------------------------------------------------
 }
+int cretr_nt = -1;
 
+//----- vita49 ---------------------------------------------------
 // ============================================================ flex native vita-49
 //
 // Native FlexRadio DAX audio over VITA-49, with no SmartSDR / DAX driver in
@@ -671,11 +715,9 @@ void Network::SetTciSelect(int i,int vr,bool vt)//tci 0=non 1=rx 2=tx 3=rx,tx
 //  * DAX TX is NOT the mirror of DAX RX; see FlexVita::SendTxPacket().
 //  * Only a slice this session created is ever removed: "client gui" may
 //    hand us a pre-existing one, and removing it kills whoever was using it.
-
-extern void _SetRxAudioTci_(int *, int, int);
-extern int  _GetRxAudioReadTci_();
-extern int  cretr_nt;   // the CAT init state, defined further down: -2 = initialised
-
+//extern void _SetRxAudioTci_(int *, int, int);
+//extern int  _GetRxAudioReadTci_();
+//extern int  cretr_nt;   // the CAT init state, defined further down: -2 = initialised
 enum
 {
     VITA_IDLE = 0,
@@ -692,14 +734,16 @@ enum
     VITA_MIXER_ON,      // "mixer front_speaker mute on"
     VITA_MIXER_OFF      // "mixer front_speaker mute off"
 };
-
 // ---- state the hooks read.  Written on the GUI thread by Network, except
 //      the meter values, which FlexVita writes on vThread -- hence the mutex
 //      around everything the two threads share.
 static bool    s_flex_rx_active = false;
-static bool    s_flex_tx_active = false;
+//static bool    s_flex_tx_active = false;
 static QString s_flex_status("Flex Native: idle");
-struct FlexMeterDef { QString nam, unit; };
+struct FlexMeterDef
+{
+    QString nam, unit;
+};
 static QMutex  flex_mutex;
 static QHash<int, FlexMeterDef> flex_meter_defs;   // id -> name/unit, from "S...|meter"
 static QHash<int, double>       flex_meter_raw;    // id -> scaled value, from UDP
@@ -709,6 +753,11 @@ static double  flex_fwd_watts = 0.0, flex_ref_watts = 0.0, flex_swr = 0.0;
 static QString flex_rxant, flex_txant, flex_mode, flex_radio_model;
 static QStringList flex_ant_list, flex_tx_ant_list, flex_mode_list;
 static bool    flex_front_spkr_mute = false, flex_front_spkr_supported = false;
+// Radio-global transmit settings, mirrored from the "transmit" status line.
+// -1 means "the radio has not told us yet", which the panel shows as blank
+// rather than as 0 -- displaying 0 W would be a lie the operator might act on.
+static int     flex_rfpower = -1, flex_tunepower = -1, flex_maxpower = -1;
+static bool    flex_hwalc = false;
 
 // ---- TX ring.  Rawplayer's thread writes 4096-int blocks (stereo 48 kHz,
 //      24-bit scale); vThread reads them out at 24 kHz mono.  One producer,
@@ -727,19 +776,9 @@ static void FlexTxBufferReset()
     flex_tx_pos.storeRelease(0);
     flex_tx_primed.storeRelease(0);
 }
-
 // ---- hooks
 bool _FlexVitaRxActive_() { return s_flex_rx_active; }
-bool _FlexVitaTxActive_() { return s_flex_tx_active; }
 QString _FlexVitaStatus_() { return s_flex_status; }
-bool _SetTxAudioFlex_(int *raw)
-{
-    // Rawplayer thread.  PushTxBlock() touches only the atomic ring, so it
-    // is safe to call on an object that lives on another thread.
-    if (!g_vita_net || !s_flex_tx_active) return true;
-    FlexVita *v = g_vita_net->VitaAudio();
-    return v ? v->PushTxBlock(raw) : true;
-}
 bool _FlexVitaMeters_(double *fwd_w, double *ref_w, double *swr)
 {
     QMutexLocker lk(&flex_mutex);
@@ -774,6 +813,17 @@ bool        _FlexVitaHasFrontSpeaker_()   { QMutexLocker lk(&flex_mutex); return
 void _FlexVitaSetAnt_(bool tx, QString ant) { if (g_vita_net) g_vita_net->VitaSetSlice(tx ? "txant" : "rxant", ant); }
 void _FlexVitaSetMode_(QString mode)        { if (g_vita_net) g_vita_net->VitaSetSlice("mode", mode); }
 void _FlexVitaSetFrontSpeakerMute_(bool on) { if (g_vita_net) g_vita_net->VitaSetFrontSpeaker(on); }
+// Transmit settings.  Each getter returns -1 (or leaves the flag alone) until
+// the radio has actually reported the value, so the panel can tell "not known
+// yet" from "zero" and show a blank instead of an authoritative-looking 0.
+int  _FlexVitaRfPower_()   { QMutexLocker lk(&flex_mutex); return flex_rfpower;   }
+int  _FlexVitaTunePower_() { QMutexLocker lk(&flex_mutex); return flex_tunepower; }
+int  _FlexVitaMaxPower_()  { QMutexLocker lk(&flex_mutex); return flex_maxpower;  }
+bool _FlexVitaHwAlc_()     { QMutexLocker lk(&flex_mutex); return flex_hwalc;     }
+void _FlexVitaSetTransmit_(QString key, int value)
+{
+    if (g_vita_net) g_vita_net->VitaSetTransmit(key, value);
+}
 
 // ---- byte order
 static inline quint32 FlexBE32(const char *p)
@@ -783,7 +833,9 @@ static inline quint32 FlexBE32(const char *p)
 }
 static inline float FlexBEFloat(const char *p)
 {
-    union { quint32 i; float f; } u;
+    union { quint32 i;
+        float f;
+    } u;
     u.i = FlexBE32(p);
     return u.f;
 }
@@ -795,10 +847,9 @@ static inline void FlexPutBE32(char *p, quint32 v)
     p[3] = (char)( v        & 0xff);
 }
 #define FLEX_METER_CLASS 0x534C8002u   // meter packets share the audio socket
-
 // ============================================================ FlexVita (UDP, vThread)
 FlexVita::FlexVita()
-    : QObject(0)
+        : QObject(0)
 {
     audio_    = new QUdpSocket(this);
     tx_timer_ = new QTimer(this);
@@ -815,8 +866,7 @@ FlexVita::FlexVita()
     connect(tx_timer_, SIGNAL(timeout()), this, SLOT(SendTxPacket()));
 }
 FlexVita::~FlexVita()
-{
-}
+{}
 quint16 FlexVita::LocalPort() const
 {
     return audio_->localPort();
@@ -836,7 +886,11 @@ void FlexVita::SetTxStream(uint id)
     // radio is fed only between key and unkey.  Feeding it while unkeyed is
     // what held the transmitter up in UNKEY_REQUESTED until MSHV quit.
     tx_stream_ = id;
-    if (!id) { tx_keyed_ = false; tx_timer_->stop(); }
+    if (!id)
+    {
+        tx_keyed_ = false;
+        tx_timer_->stop();
+    }
 }
 void FlexVita::SetTxKeyed(bool on)
 {
@@ -877,7 +931,6 @@ void FlexVita::Reset()
     SetTxStream(0);
     rx_stream_ = 0;
 }
-
 bool FlexVita::ParseVita(const char *data, int len, int *payload_offset, int *payload_bytes)
 {
     if (len < 8) return false;
@@ -903,7 +956,6 @@ bool FlexVita::ParseVita(const char *data, int len, int *payload_offset, int *pa
     *payload_bytes  = end - idx;
     return true;
 }
-
 void FlexVita::ReadAudio()
 {
     static char buf[65536];
@@ -976,7 +1028,6 @@ void FlexVita::ReadAudio()
         if (mono > 0) _SetRxAudioTci_(rx_scratch_, mono, 1);   // k_res 1 = 24000
     }
 }
-
 bool FlexVita::PushTxBlock(int *raw)
 {
     // Rawplayer's thread.  Wait until the sender has drained enough that this
@@ -1001,7 +1052,6 @@ bool FlexVita::PushTxBlock(int *raw)
     if (flex_tx_primed.loadAcquire() < 4) flex_tx_primed.fetchAndAddRelease(1);
     return true;
 }
-
 void FlexVita::SendTxPacket()
 {
     if (!tx_keyed_ || !tx_stream_ || radio_addr_.isNull()) return;
@@ -1065,13 +1115,11 @@ void FlexVita::SendTxPacket()
         tx_sent_frames_ += FramesPerPacket;
     }
 }
-
 // ============================================================ Network side (control)
 FlexVita *Network::VitaAudio()
 {
     return is_vita ? vita_ : NULL;
 }
-
 // Called from SetTciSelect() (device chosen), from VitaTimeout() once the CAT
 // init has completed, and on the retry.  Idempotent: an unchanged, running
 // backend is left alone; a changed channel, direction or slice rebuilds it.
@@ -1095,7 +1143,6 @@ void Network::UpdateFlexVita()
     }
     VitaStart();
 }
-
 void Network::VitaStart()
 {
     if (!is_vita)
@@ -1130,7 +1177,6 @@ void Network::VitaStart()
     }
     else VitaReply(VITA_GUI, 0, QString());   // already a GUI client on this connection
 }
-
 // One command out, remembered by sequence number so its "R<seq>|" reply can
 // be routed to the step that sent it.  writeData() does the framing.
 int Network::VitaSend(QString cmd, int step)
@@ -1143,7 +1189,6 @@ int Network::VitaSend(QString cmd, int step)
     vita_pend[seq] = step;
     return seq;
 }
-
 // Every complete line off the control socket, before the CAT parser sees the
 // chunk.  H = our handle, R = a reply, S = status.
 void Network::VitaLine(QString line)
@@ -1218,6 +1263,25 @@ void Network::VitaLine(QString line)
             at += kv.matchedLength();
         }
     }
+    // Radio-global transmit settings: "transmit rfpower=50 tunepower=10 ...".
+    // These are NOT slice properties -- one transmitter, one set of values --
+    // so they are matched on the "|transmit " line rather than the slice line.
+    if (line.contains("|transmit "))
+    {
+        QRegExp kv("\\b(rfpower|tunepower|max_power_level|hwalc_enabled)=(\\d+)");
+        QMutexLocker lk(&flex_mutex);
+        int at = 0;
+        while ((at = kv.indexIn(line, at)) >= 0)
+        {
+            const QString k = kv.cap(1);
+            const int     v = kv.cap(2).toInt();
+            if      (k == "rfpower")         flex_rfpower   = v;
+            else if (k == "tunepower")       flex_tunepower = v;
+            else if (k == "max_power_level") flex_maxpower  = v;
+            else if (k == "hwalc_enabled")   flex_hwalc     = (v != 0);
+            at += kv.matchedLength();
+        }
+    }
     // The front speaker is not in the status stream on a 6600; if a firmware
     // does report it, believe that over our own shadow.
     if (line.contains("|radio slices="))
@@ -1248,15 +1312,24 @@ void Network::VitaLine(QString line)
             const int id = def.cap(1).toInt();
             const QString nam = def.cap(2).toUpper();
             flex_meter_defs[id].nam = nam;
-            if      (nam == "FWDPWR") { if (flex_meter_fwd_id < 0) flex_meter_fwd_id = id; }
-            else if (nam == "REFPWR") { if (flex_meter_ref_id < 0) flex_meter_ref_id = id; }
-            else if (nam == "SWR")    { if (flex_meter_swr_id < 0) flex_meter_swr_id = id; }
+            if      (nam == "FWDPWR")
+            {
+                if (flex_meter_fwd_id < 0) flex_meter_fwd_id = id;
+            }
+            else if (nam == "REFPWR")
+            {
+                if (flex_meter_ref_id < 0) flex_meter_ref_id = id;
+            }
+            else if (nam == "SWR")
+            {
+                if (flex_meter_swr_id < 0) flex_meter_swr_id = id;
+            }
             at += def.matchedLength();
         }
     }
     // The create reply does not always carry the stream id; the status does.
     if (vita_step==VITA_RX_CREATE && vita_rx_stream==0 && line.contains("type=dax_rx")
-        && line.toLower().contains(QString("client_handle=0x%1").arg(vita_handle, 8, 16, QChar('0'))))
+            && line.toLower().contains(QString("client_handle=0x%1").arg(vita_handle, 8, 16, QChar('0'))))
     {
         QRegExp rx("\\|stream 0x([0-9A-Fa-f]+)");
         if (rx.indexIn(line) >= 0)
@@ -1266,7 +1339,7 @@ void Network::VitaLine(QString line)
         }
     }
     if (vita_step==VITA_TX_CREATE && vita_tx_stream==0 && line.contains("type=dax_tx")
-        && line.toLower().contains(QString("client_handle=0x%1").arg(vita_handle, 8, 16, QChar('0'))))
+            && line.toLower().contains(QString("client_handle=0x%1").arg(vita_handle, 8, 16, QChar('0'))))
     {
         QRegExp tx("\\|stream 0x([0-9A-Fa-f]+)");
         if (tx.indexIn(line) >= 0)
@@ -1297,14 +1370,17 @@ void Network::VitaLine(QString line)
         }
     }
 }
-
 void Network::VitaReply(int step, quint32 code, QString body)
 {
     body = body.trimmed();
     switch (step)
     {
     case VITA_GUI:
-        if (code != 0) { VitaFail("client gui refused - radio granted no slice rights"); return; }
+        if (code != 0)
+        {
+            VitaFail("client gui refused - radio granted no slice rights");
+            return;
+        }
         vita_gui_done = true;
         VitaSend("sub slice all", VITA_MISC);
         VitaSend("sub audio_stream all", VITA_MISC);
@@ -1317,7 +1393,11 @@ void Network::VitaReply(int step, quint32 code, QString body)
         vita_timer->start(3000);
         return;
     case VITA_UDPPORT:
-        if (code != 0) { VitaFail("client udpport refused"); return; }
+        if (code != 0)
+        {
+            VitaFail("client udpport refused");
+            return;
+        }
         vita_step = VITA_DRAIN;              // let the slice status arrive first
         vita_timer->start(1200);
         return;
@@ -1328,7 +1408,11 @@ void Network::VitaReply(int step, quint32 code, QString body)
         vita_timer->start(3000);
         return;
     case VITA_RX_CREATE:
-        if (code != 0) { VitaFail("DAX RX stream refused"); return; }
+        if (code != 0)
+        {
+            VitaFail("DAX RX stream refused");
+            return;
+        }
         if (!body.isEmpty())
         {
             bool ok = false;
@@ -1356,19 +1440,18 @@ void Network::VitaReply(int step, quint32 code, QString body)
         return;
     case VITA_MIXER_ON:
     case VITA_MIXER_OFF:
-        {
-            // A radio without a front panel answers 0x500000B7 (verified on a
-            // 6600); remember that so the UI greys the control, not lies.
-            QMutexLocker lk(&flex_mutex);
-            flex_front_spkr_supported = (code == 0);
-            if (code == 0) flex_front_spkr_mute = (step == VITA_MIXER_ON);
-        }
-        return;
+    {
+        // A radio without a front panel answers 0x500000B7 (verified on a
+        // 6600); remember that so the UI greys the control, not lies.
+        QMutexLocker lk(&flex_mutex);
+        flex_front_spkr_supported = (code == 0);
+        if (code == 0) flex_front_spkr_mute = (step == VITA_MIXER_ON);
+    }
+    return;
     default:
         return;
     }
 }
-
 void Network::VitaTimeout()
 {
     switch (vita_step)
@@ -1381,27 +1464,35 @@ void Network::VitaTimeout()
         VitaChooseSlice();
         return;
     case VITA_SLICE_CREATE:
+    {
+        const int made = VitaOwnedSlice();
+        if (made < 0)
         {
-            const int made = VitaOwnedSlice();
-            if (made < 0) { VitaFail("slice create not answered"); return; }
-            vita_slice = made;
-            vita_slice_created = true;
-            // Same as the status-stream path above: the slice we just created
-            // is ours whatever index it landed on, so move the CAT half to it.
-            if (vita_rig_slice >= 0 && made != vita_rig_slice)
-            {
-                slicenum = QString::number(made);
-                vita_rig_slice = made;
-            }
-            VitaSliceReady();
+            VitaFail("slice create not answered");
             return;
         }
+        vita_slice = made;
+        vita_slice_created = true;
+        // Same as the status-stream path above: the slice we just created is
+        // ours whatever index it landed on, so move the CAT half onto it.
+        if (vita_rig_slice >= 0 && made != vita_rig_slice)
+        {
+            slicenum = QString::number(made);
+            vita_rig_slice = made;
+        }
+        VitaSliceReady();
+        return;
+    }
     case VITA_RX_CREATE:
         if (vita_rx_stream) VitaRxUp();
         else VitaFail("DAX RX stream not granted");
         return;
     case VITA_TX_CREATE:
-        if (vita_tx_stream) { VitaTxUp(); return; }
+        if (vita_tx_stream)
+        {
+            VitaTxUp();
+            return;
+        }
         vita_mismatch += " [!] DAX TX stream not granted";
         vita_step = VITA_RUN;
         VitaSetStatus();
@@ -1415,7 +1506,6 @@ void Network::VitaTimeout()
         return;
     }
 }
-
 // Which slice feeds DAX, and is transmitted on.  It MUST be the slice the CAT
 // tunes and reads, or MSHV shows one frequency and works another.  Order:
 //   1. Rig Control's slice, if it exists -- whoever owns it; the CAT
@@ -1465,7 +1555,16 @@ void Network::VitaChooseSlice()
         return;
     }
     vita_step = VITA_SLICE_CREATE;
-    VitaSend("slice create mode=digu", VITA_MISC);
+    // The API takes a frequency at creation -- "slice create [freq=<MHz>]
+    // [pan=][ant=][mode=][clone_slice=]" -- so ask for the last one
+    // set_freq() sent, when there is one, and the slice appears where MSHV is
+    // rather than at the radio's default.  The app re-asserts on
+    // VitaSliceReady() regardless, which is what covers the adopt path and a
+    // first run with nothing sent yet.
+    QString create = "slice create mode=digu";
+    if (vita_last_freq_hz > 0)
+        create += QString(" freq=%1").arg((double)vita_last_freq_hz / 1000000.0, 0, 'f', 6);
+    VitaSend(create, VITA_MISC);
     vita_timer->start(4000);
 }
 void Network::VitaSliceReady()
@@ -1475,6 +1574,14 @@ void Network::VitaSliceReady()
     vita_step = VITA_DAX;
     VitaSend(QString("dax audio set %1 slice=%2").arg(vita_ch).arg(vita_slice), VITA_DAX);
     vita_timer->start(3000);
+    // The slice exists and is ours: tell the app to put it on MSHV's
+    // frequency.  A fresh GUI client's slice sits at the radio's default
+    // (14.100 USB on the 6600), and MSHV otherwise FOLLOWS the rig, so without
+    // this it adopts 20m from the radio and never tunes -- measured 2026-09-09,
+    // three minutes untouched.  Deferred a tick: the app's answer comes back
+    // down as set_freq() -> writeData(), and writeData() can re-enter
+    // readNet(), which is not something to invite from inside the step machine.
+    QTimer::singleShot(0, this, [this]{ emit EmitFlexSliceReady(); });
 }
 void Network::VitaRxUp()
 {
@@ -1496,7 +1603,6 @@ void Network::VitaRxUp()
     vita_step = VITA_RUN;
     VitaSetStatus();
 }
-
 void Network::VitaTxUp()
 {
     if (vita_tx_active) return;          // same double-arrival as VitaRxUp()
@@ -1509,7 +1615,6 @@ void Network::VitaTxUp()
     vita_step = VITA_RUN;
     VitaSetStatus();
 }
-
 bool Network::VitaSliceExists(int n)
 {
     // Slices come and go and the status reports both, so the LAST line wins.
@@ -1557,7 +1662,6 @@ int Network::VitaOwnedSliceByLetter(int letter)
     }
     return found;
 }
-
 // Tear down.  tell_radio is false when the socket is already gone.
 void Network::VitaStop(bool tell_radio)
 {
@@ -1583,8 +1687,12 @@ void Network::VitaStop(bool tell_radio)
     {
         QMutexLocker lk(&flex_mutex);
         flex_meters_ok = false;
-        flex_ant_list.clear(); flex_tx_ant_list.clear(); flex_mode_list.clear();
-        flex_rxant.clear(); flex_txant.clear(); flex_mode.clear();
+        flex_ant_list.clear();
+        flex_tx_ant_list.clear();
+        flex_mode_list.clear();
+        flex_rxant.clear();
+        flex_txant.clear();
+        flex_mode.clear();
     }
     vita_status = "Flex Native: idle";
     VitaMirror();
@@ -1602,7 +1710,8 @@ void Network::VitaQuit()
     VitaStop(true);
     // Let the release complete on the wire before the process goes: the
     // radio answers each command, and we leave once it has (or 500 ms).
-    QElapsedTimer t; t.start();
+    QElapsedTimer t;
+    t.start();
     while (socket && socket->state()==QAbstractSocket::ConnectedState && !vita_pend.isEmpty() && t.elapsed() < 500)
     {
         if (socket->waitForReadyRead(50)) readNet();
@@ -1611,14 +1720,14 @@ void Network::VitaQuit()
 void Network::VitaSetStatus()
 {
     vita_status = QString("Flex Native: RX ch%1%2 slice %3%4")
-                      .arg(vita_ch).arg(vita_tx_active ? " + TX" : "").arg(vita_slice).arg(vita_mismatch);
+                  .arg(vita_ch).arg(vita_tx_active ? " + TX" : "").arg(vita_slice).arg(vita_mismatch);
     VitaMirror();
 }
 void Network::VitaMirror()
 {
     s_flex_rx_active = vita_rx_active;
     s_flex_tx_active = vita_tx_active;
-    if (s_flex_status != vita_status) fprintf(stderr, "[MSHV Flex] %s\n", qPrintable(vita_status));
+    if (flex_trace && s_flex_status != vita_status) fprintf(stderr, "[MSHV Flex] %s\n", qPrintable(vita_status));
     s_flex_status    = vita_status;
 }
 void Network::VitaSetSlice(QString key, QString value)
@@ -1637,11 +1746,29 @@ void Network::VitaSetFrontSpeaker(bool mute)
     VitaSend(QString("mixer front_speaker mute %1").arg(mute ? "on" : "off"),
              mute ? VITA_MIXER_ON : VITA_MIXER_OFF);
 }
+// Radio-global transmit settings: rfpower, tunepower, max_power_level,
+// hwalc_enabled -- all 0..100 except the last, which is a flag.
+//
+// NOTE THE SYNTAX IS NOT THE MIXER'S.  "transmit set" takes key=value with an
+// EQUALS sign; the mixer command immediately above takes space-separated
+// words and REJECTS the equals form.  Two neighbouring commands, two
+// conventions -- per the SmartSDR API reference, pages "TCPIP transmit" and
+// "TCPIP mixer".  Read the reference before adding a third; guessing
+// spellings against live hardware has already cost this project a day.
+//
+// No clamp here beyond the radio's own: max_power_level is the ceiling and it
+// is the radio that enforces it, which is where an operator expects to find it.
+void Network::VitaSetTransmit(QString key, int value)
+{
+    if (key.isEmpty()) return;
+    VitaSend(QString("transmit set %1=%2").arg(key).arg(value), VITA_MISC);
+}
 // ============================================================ end flex native vita-49
+//----- end vita49 ---------------------------------------------------
+
 void Network::connectToHost()
 {
     if (s_ModelID!=n_ModelID) return;//protection 2.57 //qDebug()<<"111"<<s_ModelID<<n_ModelID;
-
     if (s_ModelID==3 || s_ModelID==4)//tci
     {
         if (is_wsocket)
@@ -1691,7 +1818,10 @@ void Network::connectToHost()
     {
         if (socket->state() == QAbstractSocket::ConnectedState)
         {
+            //----- vita49 ---------------------------------------------------
             VitaStop(true);//flex native vita-49: release the radio while we can still tell it
+            //----- end vita49 ---------------------------------------------------
+
             socket->disconnectFromHost(); //qDebug()<<"Cnect to Disconect=";
             //socket->waitForDisconnected(300);
             return;
@@ -1699,6 +1829,9 @@ void Network::connectToHost()
         int p1 = s_netport.toInt();
         socket->connectToHost(s_nethost, p1);
         socket->waitForConnected(350);//importent for TCP hv
+    	//----- vita49 ---------------------------------------------------
+    	UpdateFlexVita();//flex native vita-49: no-op until the CAT init completes
+    	//----- end vita49 ---------------------------------------------------        
     }
 }
 void Network::ConnectNet(QString all)
@@ -1711,11 +1844,10 @@ void Network::ConnectNet(QString all)
     s_tcityp = l.at(4);
     s_tcisamprate = l.at(5);
     s_tcitxbuff = l.at(6);
-    UpdateFlexVita();//flex native vita-49: the host may only now be known
     connectToHost(); //qDebug()<<l.at(0)<<l.at(1)<<l.at(2)<<l.at(3)<<l.at(4)<<l.at(5);
 }
 int cinit_id_nt = -1;
-int cretr_nt = -1;
+//int cretr_nt = -1;//2.76.7 move up
 void Network::connected_s()
 {
 #if defined _MACOS_
@@ -1739,6 +1871,7 @@ void Network::disconnected_s()
 #if defined _MACOS_
     fprintf(stderr, "[MSHV TCI] disconnected_s fired\n");
 #endif
+    //----- vita49 ---------------------------------------------------
     //flex native vita-49: the control socket is gone, so there is nobody to
     //tell; drop the streams locally and forget the handle.  A reconnect runs
     //the CAT init again, and its completion restarts the audio.
@@ -1746,6 +1879,8 @@ void Network::disconnected_s()
     vita_gui_done = false;
     vita_handle = 0;
     vita_buf.clear();
+    //----- end vita49 ---------------------------------------------------
+
     emit EmitNetConnInfo("<font color='red'>"+tr("Disconnected")+"</font>",false,false);
     if (is_wsocket)//  && wsocket
     {
@@ -2151,8 +2286,7 @@ void Network::wTextMessageReceived(const QString &s0)//tci
 #else
         ls1 = cmdd.split(":",QString::SkipEmptyParts);
 #endif
-        ls1 <<""<<"";
-		//qDebug()<<"MSHV Receive <-"<<ls1;
+        ls1 <<""<<""; //qDebug()<<"MSHV Receive <-"<<ls1;
         if (!isMyTCICommand(ls1.at(0))) continue;//2.64
         //if (ls1.at(0)=="if" || ls1.at(0)=="dds") continue; //2.64 HPSDR not needed return from vfo: get set command
         //if (ls1.at(0)=="tx_power" || ls1.at(0)=="tx_swr") continue; //2.64
@@ -2238,7 +2372,7 @@ void Network::wTextMessageReceived(const QString &s0)//tci
         }
 #endif
         if (isGetRadio)
-        {            
+        {
             isGetRadio = false; //qDebug()<<"First Start---------------------------------------------";
             if (ls1.at(0)=="vfo" && ls2.at(1)=="0")//2.64 && ls2.at(0)==tci_trx
             {
@@ -2701,6 +2835,8 @@ void Network::readNet()
         QString sba = QString(ba.data()); //qDebug()<<"IN-> "<<sba;
         if (sba.isEmpty ()) return;//if (seqnum > 999999) seqnum = 0; R999999|0. = count=10
         //if (sba.count()<10) return;//???
+
+        //----- vita49 ---------------------------------------------------
         //flex native vita-49: the control channel shares this socket.  Every
         //complete line goes to the vita parser first -- stream ids and reply
         //codes are line-exact, whereas the CAT logic below flattens the chunk.
@@ -2718,6 +2854,8 @@ void Network::readNet()
         //first one whatever slice it belongs to.  Hand the CAT parser this
         //chunk's line for OUR slice instead, when there is one.
         if (!vita_last_slice_line.isEmpty()) sba = vita_last_slice_line;
+        //----- end vita49 ---------------------------------------------------
+
         sba.replace('\r',' ');
         sba.replace('\n',' ');
         /*if (wdevice == "NONE")
@@ -2751,10 +2889,14 @@ void Network::readNet()
             {
                 timer_init->stop();
                 cretr_nt = -2;
+
+                //----- vita49 ---------------------------------------------------
                 //flex native vita-49: the CAT session is up; the audio may
                 //follow.  Deferred a tick rather than started from inside
                 //readNet(), since writeData() can re-enter it.
                 if (vita_step==0) vita_timer->start(50);
+                //----- end vita49 ---------------------------------------------------
+
                 QString mod0 = "Flex-XXXX";
                 int id1 = sba.indexOf(' ',id0);
                 id0 = id0+6;
@@ -2894,11 +3036,11 @@ void Network::set_ptt(ptt_t ptt)
             if (!is_tci_trx)
             {
                 if (tci_trx=="1") QTimer::singleShot(100,this,SLOT(SetTciTxOnRX2()));//protection
-                else 
+                else
                 {
-                	writeData("trx:"+tci_trx+",true"+tci_trx150+";",false,NULL);
-                	//if (tci_drive<=0) writeData("drive:"+tci_trx+",25;",false,NULL);//2.76.6
-               	}	                
+                    writeData("trx:"+tci_trx+",true"+tci_trx150+";",false,NULL);
+                    //if (tci_drive<=0) writeData("drive:"+tci_trx+",25;",false,NULL);//2.76.6
+                }
             }
             //is_my_trx = true;
         }
@@ -2930,6 +3072,8 @@ void Network::set_ptt(ptt_t ptt)
     else if (fsdrs)//FlexRadio SmartSDR Slice A-H
     {
         QString ptt_cmd = "0";//"dax audio set %d tx=1"  "slice set %d tx=1" "xmit %d"
+
+        //----- vita49 ---------------------------------------------------
         //There is deliberately NO duplicate-key guard here.  A second PTT-ON
         //inside one transmission is worse on a Flex than on a rig with a plain
         //PTT line: this branch does not send a bare "xmit", it sends
@@ -2947,11 +3091,16 @@ void Network::set_ptt(ptt_t ptt)
         //number (channel 3 can be fed by slice A).  While the audio backend is
         //up, key the channel it actually created; slice+1 is only the default.
         int iddax = vita_tx_active ? vita_ch : slicenum.toInt()+1;
+        //----- end vita49 ---------------------------------------------------
+        //old= int iddax = slicenum.toInt()+1;//2.76.6
+
         if (ptt==RIG_PTT_ON)
         {
             fsdrs_poll = true;
             get_freq();
             ptt_cmd = "1";
+
+            //----- vita49 ---------------------------------------------------
             // Start the DAX TX audio just BEFORE keying, so the radio has a
             // little buffered when xmit 1 lands (it wants a few primed
             // packets first).
@@ -2960,11 +3109,15 @@ void Network::set_ptt(ptt_t ptt)
                 if (flex_trace) fprintf(stderr, "[MSHV Flex] TX audio ON (keyed)\n");
                 QMetaObject::invokeMethod(vita_, "SetTxKeyed", Qt::QueuedConnection, Q_ARG(bool, true));
             }
+            //----- end vita49 ---------------------------------------------------
+
             writeData("dax audio set "+QString("%1").arg(iddax)+" tx=1",false,NULL);
         }
         else ptt_cmd = "0";
         writeData("slice set "+slicenum+" tx=1",false,NULL);
         writeData("xmit "+ptt_cmd,false,NULL);
+
+        //----- vita49 ---------------------------------------------------
         // Stop the DAX TX audio on unkey.  Without this the radio keeps
         // transmitting what we send and stays in UNKEY_REQUESTED at full
         // power until the stream is torn down -- the "PTT does not release"
@@ -2974,6 +3127,7 @@ void Network::set_ptt(ptt_t ptt)
             if (flex_trace) fprintf(stderr, "[MSHV Flex] TX audio OFF (unkey)\n");
             QMetaObject::invokeMethod(vita_, "SetTxKeyed", Qt::QueuedConnection, Q_ARG(bool, false));
         }
+        //----- end vita49 ---------------------------------------------------
     }
 }
 void Network::set_freq(unsigned long long freq)
@@ -3020,6 +3174,7 @@ void Network::set_freq(unsigned long long freq)
         double freqd = ((double)freq / 1000000.0);//"slice tune %d %.6f autopan=1"
         writeData("slice tune "+slicenum+" "+QString("%1").arg(freqd,0,'f',6)+" autopan=1",false,NULL);
         fsdrs_poll = true;
+        vita_last_freq_hz = freq;   //flex native vita-49: so a slice we CREATE starts here
     }
 }
 void Network::set_mode(QString str)

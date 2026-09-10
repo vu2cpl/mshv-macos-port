@@ -14,6 +14,7 @@
 #include <QSplashScreen>
 #include "main_ms.h"
 #include "config.h"
+#include "mshv_userbands.h"
 //#include <unistd.h> //usleep
 
 //#define TXT_CODEC_LIN "UTF-8"
@@ -128,6 +129,24 @@ int main(int argc, char ** argv)
     QElapsedTimer time5;//2.56 stop QTimer
     time5.start();
     //app.processEvents();
+
+    /* macOS port -- load the operator's user-defined bands and patch them into
+     * every translation unit's copy of the band tables BEFORE any widget that
+     * reads those tables is constructed (the band menu, the band switcher and
+     * the Radio And Frequencies list are all built in Main_Ms's ctor chain).
+     *
+     * Compiled out where MSHV_USER_BANDS is 0, which is every platform but
+     * macOS.  The guard is about LINKING, not about the runtime cost: only
+     * MSHV_macOS.pro lists src/mshv_userbands.cpp, so an unguarded call left
+     * the other eight .pro files with four undefined references in main() and
+     * they could not link at all.  MSHV_USER_BANDS being 0 makes these calls
+     * no-ops, but a no-op still needs its symbol.  (Found 2026-09-08 building
+     * MSHV_x86_64.pro on Ubuntu; broken since the feature landed 09-01 and
+     * unnoticed because macOS is the only target built here.) */
+#if MSHV_USER_BANDS > 0
+    MshvUserBands::Inst().LoadFile(MshvUserBands::DefaultPath());
+    MshvApplyUserBandsAll();
+#endif
 
     Main_Ms win(inst0);
     //app.processEvents();

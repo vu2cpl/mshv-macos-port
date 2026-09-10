@@ -205,6 +205,7 @@ protected:
 	//void keyPressEvent(QKeyEvent * event);
 };
 
+#include "../../mshv_userbands.h"
 #include "bcnlistw.h"
 #include "pskreporterudptcp.h"
 class RadioAndNetW : public QWidget
@@ -291,6 +292,13 @@ signals:
     void EmitUdpCmdDl(QStringList);
     void EmitUdpCmdStop(bool);
     void EmitOpenRadNetWToRecon();
+#if MSHV_USER_BANDS > 0
+    // macOS port — fired after a user band is added to a slot. HvTxW resets
+    // that band index's per-band TX drive to the default, so a slot reused by
+    // a new band doesn't silently inherit the removed band's level (F2). The
+    // argument is the band index (COUNT_BANDS_STD + slot).
+    void EmitUserBandSlotCleared(int band_index);
+#endif
     void EmitUploadClubLogInfo(QString);
     void EmitOtpTxKey(QString);
     void EmitOtpRxMsg(bool);
@@ -412,6 +420,10 @@ private:
     QLineEdit *TCPPortBroad;
     QCheckBox *cb_tcp_broad_log_adif;
     QPushButton *b_reset_default_freqs_cont;
+#if MSHV_USER_BANDS > 0
+    QPushButton *b_add_user_band;
+    QPushButton *b_del_user_band;
+#endif
 
     bool cl_send_file;
     bool cl_err_flag;
@@ -520,6 +532,12 @@ private slots:
     void SetDefaultFreqsActType(int id);
     void SetDefaultFreqsActTypeBut();
     void ResetDefaultFreqsBut();
+#if MSHV_USER_BANDS > 0
+    // macOS port -- operator-defined bands, see mshv_userbands.h
+    void AddUserBandBut();
+    void RemoveUserBandBut();
+    void RefreshUserBandRows();
+#endif
     void SetDefaultFreqs(bool f);
     void set_reply_clr(QStringList);
     void set_halt_tx(bool);

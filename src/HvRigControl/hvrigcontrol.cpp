@@ -4,6 +4,10 @@
  */
 #define _BANDS_H_
 #include "hvrigcontrol.h"
+#if defined _MACOS_
+#include <QTime>
+#include "../mshv_txtrace.h"   // MSHV_TXTRACE=1: LZ2HV asked for prints at SetPtt() and TimerTryStaticTxF()
+#endif
 #include <unistd.h>   // uslepp Linux and windows
 #include <math.h> /* round, floor, ceil, trunc */
 #include "qexsp_1_2rc/qextserialenumerator.h"
@@ -785,6 +789,7 @@ HvRigControl::HvRigControl( QWidget *parent )
     connect(THvRigCat, SIGNAL(EmitGetedMode(QString)), this, SLOT(SetGetedMode(QString)));
     connect(THvRigCat, SIGNAL(EmitPttDtr(bool)), this, SLOT(SetPttDtr(bool)));// sea-235
     connect(THvRigCat, SIGNAL(EmitFullRigInfo(QString)), this, SLOT(SetFullRigInfo(QString)));//2.76.1 for pskreporter
+    connect(THvRigCat, SIGNAL(EmitFlexSliceReady()), this, SIGNAL(EmitFlexSliceReady()));//flex native vita-49
 
     ////// omnirig /////////////
     omnirig_active = false;
@@ -1960,6 +1965,11 @@ void HvRigControl::SetQrgParms(QString s,bool f)//2.45
 //int currt = 0;
 void HvRigControl::TimerTryStaticTxF()
 {
+#if defined _MACOS_
+    // LZ2HV, 2026-09-10: "qDebug()<<\"TimerTryStaticTxF()-------------->\"<<\"f_txrx_static_tx=\"<<f_txrx_static_tx;"
+    if (MshvTxTraceOn()) fprintf(stderr, "[MSHV TX] %s  TimerTryStaticTxF()--------------> f_txrx_static_tx=%s\n",
+                                 qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), f_txrx_static_tx ? "true" : "false");
+#endif
     if (f_txrx_static_tx)//try go to TX
     {
         timer_try_static_tx->stop();
@@ -2029,6 +2039,11 @@ void HvRigControl::TimerTryStaticTxF()
 }
 void HvRigControl::SetPtt(bool flag, int id)//id 0=All 1=p1 2=p2
 {
+#if defined _MACOS_
+    // LZ2HV, 2026-09-10: "qDebug()<<\"SetPt=\"<<\"flag=\"<<flag<<\"id=\"<<id;" -- to see where TX is set 2-3 times
+    if (MshvTxTraceOn()) fprintf(stderr, "[MSHV TX] %s  SetPt= flag=%s id=%d\n",
+                                 qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), flag ? "true" : "false", id);
+#endif
     bool all_sttx = false;  //ft8  ft4 q65
     if (f_static_tx && all_static_tx_modes) all_sttx = true;
     bool all_qrg = false;  //msk fsk
@@ -2552,4 +2567,18 @@ void HvRigControl::SetupPtt2(QString str)
 {
     if (str.toInt()==0) rb_dtr2->setChecked(true);
     if (str.toInt()==1) rb_rts2->setChecked(true);
+}
+/* macOS port -- copy the operator's user-defined bands into THIS translation
+ * unit's private copy of the band tables. config_band_all.h declares them
+ * `static`, so every .cpp that defines the guards gets its own set and each
+ * has to be patched separately. Called from main() before any UI is built.
+ * A no-op when MSHV_USER_BANDS is 0 (non-macOS builds). */
+#include "../mshv_userbands.h"
+void MshvApplyUserBands_hvrigcontrol()
+{
+    for (int i = 0; i < MSHV_USER_BANDS; ++i)
+    {
+        const MshvUserBand &b = MshvUserBands::Inst().At(i);
+        lst_bands[COUNT_BANDS_STD + i] = b.name;
+    }
 }

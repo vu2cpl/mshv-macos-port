@@ -231,6 +231,9 @@ public:
 	QString GetPropSettings();//2.75
 	void SetPropSettings(QString);//2.75
 	void SetLogAutoComm(bool f);//2.76.3
+	// macOS port -- true when Auto Logging Info is armed AND its band scope
+	// covers `band`, i.e. a QSO logged on `band` would be stamped.
+	bool AliActiveForBand(QString band);
 
 public slots:
    void EditQso();
@@ -245,6 +248,9 @@ signals:
    void EmitCBEnableAliChanged(bool);
 
 private slots:
+    // macOS port -- re-announce armed state so the Add To Log button tint
+    // tracks the band scope, not just the checkbox.
+    void AliBandScopeChanged(int);
     void DeleteSelected();
     void End_Edit();
     //void SetEditText();
@@ -325,6 +331,9 @@ private:
     QLabel *l_freq;
     QLineEdit *add_to_log_le_frq;
     QCheckBox *cb_enable_ali;//2.75
+    // macOS port -- restricts Auto Logging Info to one band. Index 0 is
+    // "Any band", which is the pre-existing behaviour and stays the default.
+    QComboBox *cb_ali_band;
     QComboBox *add_to_log_cb_prop;
     QComboBox *cb_sat_mod;
     QComboBox *cb_sat_nam;
