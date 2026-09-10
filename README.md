@@ -29,7 +29,8 @@ not damaged: the zip was unpacked by a tool that left extra files inside
 the bundle (some third-party unarchivers do this, and so does a copy that
 went through a cloud drive's "download as zip"). Use the DMG, or unpack
 the zip with the Finder. Releases before 2026-09-08 were more prone to
-this; the mac9 downloads were re-issued that day.
+this; the mac9 downloads were re-issued that day, and from mac10 the zip
+is built so that no unpacker can cause it.
 
 First launch on macOS:
 - The bundle is signed with an Apple Developer ID and notarised by
@@ -45,7 +46,21 @@ WAVs, screenshots) lives in
 `~/Library/Application Support/MSHV/`. Replacing the bundle with a
 new release does **not** wipe your data.
 
-## Native FlexRadio support (new in mac8)
+**Run MSHV from Applications.** macOS runs a downloaded app from a
+randomised read-only location until you move it out of the disk image or
+Downloads folder, which stops MSHV writing some of its files.
+
+## If you use RUMlogNG (changed in mac10)
+
+MSHV identifies itself on the WSJT-X UDP protocol as **`MSHV`**. Older
+macOS builds said `WSJT-X MSHV`, because RUMlogNG's DXSpots window and
+callsign lookup only accepted a WSJT-X-style client name.
+
+Tom DL2RUM added native MSHV support and it is in **RUMlogNG 6.5.1**. If
+DX spots or lookups stop arriving after you update MSHV, update RUMlogNG
+to 6.5.1 or later. No other logging program is affected.
+
+## Native FlexRadio support
 
 If you run a **FLEX-6000/8000**, MSHV can now talk to the radio directly
 over its own SmartSDR/VITA-49 protocol — **no SmartSDR running, no TCI
