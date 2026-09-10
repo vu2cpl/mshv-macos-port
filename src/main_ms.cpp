@@ -303,9 +303,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     pb_flex_panel->hide();
     flex_panel = 0;
     connect(pb_flex_panel, SIGNAL(clicked()), this, SLOT(ShowFlexPanel()));
-    timer_flex_meter = new QTimer(this);
-    connect(timer_flex_meter, SIGNAL(timeout()), this, SLOT(UpdateFlexMeter()));
-    timer_flex_meter->start(250);
+    //timer_flex_meter = new QTimer(this);
+    //connect(timer_flex_meter, SIGNAL(timeout()), this, SLOT(UpdateFlexMeter()));
+    //timer_flex_meter->start(500);
 
     l_tx_text = new QLabel("Txing:");
     l_tx_text->setFixedHeight(20);
@@ -3139,6 +3139,13 @@ void Main_Ms::Refresh()
     }
     //////////////END REMUTE/////////////////////////////////
     //qDebug()<<"s_f_dec50"<<s_f_dec50;
+    static int ic = 0;//5ms*100=500ms
+    if (ic>100)
+    {
+    	ic = 0;
+    	UpdateFlexMeter();//qDebug()<<"500ms=";
+   	}
+	ic++;
 }
 void Main_Ms::SetAuto()
 {
