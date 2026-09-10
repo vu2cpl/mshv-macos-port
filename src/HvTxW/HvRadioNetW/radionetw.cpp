@@ -3950,24 +3950,22 @@ void RadioAndNetW::SaveSettings()
 {
     // PRESERVE-UNKNOWN-LINES (2026-09-02). Before truncating ms_stinfonet,
     // capture every key=value line this build does NOT itself write, and
-    // re-append it verbatim at the very end (below). Rationale: the private
-    // and public MSHV builds share one data dir (~/Library/Application
-    // Support/MSHV) but carry different settings schemas. The public build
-    // has no Club Log DXCC / Alerts widgets, so its SaveSettings never emits
-    // tcps_club_log_dxcc / alerts_config — and, before this fix, rewriting the
-    // file simply dropped those lines, destroying the operator's private
-    // credentials (the private build then regenerated them blank). A settings
-    // writer must never delete keys it doesn't understand.
+    // re-append it verbatim at the very end (below).
     //
-    // knownKeys is gated identically to the write statements below, so:
-    //   - private build: writes the private lines itself; they ARE in
-    //     knownKeys, so they are NOT also carried over (no duplication).
-    //   - public build (or a non-private build of this tree): the private
-    //     lines are NOT in knownKeys, so they are carried through untouched.
-    // Carry-over lines are appended AFTER all known keys, which keeps the
-    // order-sensitive ReadSettings() parser correct: an unknown key only ever
-    // belongs to a richer/newer schema, which always appends its extra keys
-    // at the end, so their file position is preserved on round-trip.
+    // Rationale: more than one build may share a data directory
+    // (~/Library/Application Support/MSHV), and a newer or differently
+    // configured one can write keys this build knows nothing about.  Before
+    // this fix, rewriting the file simply dropped them, destroying settings
+    // that were not ours to destroy.  A settings writer must never delete
+    // keys it does not understand.
+    //
+    // knownKeys lists exactly what the write statements below emit, so a key
+    // this build writes is never also carried over (no duplication), and a
+    // key it does not write is carried through untouched.  Carry-over lines
+    // are appended AFTER all known keys, which keeps the order-sensitive
+    // ReadSettings() parser correct: an unknown key belongs to a richer
+    // schema, which appends its extra keys at the end, so file position is
+    // preserved on a round trip.
     static const QStringList knownKeys = {
         "udp_server","udp_port","psk_spot_val","st_info_all","dx_spot_telnet_val",
         "tcp_server","tcp_port","udp_broad_server","udp_broad_port","udp_broad_log_all",
@@ -4082,12 +4080,12 @@ void RadioAndNetW::ReadSettings()
             "udp_broad_server","udp_broad_port","udp_broad_log_all","psk_udp_tcp","tcp_broad_log_all",
             "tcps_club_log_all","udp2_broad_all","tcps_qrz_log_all","def_wr_status","tcp_eqsl_log_all",
             "tcp_otp_all","otp_servers_list","tcp_pass",
-            // index 20 — Club Log DXCC API credentials (private feature).
-            // Format: email#callsign#api_token#app_password#enabled.
+            // Indices 20 and 21 are parsed and then ignored by this build.
+            // They stay in the table because ReadSettings() below walks it in
+            // order: drop an entry and every key after it is read into the
+            // wrong slot.  SaveSettings() does not write them, so a file that
+            // has them keeps them via the carry-over above.
             "tcps_club_log_dxcc",
-            // index 21 — Page 4 Alerts config (private feature).
-            // Format: tg_token#tg_chat#tg_enabled#mac_enabled#
-            // cooldown_min#alert_atno#alert_band#alert_mode.
             "alerts_config"
         };
     QString st_res[c_st_id];

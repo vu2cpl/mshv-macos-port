@@ -39,8 +39,15 @@ if codesign -dvv "$APP" 2>&1 | grep -q "Signature=adhoc"; then
 fi
 
 echo "==> zipping bundle for submission"
+# --norsrc: do not store resource forks / extended attributes.  Without it
+# ditto writes the com.apple.provenance xattr macOS stamps on every signed
+# file as an inline "._name" AppleDouble entry beside each file.  Archive
+# Utility folds those back invisibly, but unzip and most third-party tools
+# leave them inside the Qt frameworks, the seal fails, and the user sees
+# "MSHV is damaged and can't be opened".  The published mac9 zips carried
+# 304 of them.  (2026-09-08)
 rm -f "$ZIP"
-ditto -c -k --keepParent "$APP" "$ZIP"
+ditto -c -k --norsrc --keepParent "$APP" "$ZIP"
 ls -lh "$ZIP"
 
 echo "==> submitting to Apple notarisation (profile: $PROFILE)"
@@ -56,7 +63,7 @@ spctl --assess --type execute --verbose "$APP" || true
 
 echo "==> re-zipping with stapled ticket"
 rm -f "$ZIP"
-ditto -c -k --keepParent "$APP" "$ZIP"
+ditto -c -k --norsrc --keepParent "$APP" "$ZIP"
 ls -lh "$ZIP"
 shasum -a 256 "$ZIP"
 
