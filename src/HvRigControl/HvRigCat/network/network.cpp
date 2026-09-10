@@ -1283,11 +1283,16 @@ void Network::VitaLine(QString line)
         {
             vita_slice = made;
             vita_slice_created = true;
-            // The radio assigns the index.  If it is not Rig Control's slice
-            // the operator has to move Rig Control to that letter -- say so.
+            // The radio assigns the index -- it may not be the one the rig
+            // model names, and with other GUI clients present it usually is
+            // not.  The slice is ours either way, so take the CAT half to it
+            // rather than asking the operator to re-pick a letter; see the
+            // note in VitaChooseSlice().  The panel line shows the number.
             if (vita_rig_slice >= 0 && made != vita_rig_slice)
-                vita_mismatch = QString(" [!] rig control is set to Slice %1 but audio is on slice %2")
-                                    .arg(QChar('A' + vita_rig_slice)).arg(made);
+            {
+                slicenum = QString::number(made);
+                vita_rig_slice = made;
+            }
             VitaSliceReady();
         }
     }
@@ -1381,9 +1386,13 @@ void Network::VitaTimeout()
             if (made < 0) { VitaFail("slice create not answered"); return; }
             vita_slice = made;
             vita_slice_created = true;
+            // Same as the status-stream path above: the slice we just created
+            // is ours whatever index it landed on, so move the CAT half to it.
             if (vita_rig_slice >= 0 && made != vita_rig_slice)
-                vita_mismatch = QString(" [!] rig control is set to Slice %1 but audio is on slice %2")
-                                    .arg(QChar('A' + vita_rig_slice)).arg(made);
+            {
+                slicenum = QString::number(made);
+                vita_rig_slice = made;
+            }
             VitaSliceReady();
             return;
         }
@@ -1418,22 +1427,40 @@ void Network::VitaTimeout()
 void Network::VitaChooseSlice()
 {
     const int want = vita_rig_slice;
-    if (want >= 0 && VitaSliceExists(want))
+    // ONE slice must carry both halves: the audio backend listens to it and the
+    // CAT side tunes, keys and reads frequency from it.  If they disagree, MSHV
+    // shows one frequency and works another.
+    //
+    // `want` comes from the rig model letter ("Slice A TCP" -> 0), i.e. it is a
+    // GLOBAL slice index.  But the radio's `index_letter` is numbered PER
+    // CLIENT: with another GUI client (SmartSDR) connected first, that client
+    // holds slice 0 and calls it "A", and the radio hands US slice 1 -- which it
+    // ALSO calls "A".  Taking the letter as a global index then adopts the other
+    // client's slice: MSHV tunes and keys theirs while the radio, under
+    // multiFLEX, feeds our DAX channel from OUR slice, which nobody has moved
+    // off the default 14.100 USB.  Waterfall alive, zero decodes on every band,
+    // and the other operator watches their slice being dragged around the bands.
+    // Measured 2026-09-10, and verified fixed against a second GUI client.
+    //
+    // So resolve the letter against slices we OWN, and fall back to the global
+    // index only when we own none -- which is the single-client case, i.e.
+    // exactly the behaviour this had before.
+    int pick = VitaOwnedSliceByLetter(want);
+    if (pick < 0) pick = VitaOwnedSlice();
+    if (pick < 0 && want >= 0 && VitaSliceExists(want)) pick = want;
+    if (pick >= 0)
     {
-        vita_slice = want;
+        vita_slice = pick;
         vita_slice_created = false;
         vita_mismatch.clear();
-        VitaSliceReady();
-        return;
-    }
-    const int owned = VitaOwnedSlice();
-    if (owned >= 0)
-    {
-        vita_slice = owned;
-        vita_slice_created = false;
-        if (want >= 0 && owned != want)
-            vita_mismatch = QString(" [!] rig control is set to Slice %1 but audio is on slice %2")
-                                .arg(QChar('A' + want)).arg(owned);
+        // Point the CAT half at the same slice.  vita_rig_slice moves with it or
+        // UpdateFlexVita()'s restart test (slicenum vs vita_rig_slice) would see
+        // a change on every call and rebuild the session in a loop.
+        if (pick != want)
+        {
+            slicenum = QString::number(pick);
+            vita_rig_slice = pick;
+        }
         VitaSliceReady();
         return;
     }
@@ -1506,6 +1533,25 @@ int Network::VitaOwnedSlice()
     {
         const QString low = vita_log.at(i).toLower();
         if (!low.contains("|slice ") || !low.contains("in_use=1") || !low.contains(want)) continue;
+        QRegExp rx("\\|slice (\\d+)");
+        if (rx.indexIn(vita_log.at(i)) >= 0) found = rx.cap(1).toInt();
+    }
+    return found;
+}
+// The slice WE own that the radio labels with this letter (0 = A).
+// index_letter is numbered PER CLIENT, so it is only meaningful together with
+// client_handle -- see the note in VitaChooseSlice().
+int Network::VitaOwnedSliceByLetter(int letter)
+{
+    if (letter < 0) return -1;
+    const QString handle = QString("client_handle=0x%1").arg(vita_handle, 8, 16, QChar('0')).toLower();
+    QRegExp isletter(QString("index_letter=%1(\\s|$)").arg(QChar('a' + letter)));
+    int found = -1;
+    for (int i = 0; i < vita_log.size(); ++i)
+    {
+        const QString low = vita_log.at(i).toLower();
+        if (!low.contains("|slice ") || !low.contains("in_use=1") || !low.contains(handle)) continue;
+        if (isletter.indexIn(low) < 0) continue;
         QRegExp rx("\\|slice (\\d+)");
         if (rx.indexIn(vita_log.at(i)) >= 0) found = rx.cap(1).toInt();
     }

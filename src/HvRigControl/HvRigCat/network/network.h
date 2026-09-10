@@ -256,6 +256,7 @@ private:
 	void VitaMirror();
 	bool VitaSliceExists(int n);
 	int  VitaOwnedSlice();
+	int  VitaOwnedSliceByLetter(int letter);//index_letter is per client -- see VitaChooseSlice()
 	FlexVita *vita_;
 	QThread vThread;
 	bool is_vita;                //vita_ exists and vThread runs
