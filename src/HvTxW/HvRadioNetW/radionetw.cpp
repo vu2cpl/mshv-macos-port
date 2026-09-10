@@ -1670,17 +1670,13 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     //qDebug()<<"Time===========================";
 
     if (!inst.isEmpty()) inst = " -"+inst;
-#if defined _MACOS_
-    // RUMlogNG's DXSpots window and its callsign-lookup path only accept
-    // decodes/spots from a "WSJT-X"-style client id (it matches on the
-    // "WSJT-X" prefix). Identify as "WSJT-X MSHV" so RUMlog still recognises
-    // us via that prefix, while the " MSHV" suffix distinguishes this source
-    // from a real WSJT-X in RUMlog / network-status views. Multi-instance
-    // still appends the " -<n>" suffix.
-    m_messageClientBroad = new MessageClient {"WSJT-X MSHV"+inst,VER_MS,"",2237,true,this};
-#else
+    // UDP client id is the plain upstream "MSHV" on every platform. The Mac
+    // branch used to spoof "WSJT-X MSHV" because RUMlogNG keyed on a
+    // "WSJT-X"-style client name and would not otherwise accept our spots.
+    // DL2RUM added native "MSHV" recognition and it is in a released
+    // RUMlogNG since 2026-09-10, so the spoof is retired everywhere.
+    // Do not re-add the "WSJT-X" prefix.
     m_messageClientBroad = new MessageClient {"MSHV"+inst,VER_MS,"",2237,true,this};
-#endif
     //m_messageClientBroad = new MessageClient {"MSHV ID:14MHz",VER_MS,"",2237,true,this};
     connect(m_messageClientBroad, SIGNAL(error(QString)), this, SLOT(networkErrorUDPBrodcast(QString)));
     connect(m_messageClientBroad, SIGNAL(replay()), this, SLOT(replayDecodes()));
