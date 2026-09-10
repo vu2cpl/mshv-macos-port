@@ -2698,10 +2698,10 @@ void Main_Ms::ShowFlexPanel()
 
 void Main_Ms::SetRigTxRx(bool f)
 {
-    //qDebug()<<"SetRigTxRx...................."<<f;
-    f_tx_busy = f;//2.47
+	if (f_tx_busy == f) return;//2.76.7 Protection MAC and PC from bad Machine Clock
+    f_tx_busy = f;//2.47  //if (f_tx_busy == f) return;
     THvRigControl->SetPtt(f,0);//id 0=All 1=p1 2=p2
-    THvTxW->SetTxRxCountAutoSeq(f);
+    THvTxW->SetTxRxCountAutoSeq(f);//qDebug()<<"SetRigTxRx...................."<<f;
     if (f)
     {
         if (dsty) l_tx_text->setStyleSheet("QLabel{background-color:rgb(170,0,0);}");
@@ -2715,7 +2715,6 @@ void Main_Ms::SetRigTxRx(bool f)
         Band_m->setDisabled(false);
         W_band_bt_sw->setDisabled(false); //qDebug()<<g_block_mam<<g_ub_m_k;
     }
-    //f_tx_busy = f;
     if (s_mode==11 || s_mode==13 || s_mode==18 || allq65) ModeMenuStatRefresh(f_de_active);//ft8 and ft4
 }
 void Main_Ms::SetOffsetDt(int dt)//2.76.5
