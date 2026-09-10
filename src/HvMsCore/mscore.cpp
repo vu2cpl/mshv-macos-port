@@ -105,6 +105,8 @@ MsCore::MsCore()
     rad_sound_state.interupts = 0;
 
     FFT1 = FFT2 = ptWriteFft = NULL;
+    fft_avg = fft_window = NULL;  // record_app() frees both before re-allocating, and its first call is below:
+                                  // on a fresh block that was free(NULL) by luck, on a recycled one a double free
     count_ftt_window = 0;
 
     bool p_read_snd = true;
