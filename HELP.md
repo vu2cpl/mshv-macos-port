@@ -164,6 +164,13 @@ the bundle's `Info.plist` and the `audio-input` entitlement.
 If denied accidentally:
 - **System Settings → Privacy & Security → Microphone** → enable MSHV.
 
+**If macOS never asks, and the input stays silent:** the first mac10
+downloads and the mac9 downloads re-issued on 2026-09-08 were signed
+without the `audio-input` entitlement. Without it macOS neither asks nor
+grants access. A Mac that had allowed an earlier MSHV kept working.
+Download mac10 again; it was re-issued on 2026-09-12 with the
+entitlement.
+
 The TCI audio path doesn't trigger this prompt because the audio
 comes over the WebSocket, not through the system microphone API.
 

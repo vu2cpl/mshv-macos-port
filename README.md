@@ -32,6 +32,14 @@ the zip with the Finder. Releases before 2026-09-08 were more prone to
 this; the mac9 downloads were re-issued that day, and from mac10 the zip
 is built so that no unpacker can cause it.
 
+**The mac10 downloads were re-issued on 2026-09-12.** The first mac10
+files, and the mac9 files re-issued on 2026-09-08, were signed without
+the entitlement macOS requires before it will ask for microphone access.
+On a Mac that had never used MSHV, the soundcard input was silent and
+nothing asked for permission. FlexRadio Native and TCI users were not
+affected. If that was you, download mac10 again. It is the same source,
+signed correctly.
+
 First launch on macOS:
 - The bundle is signed with an Apple Developer ID and notarised by
   Apple, so Gatekeeper accepts it without complaint.
