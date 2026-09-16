@@ -48,6 +48,15 @@ would break a signed bundle's seal from `/Applications`.
 - The build seed `bin/settings/ms_settings` should only carry sane
   defaults for new users — not someone's runtime state. When you
   intentionally change a default, document why in the commit message.
+- **The seed `bin/settings/ms_stinfonet` must carry no credentials** —
+  no QRZ logbook API key, no eQSL user or password, no Club Log email or
+  password, no OTP key. Every build copies it into the bundle and every
+  first launch copies it into the user's Library, so anything left in it
+  ships to every downloader. Until 2026-09-16 it carried a developer's
+  own upload logins; it now matches upstream's clean copy. Check it
+  before committing: the credential fields in `tcps_qrz_log_all`,
+  `tcp_eqsl_log_all`, `tcps_club_log_all` and `tcp_otp_all` must be
+  empty.
 - Drag-replacing `MSHV.app` into `/Applications/` must remain safe.
   If a change would invalidate that property, stop and flag it
   before shipping.
