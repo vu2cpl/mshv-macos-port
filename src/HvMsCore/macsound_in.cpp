@@ -19,6 +19,21 @@ static bool s_pa_in_initialized = false;
 static bool s_pa_in_is_float = false;
 static int  s_pa_in_chan_capt = 2;
 
+// Deferred open (2026-09-17).  Upstream opens the capture device the moment it
+// is configured, and at startup that happens several times before the settings
+// are in: the MsCore constructor opens the SYSTEM DEFAULT input at 44100 Hz
+// (it still holds "default" and the FSK441 rate), then the saved device opens
+// at 44100, then again at 48000 once the mode is set.  On a Mac every one of
+// those opens sets the CoreAudio device's nominal rate, so another app playing
+// through that device -- AetherSDR on the USB audio interface, here -- got
+// crackling and dropouts each time MSHV started, although MSHV never used the
+// device.  rad_open_sound() now only closes and marks the open as wanted; the
+// capture tick (alsa_read_sound) performs it once, with whatever device and
+// rate the last configuration left.  A close clears the request, so Flex/TCI
+// input and quit never open anything.
+static bool s_pa_open_pending = false;
+static bool s_pa_opening_now  = false;   // set only while the tick performs the open
+
 // Scratch buffer for the 24-bit->int24 normalisation below. alsa_read_sound()
 // is driven by the 5 ms tick, so the old `new int[]`/`delete[]` here was a
 // malloc/free pair a few hundred times a second on a path that must not stall
@@ -60,6 +75,7 @@ void MsCore::rad_close_sound()
         Pa_CloseStream(s_pa_rx);
         s_pa_rx = NULL;
     }
+    s_pa_open_pending = false;
     strncpy(rad_sound_state.err_msg, CLOSED_TEXT, SC_SIZE_L);
     rad_sound_state.bad_device = 1;
 }
@@ -67,6 +83,11 @@ void MsCore::rad_close_sound()
 void MsCore::rad_open_sound()
 {
     rad_close_sound();
+    if (!s_pa_opening_now)
+    {
+        s_pa_open_pending = true;   // alsa_read_sound() opens it on the next tick
+        return;
+    }
     ensure_pa_in_init();
 
     rad_sound_state.read_error      = 0;
@@ -201,6 +222,12 @@ void MsCore::rad_open_sound()
 // dispatch in linsound_in.cpp.
 int MsCore::alsa_read_sound()
 {
+    if (s_pa_open_pending)
+    {
+        s_pa_opening_now = true;
+        rad_open_sound();           // clears the request via rad_close_sound()
+        s_pa_opening_now = false;
+    }
     if (!s_pa_rx) return 0;
     long avail = Pa_GetStreamReadAvailable(s_pa_rx);
     if (avail <= 0) return 0;

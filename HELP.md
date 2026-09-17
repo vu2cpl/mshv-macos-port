@@ -146,6 +146,12 @@ hardware supports. MSHV handles 16-bit, 24-bit, and 32-bit PCM
 input/output; the device picker remembers your choice across
 launches.
 
+MSHV opens the input device once its settings are loaded, and
+only while **Monitor** is on. On macOS, opening a device sets its
+sample rate for every app using it, so earlier builds could make
+another program's audio on your default input device crackle for a
+moment each time MSHV started. That no longer happens.
+
 ### 24-bit audio
 
 Verified end-to-end against AetherSDR's CommonRadioAudio (24-bit)
