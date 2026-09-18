@@ -93,7 +93,7 @@ HEADERS = src/main_ms.h \
  src/HvRigControl/HvRigCat/omnirig/omnirighv.h \
  src/HvRigControl/HvRigCat/sdrs/sdrs.h \
  src/HvRigControl/HvRigCat/network/network.h \
- src/HvRigControl/HvRigCat/flexpanel/flexpanel.h \
+ src/HvRigControl/HvRigCat/network/flexpanel.h \
  src/HvRigControl/HvRigCat/mits/mits.h \
  src/LabWidget/labw.h \
  src/HvSlider_V_Identif/hvslider_v_identif.h \
@@ -206,7 +206,7 @@ SOURCES = src/main.cpp \
  src/HvRigControl/HvRigCat/omnirig/omnirighv.cpp \
  src/HvRigControl/HvRigCat/sdrs/sdrs.cpp \
  src/HvRigControl/HvRigCat/network/network.cpp \
- src/HvRigControl/HvRigCat/flexpanel/flexpanel.cpp \
+ src/HvRigControl/HvRigCat/network/flexpanel.cpp \
  src/HvRigControl/HvRigCat/mits/mits.cpp \
  src/LabWidget/labw.cpp \
  src/HvSlider_V_Identif/hvslider_v_identif.cpp \

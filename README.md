@@ -81,10 +81,20 @@ Settings. The radio address is read back from the rig entry, so it is
 entered once. `Flex Native Input DAX 2..8` selects a different DAX
 channel if you are sharing the radio with another DAX application.
 
-A **`Flex`** button then appears in the status row, next to a live
+A **`Flex`** button then appears in the top row, next to a live
 forward-power / SWR readout. It opens a small panel with forward power,
 SWR, reflected power, ALC, PA temperature and supply voltage, plus RX
 antenna, TX antenna and mode — all read from, and written to, the radio.
+
+At start-up MSHV takes its slice to the frequency it last used (14.074 MHz
+FT8 the first time), because a fresh Flex slice always begins at 14.100
+USB, and puts back the RX and TX antennas it last used on that band. The
+antennas follow every band change the same way, one pair per band, learned
+from whatever you set in the panel — a band you have not used yet is left
+exactly as the radio sets it up. This is for the native backend only;
+plain Flex CAT with SmartSDR as the GUI still follows the radio. (The
+settings key for this changed once, in September 2026; after that update
+the first start is on 14.074 again and the antennas are relearned.)
 
 TCI with AetherSDR remains fully supported and is still the right choice
 for non-Flex SDRs; see `HELP.md`.

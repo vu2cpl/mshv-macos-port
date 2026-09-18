@@ -180,4 +180,7 @@ void MshvApplyUserBandsAll()
     MshvApplyUserBands_radionetw();
     MshvApplyUserBands_hvlogw();
     MshvApplyUserBands_hvrigcontrol();
+#if defined _MACOS_
+    MshvApplyUserBands_flexpanel();
+#endif
 }

@@ -122,8 +122,6 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     //printf("--");
     InstName = inst0;
     s_id_set_to_rig = 0;//0<-from App 1<-from Rig
-    flex_rig_active = false;
-    flex_push_pending = false;
     f_is_d1_data_todec65 = false;
     f_is_d2_data_todec65 = false;
     is_active_astro_w = false;
@@ -294,23 +292,18 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     // FWDPWR/REFPWR/SWR meters. Hidden unless the Flex backend is transmitting,
     // so it is invisible to anyone not using a FlexRadio.
     l_flex_meter = new QLabel("");
-    l_flex_meter->setFixedHeight(20);
+    l_flex_meter->setFixedHeight(19);
     l_flex_meter->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     l_flex_meter->setMinimumWidth(150);
     l_flex_meter->setAlignment(Qt::AlignCenter);
     l_flex_meter->setToolTip(tr("FlexRadio forward power and SWR"));
     l_flex_meter->hide();
     pb_flex_panel = new QPushButton("Flex");
-    pb_flex_panel->setFixedHeight(20);
+    pb_flex_panel->setFixedHeight(19);
     pb_flex_panel->setFixedWidth(46);
     pb_flex_panel->setToolTip(tr("FlexRadio meters, antenna and mode"));
-    pb_flex_panel->hide();
-    flex_panel = 0;
-    connect(pb_flex_panel, SIGNAL(clicked()), this, SLOT(ShowFlexPanel()));
-    //timer_flex_meter = new QTimer(this);
-    //connect(timer_flex_meter, SIGNAL(timeout()), this, SLOT(UpdateFlexMeter()));
-    //timer_flex_meter->start(500);
-
+    pb_flex_panel->hide();    
+    
     l_tx_text = new QLabel("Txing:");
     l_tx_text->setFixedHeight(20);
     //l_tx_text->setFont(tx_font);
@@ -419,6 +412,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvTxW,SIGNAL(EmitOtpVerif(QString,uint8_t)),TDecodeList1,SLOT(SetOtpVerif(QString,uint8_t)));//2.76sf only to list 1
     //connect(THvTxW,SIGNAL(EmitSFoxVerif(QString)),TDecodeList2,SLOT(SetSFoxVerif(QString)));//2.76sf
     connect(THvTxW,SIGNAL(EmitOffsetDt(int)),this,SLOT(SetOffsetDt(int)));//2.76sf
+    
+    connect(pb_flex_panel,SIGNAL(clicked()),THvTxW,SLOT(ShowFlexPanel()));
+    connect(THvTxW,SIGNAL(EmitUpdateFlexMeter(bool,bool,double,double)),this,SLOT(UpdateFlexMeter(bool,bool,double,double)));
 
     QMenuBar *Min_Menu = new QMenuBar();
 
@@ -830,12 +826,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvRigControl, SIGNAL(EmitGetedFreq(QString)), THvTxW, SLOT(SetFreqGlobalFromRigCat(QString)));//1.61=
     connect(THvRigControl, SIGNAL(EmitGetedMode(QString)), THvTxW, SLOT(SetModeGlobalFromRigCat(QString)));//1.61=
     connect(THvRigControl, SIGNAL(EmitTxActive(int)), THvTxW, SLOT(SetTxActive(int)));//2.21
-    connect(THvRigControl, SIGNAL(EmitRigCatActiveAndRead(bool,QString)), THvTxW, SLOT(SetRigCatActiveAndRead(bool,QString)));//2.53 //2.76.1
-    // Native Flex VITA-49: MSHV leads the radio once, when the slice is ours.
-    // Both readiness signals feed one gate -- see FlexSliceReady().
-    connect(THvRigControl, SIGNAL(EmitFlexSliceReady()), this, SLOT(FlexSliceReady()));
-    connect(THvRigControl, SIGNAL(EmitRigCatActiveAndRead(bool,QString)), this, SLOT(FlexRigActive(bool,QString)));
-    connect(THvTxW, SIGNAL(EmitFreqGlobalToDec(QString)), this, SLOT(FlexTrackFreq(QString)));
+    connect(THvRigControl, SIGNAL(EmitRigCatActiveAndRead(bool,QString)), THvTxW, SLOT(SetRigCatActiveAndRead(bool,QString)));//2.53 //2.76.1    
 
     connect(THvTxW, SIGNAL(EmitQSOProgress(int)), TDecoderMs, SLOT(SetQSOProgress(int)));
     connect(THvTxW, SIGNAL(EmitQSOProgress(int)), THvRigControl, SLOT(SetQSOProgress(int)));//2.45
@@ -1294,6 +1285,19 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     H_l->setAlignment(Min_Menu,Qt::AlignLeft);
     //H_l->addWidget(lsuperfox);
     //H_l->setAlignment(lsuperfox,Qt::AlignCenter);
+    
+    // Flex Panel
+    QHBoxLayout *H_lflex = new QHBoxLayout();
+    H_lflex->setContentsMargins(0,0,0,0);
+    H_lflex->addWidget(l_flex_meter);
+    H_lflex->addWidget(pb_flex_panel);
+    H_lflex->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);
+    H_l->addLayout(H_lflex);     
+    /*H_l->addWidget(l_flex_meter);
+    H_l->setAlignment(l_flex_meter,Qt::AlignRight | Qt::AlignHCenter); 
+    H_l->addWidget(pb_flex_panel);
+    H_l->setAlignment(pb_flex_panel,Qt::AlignRight | Qt::AlignHCenter);*/  
+         
     H_l->addWidget(TCpuWudget);
     H_l->setAlignment(TCpuWudget,Qt::AlignRight | Qt::AlignHCenter);
     //H_l->setAlignment(TPicW,Qt::AlignHCenter);
@@ -1470,9 +1474,8 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     H_status->addWidget(cb_rtd_decode);
     H_status->addWidget(TPicW);
     //H_status->setAlignment(TPicW,Qt::AlignLeft);
-    H_status->addWidget(l_tx_text);
-    H_status->addWidget(l_flex_meter);
-    H_status->addWidget(pb_flex_panel);
+    H_status->addWidget(l_tx_text); 
+     
     //H_status->setAlignment(l_tx_text,Qt::AlignHCenter);
     H_status->addWidget(THvSMeter_H);
     //H_centr->setAlignment(THvTxW, Qt::AlignRight);
@@ -2701,117 +2704,48 @@ void Main_Ms::ModeMenuStatRefresh(bool dea)
         W_mod_bt_sw->setDisabled(false);
     }
 }
-// Native Flex VITA-49 backend (network.cpp): live TX metering off the radio.
-extern bool _FlexVitaMeters_(double *fwd_w, double *ref_w, double *swr);
-extern bool _FlexVitaTxActive_();
-extern bool _FlexVitaRxActive_();
-#include "HvRigControl/HvRigCat/flexpanel/flexpanel.h"
 
-void Main_Ms::UpdateFlexMeter()
+// Native Flex VITA-49 backend (network.cpp): live TX metering off the radio.
+void Main_Ms::UpdateFlexMeter(bool up,bool is_meter,double fwd,double swr)
 {
     // Visible whenever the Flex backend is up, RX or TX -- not only while
     // transmitting. Hiding it during receive meant the operator could never
     // see that it existed, nor check SWR except mid-transmission.
-    if (!_FlexVitaRxActive_() && !_FlexVitaTxActive_())
+    //qDebug()<<"Main_Ms::UpdateFlexMeter"<<up<<is_meter<<fwd<<swr<<"flex_push_pending="<<flex_push_pending;
+    if (!up)
     {
-        if (l_flex_meter->isVisible()) { l_flex_meter->hide(); pb_flex_panel->hide(); }
+        if (l_flex_meter->isVisible()) 
+        { 
+        	l_flex_meter->hide();
+        	pb_flex_panel->hide();
+        }
         return;
-    }
-    if (!l_flex_meter->isVisible()) { l_flex_meter->show(); pb_flex_panel->show(); }
-
-    double fwd = 0.0, ref = 0.0, swr = 0.0;
-    if (!_FlexVitaMeters_(&fwd, &ref, &swr))
+    }     
+    if (!l_flex_meter->isVisible()) 
+    { 
+    	if (!l_flex_meter->isVisible())
+    	{
+    		l_flex_meter->show(); 
+    		pb_flex_panel->show();    		
+   		}   //qDebug()<<"UpdateFlexMeter="<<"flex_push_pending="<<flex_push_pending<<flex_native_last_freq;
+    }          
+    if (!is_meter)
     {
         // Backend is up but the radio has not sent a meter packet yet.
         l_flex_meter->setText("Flex: --");
         l_flex_meter->setStyleSheet("");
         return;
     }
-
     l_flex_meter->setText(QString("%1 W   SWR %2")
                           .arg(fwd, 0, 'f', (fwd < 10.0) ? 1 : 0)
                           .arg(swr, 0, 'f', 2));
-
     // Only colour on a genuinely high SWR, and only while actually producing
     // power -- an idle radio reads SWR 1.00 and would otherwise flicker green.
-    if (fwd > 0.5 && swr >= 3.0)
-        l_flex_meter->setStyleSheet("QLabel{color:rgb(255,80,80);}");
-    else if (fwd > 0.5 && swr >= 2.0)
-        l_flex_meter->setStyleSheet("QLabel{color:rgb(255,180,60);}");
-    else
-        l_flex_meter->setStyleSheet("");
+    if (fwd > 0.5 && swr >= 3.0) l_flex_meter->setStyleSheet("QLabel{color:rgb(255,80,80);}");
+    else if (fwd > 0.5 && swr >= 2.0) l_flex_meter->setStyleSheet("QLabel{color:rgb(255,180,60);}");
+    else l_flex_meter->setStyleSheet("");
 }
-
-void Main_Ms::ShowFlexPanel()
-{
-    if (!flex_panel) flex_panel = new FlexPanel(dsty, this);
-    flex_panel->show();
-    flex_panel->raise();
-    flex_panel->activateWindow();
-}
-
-// ---- Native Flex VITA-49: MSHV leads the radio once, when the slice is ours.
-//
-// MSHV FOLLOWS the rig.  It polls the radio, derives its band from what it
-// reads, and the "from Rig" path (SetBandFromRigFreq -> s_id_set_to_rig=1)
-// deliberately never pushes a frequency back -- right for a conventional CAT
-// rig, whose VFO holds the operator's last frequency.  It is wrong for the
-// native Flex backend: the radio hands a fresh GUI client a slice at its own
-// default (14.100 USB on the 6600 -- observed, the API documents no default),
-// so there is nothing worth following.  MSHV adopted 20m from the radio and
-// sat on a non-FT8 frequency until a band button was pressed; measured
-// 2026-09-09, three minutes untouched, never tuned.  And because default_band
-// is written from that rig-derived band on exit, the "band memory" recorded
-// whatever the radio last had, not what the operator chose.
-//
-// So for THIS backend only, once the slice is ours, push the last frequency
-// MSHV was on -- remembered across runs as flex_native_last_freq -- or, with
-// nothing remembered, 14.074 MHz.  Manoj's spec, 2026-09-09: "remember last
-// freq and if not available, go to 14074 ft8".  The push is
-// HvTxW::SetDefFreqGlobal(2, hz), the from-App path a band button takes: it
-// re-syncs the band button to that frequency and sets the mode as well
-// (DIGU for FT8), given Interface Control's mode-set option is on.
-//
-// Two readiness conditions, in either order: the slice must exist
-// (EmitFlexSliceReady) AND the rig must be "active and read", because
-// HvRigControl::SetFreq pushes the MODE only once that flag is up.  Push too
-// early and the frequency lands but the slice stays USB.
-//
-// The vendor's own restore -- "client start_persistence" -- was tried first
-// and is rejected by this radio (0x50001000, any ordering, either value).
-void Main_Ms::FlexTrackFreq(QString hz)
-{
-    // Remember only while the backend is RUNNING.  The fresh slice's 14.100
-    // arrives before the streams are up -- at startup and on every reconnect
-    // -- so this filter is what keeps it out of the memory, and a session in
-    // which the backend never came up leaves the last good value alone.
-    if (!(_FlexVitaRxActive_() || _FlexVitaTxActive_())) return;
-    if (hz.toLongLong() < 100000) return;
-    flex_native_last_freq = hz;
-}
-void Main_Ms::FlexRigActive(bool f, QString)
-{
-    flex_rig_active = f;
-    if (f && flex_push_pending) FlexPushStartFreq();
-}
-void Main_Ms::FlexSliceReady()
-{
-    if (flex_rig_active) FlexPushStartFreq();
-    else flex_push_pending = true;   // FlexRigActive() finishes the job
-}
-void Main_Ms::FlexPushStartFreq()
-{
-    flex_push_pending = false;
-    QString hz = flex_native_last_freq;
-    if (hz.toLongLong() < 100000) hz = "14074000";   // nothing remembered: 20m FT8
-    flex_native_last_freq = hz;                       // this IS where we are now
-    // SetDefFreqGlobal is a private slot in upstream hvtxw.h.  Reach it
-    // through the meta-object rather than widening its access -- the same
-    // way the connect() to its private SetRigCatActiveAndRead already does --
-    // so LZ2HV's header stays untouched.  Direct: same thread, synchronous.
-    QMetaObject::invokeMethod(THvTxW, "SetDefFreqGlobal", Qt::DirectConnection,
-                              Q_ARG(int, 2), Q_ARG(QString, hz));//2=frq,mod -- the band-button path
-}
+//end Native Flex VITA-49 backend (network.cpp): live TX metering off the radio.
 
 void Main_Ms::SetRigTxRx(bool f)
 {
@@ -3290,13 +3224,6 @@ void Main_Ms::Refresh()
     }
     //////////////END REMUTE/////////////////////////////////
     //qDebug()<<"s_f_dec50"<<s_f_dec50;
-    static int ic = 0;//5ms*100=500ms
-    if (ic>100)
-    {
-    	ic = 0;
-    	UpdateFlexMeter();//qDebug()<<"500ms=";
-   	}
-	ic++;
 }
 void Main_Ms::SetAuto()
 {
@@ -4235,8 +4162,7 @@ void Main_Ms::SetQActionCb(QString s, bool idp, QAction *ac)//idp priority of pr
 }
 void Main_Ms::Read_Settings(QString path)
 {
-    const int c_st_id = 113;//92  89
-    //dopalva se tuk v kraia
+    const int c_st_id = 112;//dopalva se tuk v kraia
     const QString st_id[c_st_id]=
         {
             "default_w","default_h","default_device_alsa","default_bitpersample","default_card_latency",
@@ -4271,16 +4197,11 @@ void Main_Ms::Read_Settings(QString path)
             // round trip through this build untouched.  Do not remove them to
             // "tidy up" -- that silently destroys somebody's settings.
             "priority_calls_config",
-            "dxcc_new_only",
-            // index 112 — flex_native_last_freq (macOS port, native Flex
-            // backend): the last frequency MSHV was on with the backend
-            // running, in Hz.  Missing = nothing remembered.
-            "flex_native_last_freq"
+            "dxcc_new_only"
         };
 
     QString st_res[c_st_id];
-    for (int i = 0; i < c_st_id; ++i)
-        st_res[i]="";
+    for (int i = 0; i < c_st_id; ++i) st_res[i]="";
 
     QDir testD(path.mid(0,path.count()-12)); // /ms_settings = 12
     if (!testD.exists())
@@ -4338,12 +4259,7 @@ void Main_Ms::Read_Settings(QString path)
     }
     file.close();
     //qDebug()<<"1Time="<<ttt.elapsed();//2297 ms   down 2813 ms
-
-    // macOS port -- native Flex backend: where to put the radio once it hands
-    // us a slice.  Missing (older save, first run) leaves this empty, and
-    // FlexPushStartFreq() falls back to 14.074 MHz.
-    if (!st_res[112].isEmpty()) flex_native_last_freq = st_res[112].trimmed();
-
+    	
     if (!st_res[84].isEmpty())
     {
         int sthr = 1;
@@ -4959,12 +4875,8 @@ void Main_Ms::Save_Settings(QString path)
             break;
         }
     }
-    out << "def_var_dec_parr=" << dd << "\n";
+    out << "def_var_dec_parr=" << dd << "\n";    
 
-    // macOS port -- native Flex backend: the last frequency with the backend
-    // running, so the next start goes back there.  Empty is valid and means
-    // "nothing remembered".
-    out << "flex_native_last_freq=" << flex_native_last_freq << "\n";
 
     file.close();
 }

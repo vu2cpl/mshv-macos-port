@@ -144,6 +144,7 @@ private:
 #include "HvAstroDataW/hvastrodataw.h"
 #include "hvspinbox.h"
 #include "../HvButtons/hvbutton_lrc.h"
+#include "../HvRigControl/HvRigCat/network/flexpanel.h"
 
 //#define _BANDS_H_
 //#define _FREQTOBAND_H_
@@ -275,7 +276,7 @@ public:
     QString GetFreqGlobal()
     {
         return FREQ_GLOBAL;
-    };      
+    };         
     void ExpandShrinkDf(bool f);//2.05
     //void SetMacros(QStringList,int,QString,QString); //2.32
     void SetDPLogQso(bool,bool);
@@ -352,6 +353,7 @@ public slots:
     void SetMaManAdding(bool);
     void CBEnableAliChanged(bool);//2.75
     void SetAutoLogInfo();//2.75
+    void ShowFlexPanel(); //2.76.7
 #if MSHV_USER_BANDS > 0
     // macOS port — reset a user band slot's per-band TX drive to the default
     // when it is (re)used, so a reused slot doesn't inherit a removed band's
@@ -404,6 +406,7 @@ signals:
     void EmitOtpRxMsg(bool);//2.76
     void EmitOtpVerif(QString,uint8_t);//2.76
     void EmitOffsetDt(int);//2.76.5
+    void EmitUpdateFlexMeter(bool,bool,double,double);
  
 private slots:
     void SetRptRsq(bool);
@@ -437,8 +440,10 @@ private slots:
     void SetQrgActiveId(int);//2.60
     void SetHisCalls(QStringList);
     void MshfChanget(bool);//2.76
+    void UpdateFlexMeter(bool,bool,double,double,bool);
 
 private:
+	FlexPanel *flex_panel;	
 	uint8_t id_mshf;//2.76
 	bool f_ma_first_tx;
 	bool dsty;

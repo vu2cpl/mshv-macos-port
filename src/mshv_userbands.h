@@ -98,8 +98,13 @@ void MshvApplyUserBands_hvtxw();
 void MshvApplyUserBands_radionetw();
 void MshvApplyUserBands_hvlogw();
 void MshvApplyUserBands_hvrigcontrol();
+#if defined _MACOS_
+// flexpanel.cpp defines _FREQTOBAND_H_ for the Flex panel's per-band antennas,
+// so it too carries its own copy of freq_min_max[] and has to be patched.
+void MshvApplyUserBands_flexpanel();
+#endif
 
-// Calls all five, in the order above.
+// Calls all of them, in the order above.
 void MshvApplyUserBandsAll();
 
 #endif

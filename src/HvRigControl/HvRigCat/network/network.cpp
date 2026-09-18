@@ -13,7 +13,8 @@ MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ra
 #define _NETWORK_RIGS_
 #include "network_def.h"
 #include "network.h"
-#include <unistd.h>
+
+#include <unistd.h> 
 #include <QLocale>
 
 //----- vita49 ---------------------------------------------------
@@ -185,10 +186,7 @@ void _SetTciBuffReset_()
 
 //----- vita49 ---------------------------------------------------
 static bool    s_flex_tx_active = false;
-bool _FlexVitaTxActive_()
-{
-    return s_flex_tx_active;
-}
+bool _FlexVitaTxActive_() { return s_flex_tx_active; }
 bool _SetTxAudioFlex_(int *raw)
 {
     // Rawplayer thread.  PushTxBlock() touches only the atomic ring, so it
@@ -378,7 +376,7 @@ void HvWebSocket::mBinaryMessageReceived(const QByteArray &ba)
                     if (hh>hh0)
                     {
                     	hh0=hh;
-                    	qDebug()<<hh0;
+                    	printf("Tci MaxOut=%.1f\n",((float)hh0*100.0));///8388607.0);
                     }*/
                 }
                 else
@@ -392,11 +390,11 @@ void HvWebSocket::mBinaryMessageReceived(const QByteArray &ba)
                     if (bit_s>2) t_txStream->data[i+2] = ((z >> 16) & 0xff);
                     if (bit_s>3) t_txStream->data[i+3] = ((z >> 24) & 0xff);
                     /*static int hh0 = 0;
-                    int hh = rawtxbuff[rawtx_pos];
+                    int hh = z;//rawtxbuff[rawtx_pos];
                     if (hh>hh0)
                     {
                     	hh0=hh;
-                    	qDebug()<<hh0;
+                    	printf("Tci MaxOut=%d\n",hh0);//qDebug()<<hh0;
                     }*/
                     /*uint8_t a[4];
                     memcpy(a,&z,bit_s*sizeof(uint8_t));
@@ -732,7 +730,7 @@ enum
     VITA_RETRY,         // failed; try again when vita_timer fires
     VITA_MISC,          // a reply that only needs consuming
     VITA_MIXER_ON,      // "mixer front_speaker mute on"
-    VITA_MIXER_OFF      // "mixer front_speaker mute off"
+    VITA_MIXER_OFF,     // "mixer front_speaker mute off"
 };
 // ---- state the hooks read.  Written on the GUI thread by Network, except
 //      the meter values, which FlexVita writes on vThread -- hence the mutex
@@ -1281,7 +1279,7 @@ void Network::VitaLine(QString line)
             else if (k == "hwalc_enabled")   flex_hwalc     = (v != 0);
             at += kv.matchedLength();
         }
-    }
+    }    
     // The front speaker is not in the status stream on a 6600; if a firmware
     // does report it, believe that over our own shadow.
     if (line.contains("|radio slices="))
@@ -1440,14 +1438,14 @@ void Network::VitaReply(int step, quint32 code, QString body)
         return;
     case VITA_MIXER_ON:
     case VITA_MIXER_OFF:
-    {
-        // A radio without a front panel answers 0x500000B7 (verified on a
-        // 6600); remember that so the UI greys the control, not lies.
-        QMutexLocker lk(&flex_mutex);
-        flex_front_spkr_supported = (code == 0);
-        if (code == 0) flex_front_spkr_mute = (step == VITA_MIXER_ON);
-    }
-    return;
+    	{
+        	// A radio without a front panel answers 0x500000B7 (verified on a
+        	// 6600); remember that so the UI greys the control, not lies.
+        	QMutexLocker lk(&flex_mutex);
+        	flex_front_spkr_supported = (code == 0);
+        	if (code == 0) flex_front_spkr_mute = (step == VITA_MIXER_ON);
+    	}
+    	return;
     default:
         return;
     }
@@ -1464,25 +1462,25 @@ void Network::VitaTimeout()
         VitaChooseSlice();
         return;
     case VITA_SLICE_CREATE:
-    {
-        const int made = VitaOwnedSlice();
-        if (made < 0)
         {
-            VitaFail("slice create not answered");
+            const int made = VitaOwnedSlice();
+            if (made < 0) 
+            { 
+            	VitaFail("slice create not answered"); 
+            	return; 
+            }
+            vita_slice = made;
+            vita_slice_created = true;
+        	// Same as the status-stream path above: the slice we just created is
+        	// ours whatever index it landed on, so move the CAT half onto it.
+        	if (vita_rig_slice >= 0 && made != vita_rig_slice)
+        	{
+            	slicenum = QString::number(made);
+            	vita_rig_slice = made;
+        	}
+            VitaSliceReady();
             return;
         }
-        vita_slice = made;
-        vita_slice_created = true;
-        // Same as the status-stream path above: the slice we just created is
-        // ours whatever index it landed on, so move the CAT half onto it.
-        if (vita_rig_slice >= 0 && made != vita_rig_slice)
-        {
-            slicenum = QString::number(made);
-            vita_rig_slice = made;
-        }
-        VitaSliceReady();
-        return;
-    }
     case VITA_RX_CREATE:
         if (vita_rx_stream) VitaRxUp();
         else VitaFail("DAX RX stream not granted");
@@ -1545,7 +1543,7 @@ void Network::VitaChooseSlice()
         vita_mismatch.clear();
         // Point the CAT half at the same slice.  vita_rig_slice moves with it or
         // UpdateFlexVita()'s restart test (slicenum vs vita_rig_slice) would see
-        // a change on every call and rebuild the session in a loop.
+        // a change on every call and rebuild the session in a loop.																						   
         if (pick != want)
         {
             slicenum = QString::number(pick);
@@ -1581,7 +1579,7 @@ void Network::VitaSliceReady()
     // three minutes untouched.  Deferred a tick: the app's answer comes back
     // down as set_freq() -> writeData(), and writeData() can re-enter
     // readNet(), which is not something to invite from inside the step machine.
-    QTimer::singleShot(0, this, [this]{ emit EmitFlexSliceReady(); });
+    //QTimer::singleShot(0, this, [this]{ emit EmitFlexSliceReady(); });
 }
 void Network::VitaRxUp()
 {
@@ -1807,11 +1805,11 @@ void Network::connectToHost()
             fprintf(stderr, "[MSHV TCI] connecting to ws://%s:%d (main thread)\n",
                     qPrintable(s_nethost), s_netport.toInt());
             wsocket->open(url);
-#else
+#else            
             wsocket->open(url); //qDebug()<<tci_19<<s_nethost;
             wsocket->moveToThread(&mThread);
             mThread.start();
-#endif
+#endif            
         }   //else wsocket->SetCommand("0"+s_nethost+" "+s_netport); // without delete on disconnect ???
     }
     else
@@ -1829,6 +1827,7 @@ void Network::connectToHost()
         int p1 = s_netport.toInt();
         socket->connectToHost(s_nethost, p1);
         socket->waitForConnected(350);//importent for TCP hv
+        
     	//----- vita49 ---------------------------------------------------
     	UpdateFlexVita();//flex native vita-49: no-op until the CAT init completes
     	//----- end vita49 ---------------------------------------------------        
@@ -1894,7 +1893,7 @@ void Network::disconnected_s()
         QWebSocket *dying = wsocket;
         wsocket = NULL;
         dying->deleteLater();
-#else
+#else        
         usleep(22000);//2.76.2 old=usleep(4000);
         delete wsocket; //wsocket->deleteLater();
         is_wsocket = false;
@@ -2134,7 +2133,7 @@ void Network::initAll()
 #else
         const int tci_max_retry = 4;
 #endif
-        if (cretr_nt > tci_max_retry)
+        if (cretr_nt > tci_max_retry)        
         {
             timer_init->stop();
             cretr_nt = -1;
@@ -2191,7 +2190,8 @@ void Network::initAll()
             return;
         }
         isGetRadio = true;
-        writeData("info",false,NULL);//writeData("sub slice "+slicenum,false,NULL);C16|info
+        writeData("info",false,NULL);//writeData("sub slice "+slicenum,false,NULL);C16|info qDebug()<<"cretr_nt="<<cretr_nt;
+        if (cretr_nt == -2) return;//init completed inside writeData() (it can re-enter readNet): "Connecting" would stop polling and VitaStop() the start
         emit EmitNetConnInfo("<font color='red'>"+tr("Connecting to")+" "+s_nethost+" "+tr("Port")+" "+s_netport+"  "+tr("Try")+": "+QString("%1").arg(cretr_nt)+"</font>",true,false);
     }
 }
@@ -2370,7 +2370,7 @@ void Network::wTextMessageReceived(const QString &s0)//tci
         {
             isGetRadio = true;
         }
-#endif
+#endif        
         if (isGetRadio)
         {
             isGetRadio = false; //qDebug()<<"First Start---------------------------------------------";
@@ -2880,7 +2880,7 @@ void Network::readNet()
             /* Test
             R16|0|model="FLEX-6700",chassis_serial="K00000000",mbtrx_pcb="PC-0062",mbtrx_pcbrev="E"
             S67319A86|slice 0 in_use=1 sample_rate=24000 RF_frequency=10.137000 client_handle=0x76AF7C73 index_letter=A rxant=ANT2 mode=DIGU wide=0
-            R16|0|model="FLEX-6700",S67319A86|slice 0 in_use=1 sample_rate=24000 RF_frequency=10.137000 mode=DIGU client_handle=0x76AF7C73
+            R16|0|model="FLEX-6700",S67319A86|slice 0 in_use=1 sample_rate=24000 RF_frequency=10.137000 mode=DIGU client_handle=0x76AF7C73 rxant=ANT2 txant=XVTA
             */
             sba.replace(',',' ');
             isGetRadio = false;

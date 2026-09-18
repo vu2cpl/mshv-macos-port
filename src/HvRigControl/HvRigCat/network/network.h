@@ -22,11 +22,14 @@ MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ra
 #include <QTcpSocket>
 #include <QtWebSockets/QWebSocket> //tci
 #include <QThread>
+
+//----- vita49 ---------------------------------------------------
 #include <QUdpSocket>    //flex native vita-49
 #include <QHostAddress>  //flex native vita-49
 #include <QElapsedTimer> //flex native vita-49
 #include <QHash>         //flex native vita-49
 #include <QStringList>   //flex native vita-49
+//----- end vita49 -----------------------------------------------
 
 class ThreadRefr : public QThread
 {
@@ -78,6 +81,7 @@ private:
 	QString wcommands[BCMAX+10];
 };
 
+//----- vita49 ---------------------------------------------------
 // ---------------------------------------------------------------- flex native vita-49
 //
 // Hooks for the rest of MSHV.  All are safe to call at any time, on any
@@ -85,7 +89,7 @@ private:
 // Audio comes and goes through the same seam the TCI client uses:
 // _SetRxAudioTci_() for receive, _SetTxAudioTci_() for transmit (which hands
 // the block to _SetTxAudioFlex_() when Flex owns the output device).
-extern bool        _SetTxAudioFlex_(int *raw);
+//extern bool        _SetTxAudioFlex_(int *raw);
 extern bool        _FlexVitaRxActive_();
 extern bool        _FlexVitaTxActive_();
 extern QString     _FlexVitaStatus_();
@@ -105,8 +109,7 @@ extern void        _FlexVitaSetMode_(QString mode);
 extern bool        _FlexVitaFrontSpeakerMute_();
 extern void        _FlexVitaSetFrontSpeakerMute_(bool on);
 extern bool        _FlexVitaHasFrontSpeaker_();
-extern QString     _FlexVitaRadioModel_();   // e.g. "FLEX-6600M"
-// Radio-global transmit settings.  Getters return -1 until the radio reports.
+extern QString     _FlexVitaRadioModel_();   // e.g. "FLEX-6600M"*/
 extern int         _FlexVitaRfPower_();
 extern int         _FlexVitaTunePower_();
 extern int         _FlexVitaMaxPower_();
@@ -171,6 +174,7 @@ private:
     qint64        tx_sent_frames_;
     int           rx_scratch_[8192];
 };
+//----- end vita49 ---------------------------------------------------
 
 class Network : public QWidget
 {
@@ -185,7 +189,7 @@ signals:
     void EmitReadedInfo(CmdID,QString);
     void EmitNetConnInfo(QString,bool,bool);//info,connect,ready to use
     void EmitFullRigInfo(QString);//2.76.1 for pskreporter
-    void EmitFlexSliceReady();     //flex native vita-49: our slice exists and is ours -- app asserts frequency
+    //void EmitFlexSliceReady();     //flex native vita-49: our slice exists and is ours -- app asserts frequency
  
 public slots:
 	void ConnectNet(QString);	
@@ -203,8 +207,12 @@ private slots:
     void wTextMessageReceived(const QString &);//tci
     void SetTciTxOnRX2();//tci
     void SetTciSelect(int,int,bool);//tci
+    
+	//----- vita49 ---------------------------------------------------    
     void VitaTimeout();//flex native vita-49
     void VitaQuit();//flex native vita-49: release the radio on the way out
+	//----- end vita49 --------------------------------------------------- 
+	   
     //void onError(QAbstractSocket::SocketError errorCode);//tci
 
 private:
@@ -242,11 +250,12 @@ private:
 	int id_tci_prot;//tci
 	//int sample_rate;//tci
 	int tci_select;//tci
-	int vita_rx;//flex native vita-49: RX DAX channel, 0 = off
-	bool vita_tx;//flex native vita-49: TX enabled
 	bool isMyTCICommand(QString);//tci
 	void SetTciStrtStopAudio(bool);
-
+	
+	//----- vita49 --------------------------------------------------- 	
+	int vita_rx;//flex native vita-49: RX DAX channel, 0 = off
+	bool vita_tx;//flex native vita-49: TX enabled
 	//flex native vita-49: control on `socket` (one API session with the CAT),
 	//UDP audio in vita_ on vThread.  See the block in network.cpp.
 	void UpdateFlexVita();
@@ -293,12 +302,12 @@ public:
 	void VitaSetTransmit(QString key,int value);  //flex native vita-49: rfpower/tunepower/max_power_level/hwalc from the panel
 	void VitaSetFrontSpeaker(bool mute);          //flex native vita-49: M-series speaker
 	FlexVita *VitaAudio();                        //flex native vita-49: the UDP side, for _SetTxAudioFlex_()
+	//----- end vita49 --------------------------------------------------- 
+	
 private:
-
 	//flrig
 	char *FLRig_xml_build(char *cmd, char *value, char *xmlbuf,int xmllen);
 	QString FLRig_get_value(QString);
-	//
 	int seqnum;
 	QString slicenum;
 	bool fsdrs;

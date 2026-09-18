@@ -60,12 +60,8 @@ public:
         
 private slots:
     // Native Flex VITA-49: live forward power / SWR straight off the radio.
-    //void UpdateFlexMeter();
-    void ShowFlexPanel();
-    // Native Flex VITA-49: MSHV leads the radio once, when the slice is ours.
-    void FlexSliceReady();
-    void FlexRigActive(bool,QString);
-    void FlexTrackFreq(QString);
+    void UpdateFlexMeter(bool,bool,double,double);
+    
 	void SetTxFreq(double);//2.16
 	void SetStaticTxFrq(bool,int);//2.16
     void SetMacros(int,QString);//2.32
@@ -265,14 +261,6 @@ private:
     QLabel *l_tx_text;
     QLabel *l_flex_meter;        // Flex fwd power / SWR; hidden unless active
     QPushButton *pb_flex_panel;  // opens the Flex control/monitor panel
-    class FlexPanel *flex_panel; // created lazily, non-modal
-    // Native Flex VITA-49: the frequency to put the radio on once it hands us
-    // a slice.  See FlexSliceReady() in main_ms.cpp for why MSHV must lead.
-    QString flex_native_last_freq; // Hz, persisted in ms_settings; empty = nothing remembered
-    bool    flex_rig_active;       // HvRigControl reports the rig active and read
-    bool    flex_push_pending;     // the slice arrived before the rig was active
-    void    FlexPushStartFreq();
-	void UpdateFlexMeter();//LZ2HV 2026-09-10: driven from Refresh(), no timer of its own
 
     bool auto_decode_all[COUNT_MODE];
     QCheckBox *cb_auto_decode_all;
