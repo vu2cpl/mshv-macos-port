@@ -123,11 +123,12 @@ private:
     QString    flex_native_last_txant;
     //int        flex_ant_restore; // Refresh ticks left before they go back, 0 = nothing to do
     int        flex_ant_restore; // Refresh ticks left in the restore, 0 = nothing to do
-    // One pair per band -- "rxant:txant" under MSHV's own band index -- because
-    // one pair cannot serve a station with transverters: the antennas that make
-    // 2m work are the wrong ones on 20m, and the radio only ever changes half of
-    // them by itself.  A band nobody has used is simply not in here, and then
-    // nothing is sent and the radio's own choice stands.
+    // One pair per band -- "rxant:txant" under MSHV's own band index, saved
+    // under the band's NAME -- because one pair cannot serve a station with
+    // transverters: the antennas that make 2m work are the wrong ones on 20m,
+    // and the radio only ever changes half of them by itself.  A band nobody
+    // has used is simply not in here, and then nothing is sent and the radio's
+    // own choice stands.
     QMap<int,QString> flex_band_ant;
     int        flex_ant_band;    // band the slice is on, -1 = not known / not a band
     // Ticks of the 500 ms panel timer.  The restore is armed with the first and
@@ -136,6 +137,7 @@ private:
     // lists had not arrived yet.
     enum { AntRestoreTicks = 6, AntSendFirst = 4, AntSendAgain = 1 };
     static int BandFromFreq(QString hz);
+    static int BandFromName(QString name);
     QString    BandAnt(int band, bool tx) const;
 };
 

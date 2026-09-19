@@ -5,10 +5,12 @@
  */
 #include "flexpanel.h"
 #include "network.h"
-// The band a frequency falls in, MSHV's own table -- the same freq_min_max[]
-// HvTxW::FindRigBandFromFreq() uses, so "the band" means here what it means in
-// the rest of the program.  This unit gets its own static copy of the table
+// The band a frequency falls in, and the band's name, MSHV's own tables -- the
+// same freq_min_max[] HvTxW::FindRigBandFromFreq() uses and the same lst_bands[]
+// the band menu shows, so "the band" means here what it means in the rest of
+// the program.  This unit gets its own static copy of the tables
 // (see MshvApplyUserBands_flexpanel at the bottom of this file).
+#define _BANDS_H_
 #define _FREQTOBAND_H_
 #include "../../../config_band_all.h"
 
@@ -171,6 +173,16 @@ int FlexPanel::BandFromFreq(QString hz)
         if (f >= freq_min_max[i].min && f <= freq_min_max[i].max) return i;
     return -1;
 }
+// The band with this name, or -1 for a name this build does not have.  An
+// exact match, not contains(): "5 MHz" is inside "3.5 MHz".  An empty name is
+// an unused slot and matches nothing.
+int FlexPanel::BandFromName(QString name)
+{
+    if (name.isEmpty()) return -1;
+    for (int i = 0; i < COUNT_BANDS; ++i)
+        if (lst_bands[i] == name) return i;
+    return -1;
+}
 // The pair remembered for one band, "" when that band has never been used.
 QString FlexPanel::BandAnt(int band, bool tx) const
 {
@@ -221,16 +233,20 @@ void FlexPanel::FlexTrackFreq(QString hz)
 // per-band pairs travel together and nothing outside this panel has to know
 // about antennas:
 //
-//     14074000#ANT2#ANT2#8:ANT2:ANT2#18:XVTA:XVTA#20:RX_B:XVTB
-//     ^freq    ^rx  ^tx  ^ one per band used: bandindex:rxant:txant
+//     14074000#ANT2#ANT2#14 MHz:ANT2:ANT2#144 MHz:XVTA:XVTA#432 MHz:RX_B:XVTB
+//     ^freq    ^rx  ^tx  ^ one per band used: bandname:rxant:txant
 //
 // Fields 0..2 keep the meaning they had when there was only one pair, so a line
 // written by a build that knows just the triple still reads here, and a build
 // that knows just the triple still reads a line written here -- it takes the
 // three fields it understands and ignores the rest.
+//
+// Each band is filed under its NAME, as offset_trsv_rig_parms= files the
+// transverter offsets (LZ2HV, 2026-09-19): a band added to the table later
+// moves every index after it, and would move everybody's antennas with it,
+// while a name stays what it is.  A name this build does not have is dropped.
 QString FlexPanel::GetFlexLastAll()
 {
-    //return GetFlexLastFreq()+"#"+flex_native_last_rxant+"#"+flex_native_last_txant;
     const QString hz = GetFlexLastFreq();
     const int band = BandFromFreq(hz);
     QString rx = BandAnt(band, false);
@@ -242,7 +258,7 @@ QString FlexPanel::GetFlexLastAll()
     while (it.hasNext())
     {
         it.next();
-        s += "#"+QString("%1").arg(it.key())+":"+it.value();
+        s += "#"+lst_bands[it.key()]+":"+it.value();
     }
     return s;
 }
@@ -257,12 +273,17 @@ void FlexPanel::SetFlexLastAll(QString s)
     {
         const QStringList e = l.at(i).trimmed().split(":");
         if (e.count()!=3) continue;
-        bool ok = false;
-        const int band = e.at(0).toInt(&ok);
-        // A band index this build does not have -- an operator-defined band from
-        // another machine -- is dropped rather than misfiled under whatever band
-        // happens to carry that number here.
-        if (!ok || band<0 || band>=COUNT_BANDS) continue;
+        // "14 MHz:ANT2:ANT2".  The first per-band build (2026-09-18) put the band
+        // INDEX there; such a line is read once and saved back under the name.
+        int band = BandFromName(e.at(0));
+        if (band<0)
+        {
+            bool ok = false;
+            band = e.at(0).toInt(&ok);
+            if (!ok || band>=COUNT_BANDS) band = -1;
+        }
+        // A band this build does not have is dropped rather than misfiled.
+        if (band<0) continue;
         if (e.at(1).isEmpty() || e.at(2).isEmpty()) continue;
         flex_band_ant[band] = e.at(1)+":"+e.at(2);
     }
@@ -550,8 +571,9 @@ void FlexPanel::LocalMuteToggled(bool on)
  * `static`, so every .cpp that defines the guards gets its own set and each
  * has to be patched separately. Called from main() before any UI is built.
  * A no-op when MSHV_USER_BANDS is 0 (non-macOS builds).
- * Only freq_min_max is used here -- the panel files antennas by band index and
- * never shows a band name. */
+ * freq_min_max files a frequency under its band; lst_bands is the name that
+ * band is saved under in the settings line, so a user band keeps its antennas
+ * across restarts like any other. */
 #include "../../../mshv_userbands.h"
 void MshvApplyUserBands_flexpanel()
 {
@@ -559,6 +581,7 @@ void MshvApplyUserBands_flexpanel()
     {
         const MshvUserBand &b = MshvUserBands::Inst().At(i);
         const int k = COUNT_BANDS_STD + i;
+        lst_bands[k]        = b.name;
         freq_min_max[k].min = b.fmin;
         freq_min_max[k].max = b.fmax;
     }
