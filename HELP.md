@@ -271,6 +271,23 @@ uploaded to [pskreporter.info](https://pskreporter.info).
 
 ---
 
+## Keyboard shortcuts on macOS
+
+**Help → Keyboard Shortcuts** lists the shortcuts as `Ctrl+…`, the way
+MSHV documents them on every platform. On a Mac, from the first release
+after mac10, the physical **Control** key fires them exactly as listed —
+Control+Q toggles MA Standard, Control+` toggles MA DXpedition, Control+H
+opens Help, Control+K opens the shortcut list — and the **Command** key
+works for them too wherever macOS does not claim the combination. Cmd+Q
+quits and Cmd+H hides MSHV, because macOS owns those two, so use the
+Control key for MA Standard and Help. `Ctrl+Click` on the waterfall is
+Cmd+Click (a Control-click is a right-click on a Mac).
+
+In releases up to mac10 only the Command key worked, so MA Standard, MA
+DXpedition and Help had no working shortcut at all on a Mac.
+
+---
+
 ## Common issues
 
 ### "MSHV cannot be opened because Apple cannot check it for malicious software"

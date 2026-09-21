@@ -17,6 +17,46 @@
 #include <QDesktopServices>
 #include <QMimeData>  // For QT5
 
+#if defined _MACOS_
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QKeySequence>
+/* macOS port (2026-09-21) -- give every "Ctrl+X" menu shortcut a physical
+ * Control-key twin. Qt on macOS maps Qt::ControlModifier (the shortcut
+ * table's "Ctrl") to the COMMAND key and the physical Control key to
+ * Qt::MetaModifier. The application menu owns Cmd+Q (Quit) and Cmd+H
+ * (Hide) and macOS itself owns Cmd+` (next window), so those shortcuts
+ * could not be reached at all, and the rest worked on Cmd only while the
+ * Keyboard Shortcuts window says "Ctrl". With the twin the table reads
+ * literally on a Mac (Control+H opens Help) and Cmd keeps working wherever
+ * macOS does not claim it. Main_Ms::keyPressEvent() does the same inline
+ * for the shortcuts it handles itself (Ctrl+Q, Ctrl+`, Ctrl+A, ...). */
+static void MshvAddControlKeyTwins(QMenuBar *mb)
+{
+    QList<QAction*> todo = mb->actions();
+    while (!todo.isEmpty())
+    {
+        QAction *a = todo.takeFirst();
+        if (a->menu())
+        {
+            todo += a->menu()->actions();
+            continue;
+        }
+        const QList<QKeySequence> seqs = a->shortcuts();
+        QList<QKeySequence> twins;
+        for (const QKeySequence &s : seqs)
+        {
+            if (s.count() != 1) continue;
+            int k = s[0];
+            if ((k & Qt::CTRL) && !(k & Qt::META))
+                twins << QKeySequence((k & ~Qt::CTRL) | Qt::META);
+        }
+        if (!twins.isEmpty()) a->setShortcuts(seqs + twins);
+    }
+}
+#endif
+
 #define _CONT_NAME_
 #include "config_str_con.h"
 
@@ -1273,6 +1313,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     Min_Menu->addMenu(lang_m);
     //// end Translation ////
     Min_Menu->addMenu(Help_m);
+#if defined _MACOS_
+    MshvAddControlKeyTwins(Min_Menu);// the physical Control key is the table's "Ctrl" too (helper at the top of this file)
+#endif
 
     Min_Menu->setContentsMargins(4,0,4,0);//4,0,4,0 ( qreal left, qreal top, qreal right, qreal bottom )
     //Min_Menu->setFixedHeight(23);//1.56=off for +150%
@@ -5277,6 +5320,23 @@ void Main_Ms::Screenshot()//new 2.56
 }
 void Main_Ms::keyPressEvent(QKeyEvent* event)
 {
+#if defined _MACOS_
+    /* macOS port (2026-09-21): the physical Control key arrives as
+     * Qt::MetaModifier here (Qt::ControlModifier is the Command key), so the
+     * shortcut table's "Ctrl+Q" and "Ctrl+`" could only be typed as Cmd+Q and
+     * Cmd+`, which the application menu (Quit) and macOS (next window) take
+     * before this widget ever sees them. Re-dispatch a Control-key press as
+     * the Command-key event the switch below expects; the switch itself stays
+     * upstream's, and Cmd still works for everything macOS leaves alone. */
+    if (event->modifiers() == Qt::MetaModifier)
+    {
+        QKeyEvent ev(event->type(), event->key(), Qt::ControlModifier, event->text(),
+                     event->isAutoRepeat(), event->count());
+        keyPressEvent(&ev);
+        event->setAccepted(ev.isAccepted());
+        return;
+    }
+#endif
     /*    Qt::Key_NumberSign-># Qt::Key_Bar->| Qt::Key_Semicolon->;
     if (event->key() == Qt::Key_Space || event->key() == Qt::Key_NumberSign
             || event->key() == Qt::Key_Bar || event->key() == Qt::Key_Semicolon)
