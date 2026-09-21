@@ -53,14 +53,20 @@ through a sync agent that stripped the staple:
 
 ## Which download?
 
-There is nothing to pick: since 2026-09-08 each release carries **one
-universal bundle** — Apple Silicon and Intel in the same app, native on
-both.
+**Apple Silicon (M-series) Mac:** the latest release. Releases after mac10
+carry one Apple Silicon bundle, as a DMG and as a zip:
 
 | File | |
 |---|---|
-| [`MSHV-macOS-universal.dmg`](../../releases) | **Recommended.** Double-click, drag **MSHV** onto **Applications**, eject. |
-| [`MSHV-macOS-universal.app.zip`](../../releases) | The same app as a zip. Unpack it by double-clicking it in the Finder. |
+| [`MSHV-macOS-AppleSilicon.dmg`](../../releases) | **Recommended.** Double-click, drag **MSHV** onto **Applications**, eject. |
+| [`MSHV-macOS-AppleSilicon.app.zip`](../../releases) | The same app as a zip. Unpack it by double-clicking it in the Finder. |
+
+**Intel Mac:** download **mac10** (re-issued 2026-09-12) — the last
+universal release, Apple Silicon and Intel in one app, files named
+`MSHV-macOS-universal.dmg` / `.app.zip`. It stays on the Releases page.
+Releases after mac10 are Apple Silicon only and will not open on an Intel
+Mac: the build machine can no longer produce Intel binaries since macOS 27
+removed Rosetta 2.
 
 If macOS says *"MSHV is damaged and can't be opened"*, the app is not
 damaged — the zip was unpacked by a tool that left extra files inside the
@@ -71,7 +77,8 @@ Releases before 2026-09-08 were more prone to it; the mac9 downloads were
 re-issued that day.
 
 (Older releases carried two per-arch zips, `MSHV-Apple-Silicon.app.zip`
-and `MSHV-Intel-Mac-x86.app.zip`. Those are gone from mac9 onwards.)
+and `MSHV-Intel-Mac-x86.app.zip`. Those are gone from mac9 onwards; mac9
+and mac10 are universal.)
 
 ---
 
@@ -82,8 +89,8 @@ NOT inside the app bundle. This means:
 
 - **Updating** by drag-replacing `MSHV.app` does not wipe your
   callsign, QSO log, or any other state.
-- **Switching** between Apple Silicon and Intel builds shares the
-  same Library state.
+- **Switching** between builds (the universal mac10 and a later Apple
+  Silicon release, say) shares the same Library state.
 
 ```
 ~/Library/Application Support/MSHV/
@@ -303,8 +310,8 @@ Capture the crash report from **Console.app → Crash Reports**
 (filter by `MSHV`), then [open an issue](../../issues) attaching:
 - The full crash report (text)
 - Your macOS version (Apple menu → About This Mac → version)
-- Your Mac's chip (Apple Silicon vs Intel)
-- Whether you launched the Apple Silicon or Intel binary
+- Your Mac's chip (Apple Silicon vs Intel) and which release you
+  downloaded (mac10 is the last one that runs on Intel)
 
 ### CPU widget shows wrong / weird values
 
@@ -375,7 +382,7 @@ make -j8
 make standalone   # creates the self-contained .app
 ```
 
-For the full build / release / notarise workflow including how to
-produce both Apple Silicon and Intel binaries, see
+For the full build / release / notarise workflow (Apple Silicon only
+since mac11; mac10 was the last universal release), see
 [`MACOS_PORT_README.md`](MACOS_PORT_README.md) and
 [`DEVELOPING.md`](DEVELOPING.md).

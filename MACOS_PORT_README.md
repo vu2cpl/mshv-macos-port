@@ -1,9 +1,12 @@
 # MSHV macOS port
 
 Native macOS port of [LZ2HV/MSHV](https://github.com/LZ2HV/MSHV).
-Prebuilt, notarised binaries for both **Apple Silicon (arm64)** and
-**Intel (x86_64)** Macs are attached to each release — see `README.md`
-and `HELP.md` for which zip to pick. Verified end-to-end against
+Prebuilt, notarised **Apple Silicon (arm64)** binaries are attached to
+each release — see `README.md` and `HELP.md` for which file to pick.
+Releases up to mac10 were universal (arm64 + x86_64); **Intel support was
+dropped on 2026-09-21**, because the build Mac lost Rosetta 2 with macOS 27
+and the x86_64 half can no longer be built. mac10 stays on the Releases
+page for Intel Macs. Verified end-to-end against
 FlexRadio 6000-series via AetherSDR's TCI bridge for RX/TX with the
 WSJT-X UDP broadcast feeding RUMlogNG's DXSpots window.
 

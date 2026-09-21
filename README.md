@@ -6,23 +6,33 @@ is a Mac-only port that tracks his upstream releases.
 
 Decodes and operates **FT8, FT4, FT2, MSK144, JT65 A/B/C, JT6M,
 PI4, FSK441/315, ISCAT, Q65 A/B/C/D**, and MA (Multi-Answer) modes
-on macOS 11 or later. A prebuilt **universal** bundle — Apple Silicon
-(arm64) and Intel (x86_64) in the same app — is attached to each
-release, as a DMG and as a zip.
+on macOS 11 or later. A prebuilt, notarised **Apple Silicon** (arm64)
+bundle is attached to each release, as a DMG and as a zip.
+
+**Intel Macs:** releases up to and including **mac10** are universal
+(Apple Silicon and Intel in one app) and stay on the Releases page.
+Releases after mac10 are Apple Silicon only — the build machine can no
+longer produce the Intel half since macOS 27 removed Rosetta 2 — so on an
+Intel Mac, download mac10.
 
 ## Download
 
 Pre-built bundles are attached to each release on the
 [Releases page](../../releases) — no build tools required.
 
-One download for every Mac — the bundle is **universal** (Apple Silicon
-and Intel in the same app), so there is nothing to choose:
+One download per release. Releases after mac10 carry an Apple Silicon
+bundle:
 
-- **`MSHV-macOS-universal.dmg`** — recommended. Double-click, drag
+- **`MSHV-macOS-AppleSilicon.dmg`** — recommended. Double-click, drag
   **MSHV** onto **Applications**, eject. A disk image is mounted rather
   than unpacked, so it opens correctly whatever tools you have.
-- `MSHV-macOS-universal.app.zip` — the same app as a zip. Unpack it by
+- `MSHV-macOS-AppleSilicon.app.zip` — the same app as a zip. Unpack it by
   double-clicking it in the Finder.
+
+Releases up to mac10 carry the same two files as a **universal** bundle
+(`MSHV-macOS-universal.dmg` / `.app.zip`, Apple Silicon and Intel in the
+same app). **On an Intel Mac, download mac10** (re-issued 2026-09-12); a
+later release will not open there.
 
 If macOS ever says *"MSHV is damaged and can't be opened"*, the app is
 not damaged: the zip was unpacked by a tool that left extra files inside
