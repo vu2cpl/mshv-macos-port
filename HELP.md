@@ -323,6 +323,16 @@ the local quarantine attribute is the problem.
 
 ### Crash on launch
 
+**If it crashes at the splash screen**, look at whether the program MSHV
+connects to for rig control was running at the time. That program can be
+SDR-Control, a Hamlib `rigctld`, or your TCI server such as ExpertSDR or
+AetherSDR. If it was not running, you have met a Qt bug on macOS: a
+connection that is refused can crash the app. This is fixed in the source
+since 2026-10-02 and will be in the next release. Until then, start that
+program before MSHV, or simply launch MSHV again.
+
+For any other crash:
+
 Capture the crash report from **Console.app → Crash Reports**
 (filter by `MSHV`), then [open an issue](../../issues) attaching:
 - The full crash report (text)

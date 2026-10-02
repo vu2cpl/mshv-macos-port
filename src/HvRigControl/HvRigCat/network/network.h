@@ -212,6 +212,9 @@ private slots:
     void VitaTimeout();//flex native vita-49
     void VitaQuit();//flex native vita-49: release the radio on the way out
 	//----- end vita49 --------------------------------------------------- 
+#if defined _MACOS_
+    void MacConnectPoll();//Qt 5.15 CFSocket workaround, see network.cpp
+#endif
 	   
     //void onError(QAbstractSocket::SocketError errorCode);//tci
 
@@ -232,6 +235,15 @@ private:
 	QThread mThread;//tci
 	HvWebSocket *wsocket;//tci
 	void connectToHost();
+#if defined _MACOS_
+	//Qt 5.15 CFSocket workaround: connect outside Qt, see network.cpp
+	int mac_cfd;            //raw socket of a connect in progress, -1 = none
+	bool mac_cfor_tci;      //that connect is the TCI port check
+	bool mac_tci_checked;   //the TCI port answered, open the WebSocket now
+	QTimer *mac_ctimer;
+	bool MacConnectStart(bool tci);
+	void MacConnectCancel();
+#endif
 	bool writeData(QString str,bool id,char*);
 	
 	bool tci_start_stop_state;//tci

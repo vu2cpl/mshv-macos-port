@@ -16,6 +16,14 @@ MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ra
 
 #include <unistd.h> 
 #include <QLocale>
+#if defined _MACOS_
+#include <sys/socket.h> //Qt 5.15 CFSocket workaround: connect outside Qt
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <errno.h>
+#include <string.h>
+#endif
 
 //----- vita49 ---------------------------------------------------
 #include <QCoreApplication> //flex native vita-49: aboutToQuit
@@ -572,6 +580,14 @@ Network::Network(int ModelID,QWidget *parent)
 
     timer_init = new QTimer();
     connect(timer_init, SIGNAL(timeout()), this, SLOT(initAll()));
+#if defined _MACOS_
+    mac_cfd = -1;
+    mac_cfor_tci = false;
+    mac_tci_checked = false;
+    mac_ctimer = new QTimer(this);
+    mac_ctimer->setSingleShot(true);
+    connect(mac_ctimer, SIGNAL(timeout()), this, SLOT(MacConnectPoll()));
+#endif
 
     //QTimer::singleShot(5000,this,SLOT(disconnected_s()));
     //QTimer::singleShot(6000,this,SLOT(connected_s()));
@@ -583,6 +599,9 @@ Network::Network(int ModelID,QWidget *parent)
 Network::~Network()
 {
     //qDebug()<<"Delete"<<rigs_network[s_ModelID].name;
+#if defined _MACOS_
+    MacConnectCancel();
+#endif
 
     //----- vita49 ---------------------------------------------------
     if (flex_trace) fprintf(stderr, "[MSHV Flex] ~Network: tearing down\n");
@@ -1783,6 +1802,12 @@ void Network::connectToHost()
         }
         if (!is_wsocket)
         {
+#if defined _MACOS_
+            //Qt 5.15 CFSocket workaround: open the WebSocket only once a plain
+            //connect to the TCI port has succeeded, see MacConnectStart().
+            if (!mac_tci_checked && MacConnectStart(true)) return;
+            mac_tci_checked = false;
+#endif
             //qDebug()<<"TCI Socket Create"<<tci_19;
             wsocket = new HvWebSocket((quint32)tci_trx.toInt());//Q_NULLPTR QString(), QWebSocketProtocol::VersionLatest, this
             connect(wsocket,SIGNAL(connected()),this,SLOT(connected_s()));
@@ -1825,8 +1850,18 @@ void Network::connectToHost()
             return;
         }
         int p1 = s_netport.toInt();
+#if defined _MACOS_
+        //Qt 5.15 CFSocket workaround, see MacConnectStart(); false = the host
+        //is a name, not an address, so it stays with Qt as before.
+        if (!MacConnectStart(false))
+        {
+            socket->connectToHost(s_nethost, p1);
+            socket->waitForConnected(350);
+        }
+#else
         socket->connectToHost(s_nethost, p1);
         socket->waitForConnected(350);//importent for TCP hv
+#endif
         
     	//----- vita49 ---------------------------------------------------
     	UpdateFlexVita();//flex native vita-49: no-op until the CAT init completes
@@ -1845,6 +1880,126 @@ void Network::ConnectNet(QString all)
     s_tcitxbuff = l.at(6);
     connectToHost(); //qDebug()<<l.at(0)<<l.at(1)<<l.at(2)<<l.at(3)<<l.at(4)<<l.at(5);
 }
+#if defined _MACOS_
+//Qt 5.15 CFSocket workaround (2026-10-02). Qt 5.15's qcfsocketnotifier.cpp,
+//on a FAILED connect (kCFSocketConnectCallBack with an error), sends the event
+//to the read notifier, whose handler closes the socket and deletes Qt's
+//MacSocketInfo, and then reads socketInfo->writeNotifier from the freed
+//memory: a crash in notifyInternal2 (rig link refused at startup crashed 4 of
+//15 launches, 0 of 15 with the port listening). Qt 6 removed that path
+//(52f1ba17); 5.15 never got it. So the connect is made here with a plain
+//socket, and Qt only ever gets a socket that is already connected -- CFSocket
+//then never sends a connect callback for it. Returns false when s_nethost is
+//a name: that connect stays with Qt as before.
+bool Network::MacConnectStart(bool tci)
+{
+    MacConnectCancel();
+    QHostAddress a;
+    QString h = s_nethost.trimmed();
+    if (h.compare("localhost", Qt::CaseInsensitive)==0) a = QHostAddress(QHostAddress::LocalHost);
+    else if (!a.setAddress(h)) return false;
+    quint16 port = (quint16)s_netport.toUInt();
+
+    struct sockaddr_storage ss;
+    memset(&ss, 0, sizeof(ss));
+    socklen_t len;
+    if (a.protocol()==QAbstractSocket::IPv6Protocol)
+    {
+        struct sockaddr_in6 *s6 = (struct sockaddr_in6 *)&ss;
+        Q_IPV6ADDR v6 = a.toIPv6Address();
+        len = sizeof(struct sockaddr_in6);
+        s6->sin6_len = len;
+        s6->sin6_family = AF_INET6;
+        s6->sin6_port = htons(port);
+        memcpy(&s6->sin6_addr, &v6, 16);
+    }
+    else
+    {
+        struct sockaddr_in *s4 = (struct sockaddr_in *)&ss;
+        len = sizeof(struct sockaddr_in);
+        s4->sin_len = len;
+        s4->sin_family = AF_INET;
+        s4->sin_port = htons(port);
+        s4->sin_addr.s_addr = htonl(a.toIPv4Address());
+    }
+    int fd = ::socket(ss.ss_family, SOCK_STREAM, IPPROTO_TCP);
+    if (fd<0) return false;
+    int one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &one, sizeof(one));
+    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+    mac_cfor_tci = tci;
+    if (::connect(fd, (struct sockaddr *)&ss, len)!=0)
+    {
+        if (errno!=EINPROGRESS)//failed at once: the error is in errno, not SO_ERROR
+        {
+            int e = errno;
+            ::close(fd);
+            fprintf(stderr, "[MSHV net] connect to %s:%s failed: %s\n",
+                    qPrintable(s_nethost), qPrintable(s_netport), strerror(e));
+            return true;
+        }
+        //the same 350 ms the Qt path blocked for, then poll without blocking
+        struct pollfd p = {fd, POLLOUT, 0};
+        poll(&p, 1, 350);
+    }
+    mac_cfd = fd;
+    MacConnectPoll();
+    return true;
+}
+void Network::MacConnectPoll()
+{
+    if (mac_cfd<0) return;
+    struct pollfd p = {mac_cfd, POLLOUT, 0};
+    int r = poll(&p, 1, 0);
+    if (r==0)//still connecting; the OS ends it with ETIMEDOUT if nobody answers
+    {
+        mac_ctimer->start(50);
+        return;
+    }
+    int err = 0;
+    socklen_t el = sizeof(err);
+    if (r<0) err = errno;
+    else if (getsockopt(mac_cfd, SOL_SOCKET, SO_ERROR, &err, &el)!=0) err = errno;
+    if (err==0)
+    {
+        struct sockaddr_storage peer;
+        socklen_t pl = sizeof(peer);
+        if (getpeername(mac_cfd, (struct sockaddr *)&peer, &pl)!=0) err = errno;//belt and braces
+    }
+    int fd = mac_cfd;
+    mac_cfd = -1;
+    if (err!=0)
+    {
+        ::close(fd);
+        fprintf(stderr, "[MSHV net] connect to %s:%s failed: %s\n",
+                qPrintable(s_nethost), qPrintable(s_netport), strerror(err));
+        return;
+    }
+    if (mac_cfor_tci)
+    {
+        ::close(fd);
+        mac_tci_checked = true;
+        connectToHost();
+        return;
+    }
+    if (!socket->setSocketDescriptor(fd, QAbstractSocket::ConnectedState, QIODevice::ReadWrite))
+    {
+        ::close(fd);
+        fprintf(stderr, "[MSHV net] setSocketDescriptor failed: %s\n", qPrintable(socket->errorString()));
+        return;
+    }
+    connected_s();//setSocketDescriptor() does not emit connected()
+}
+void Network::MacConnectCancel()
+{
+    mac_ctimer->stop();
+    if (mac_cfd>=0)
+    {
+        ::close(mac_cfd);
+        mac_cfd = -1;
+    }
+}
+#endif
 int cinit_id_nt = -1;
 //int cretr_nt = -1;//2.76.7 move up
 void Network::connected_s()
