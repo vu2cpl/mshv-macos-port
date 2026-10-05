@@ -206,6 +206,268 @@
     </message>
 </context>
 <context>
+    <name>FlexPanel</name>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="41"/>
+        <source>FlexRadio Native</source>
+        <translation>FlexRadio Native</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="65"/>
+        <source>Radio meters</source>
+        <translation>Radiometry</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="70"/>
+        <source>Forward power</source>
+        <translation>Vyzářený výkon</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="71"/>
+        <source>SWR</source>
+        <translation>SWR</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="72"/>
+        <source>Reflected</source>
+        <translation>Odražený</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="73"/>
+        <source>ALC</source>
+        <translation>ALC</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="74"/>
+        <source>PA temperature</source>
+        <translation>Teplota PA</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="75"/>
+        <source>Supply</source>
+        <translation>Zdroj</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="79"/>
+        <source>Slice</source>
+        <translation>Plátek</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="86"/>
+        <source>RX antenna</source>
+        <translation>RX anténa</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="87"/>
+        <source>TX antenna</source>
+        <translation>TX anténa</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="88"/>
+        <source>Mode</source>
+        <translation>Mód</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="99"/>
+        <source>Transmit power</source>
+        <translation>Výstupní výkon</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="113"/>
+        <source>RF drive for normal transmit (transmit set rfpower).
+Takes effect on Enter or when the field loses focus.</source>
+        <translation>Vysílací výkon pro normální vysílání (nastavení vysílacího výkonu).
+Nastavení se uplatní po stisknutí klávesy Enter nebo v okamžiku, kdy pole ztratí fokus.</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="115"/>
+        <source>RF drive for TUNE only (transmit set tunepower).
+Kept separate so a tune-up does not hit the
+amplifier at full transmit drive.</source>
+        <translation>Vysílací výkon pouze pro TUNE (nastavení výkonu při ladění).
+Je oddělený, aby při ladění nedošlo k zatížení
+zesilovače plným vysílacím výkonem.</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="118"/>
+        <source>Ceiling the radio enforces on the two above
+(transmit set max_power_level).</source>
+        <translation>Omezení výkonu rádia se vztahuje na obě výše uvedené hodnoty
+(nastavení maximálního výkonu vysílání).</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="120"/>
+        <source>Hardware ALC</source>
+        <translation>Hardwarový ALC</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="121"/>
+        <source>Let an external amplifier&apos;s ALC line control drive
+(transmit set hwalc_enabled).</source>
+        <translation>Nechť řízení linky ALC externího zesilovače řídí
+(nastavit hwalc_enabled na „transmit“).</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="124"/>
+        <source>RF power</source>
+        <translation>Vysokofrekvenční výkon</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="125"/>
+        <source>Tune power</source>
+        <translation>Nastavení výkonu</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="126"/>
+        <source>Max power</source>
+        <translation>Maximální výkon</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="136"/>
+        <source>Antenna tuner</source>
+        <translation>Anténní tuner</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="141"/>
+        <source>Tune</source>
+        <translation>Ladění</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="142"/>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="530"/>
+        <source>Bypass</source>
+        <translation>Přemostění</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="143"/>
+        <source>Memories</source>
+        <translation>Paměti</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="144"/>
+        <source>Runs the radio&apos;s antenna tuner (atu start).
+The radio TRANSMITS while it tunes -
+put an amplifier in standby first.</source>
+        <translation>Spustí ladicí obvod antény rádia (atu start).
+Rádio během ladění VYSÍLÁ –
+nejprve přepněte zesilovač do pohotovostního režimu.</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="147"/>
+        <source>Takes the tuner out of the antenna path (atu bypass).</source>
+        <translation>Odpojí tuner z anténní trasy (obejití ATU).</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="148"/>
+        <source>Use the tuner&apos;s stored settings
+(atu set memories enabled).</source>
+        <translation>Použijte uložená nastavení tuneru
+(funkce „atu set memories“ je zapnutá).</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="150"/>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="159"/>
+        <source>Local audio</source>
+        <translation>Místní audio</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="165"/>
+        <source>Mute front speaker</source>
+        <translation>Ztišení předního reproduktoru</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="166"/>
+        <source>Mutes the speaker in the radio&apos;s front panel.
+M series only - other models have no front speaker.
+Line-out and headphones are left alone, and the
+DAX audio MSHV decodes is unaffected.</source>
+        <translation>Vypne reproduktor na předním panelu rádia.
+Pouze řada M – ostatní modely nemají přední reproduktor.
+Výstup Line-out a sluchátka zůstávají neovlivněny a
+dekódování zvuku DAX v MSHV není ovlivněno.</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="417"/>
+        <source>Flex Native: not connected</source>
+        <translation>Flex Native: není připojeno</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="522"/>
+        <source>Tuned</source>
+        <translation>Naladěno</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="523"/>
+        <source>OK</source>
+        <translation>OK</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="524"/>
+        <source>Tuning...</source>
+        <translation>Ladění...</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="529"/>
+        <source>No tuning required</source>
+        <translation>Není třeba ladit</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="531"/>
+        <source>Bypass (manual)</source>
+        <translation>Ruční přemostění</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="532"/>
+        <source>Failed, bypassed</source>
+        <translation>Selhání, přemostěno</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="533"/>
+        <source>Failed</source>
+        <translation>Selhání</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="534"/>
+        <source>Aborted</source>
+        <translation>Zrušeno</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="535"/>
+        <source>Not tuned</source>
+        <translation>Nenaladěno</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="538"/>
+        <source>memory</source>
+        <translation>paměť</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="542"/>
+        <source>Refused by the radio</source>
+        <translation>Odmítnuto rádiem</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="582"/>
+        <source>Mutes the speaker in the radio&apos;s front panel.
+Line-out and headphones are left alone, and the
+DAX audio MSHV decodes is unaffected.</source>
+        <translation>Vypne mikrofon na předním panelu rádia.
+Výstup Line-out a sluchátka zůstávají beze změny a
+dekódování zvuku pomocí DAX v MSHV není ovlivněno.</translation>
+    </message>
+    <message>
+        <location filename="../HvRigControl/HvRigCat/network/flexpanel.cpp" line="585"/>
+        <source>has no front panel speaker.
+This control is for M series radios.</source>
+        <translation>nemá reproduktor na předním panelu.
+Tento ovládací prvek je určen pro rádia řady M.</translation>
+    </message>
+</context>
+<context>
     <name>HvAstroDataW</name>
     <message>
         <location filename="../HvTxW/HvAstroDataW/hvastrodataw.cpp" line="578"/>
@@ -620,487 +882,487 @@
 <context>
     <name>HvLogW</name>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1113"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3243"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1115"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3256"/>
         <source>ADD TO LOG</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1127"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1207"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1129"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1209"/>
         <source>Frequency In</source>
         <translation>Frekvence v</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1141"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1143"/>
         <source>Propagation</source>
         <translation>Šíření</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1151"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1153"/>
         <source>Sat Mode</source>
         <translation>SAT mód</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1162"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1164"/>
         <source>Satellite</source>
         <translation>Satelit</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1231"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1233"/>
         <source>Enable Auto Logging Info</source>
         <translation>Povolit automatické logování</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1257"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1259"/>
         <source>Auto Logging Info</source>
         <translation>Info o automatickém logování</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1243"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1245"/>
         <source>COMMENT</source>
         <translation>KOMENTÁŘ</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1298"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1822"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1300"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1824"/>
         <source>Add QSO</source>
         <translation>Přidat QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1299"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1681"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3251"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1301"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1683"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3264"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1324"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1326"/>
         <source>Please Choose</source>
         <translation>Vyberte si, prosím</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1340"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1753"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1342"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1755"/>
         <source>Export In Cabrillo</source>
         <translation>Export z Cabrillo</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1343"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1345"/>
         <source>Contest Name</source>
         <translation>Jméno závodu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1350"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1352"/>
         <source>Contest ID</source>
         <translation>ID závodu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1365"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1367"/>
         <source>Do not filter QSOs by Contest ID (It is not recommended)</source>
         <translation>Nefiltrujte QSO podle ID závodu (nedoporučuje se)</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1368"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1370"/>
         <source>Band</source>
         <translation>Pásmo</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1377"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1379"/>
         <source>Operator</source>
         <translation>Operátor</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1386"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1388"/>
         <source>Power</source>
         <translation>Výkon</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1395"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1397"/>
         <source>Mode</source>
         <translation>Mód</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1405"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1407"/>
         <source>Assisted</source>
         <translation>Asistované</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1414"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1416"/>
         <source>Overlay</source>
         <translation>Překrytí</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1423"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1425"/>
         <source>Station</source>
         <translation>Stanice</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1432"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1434"/>
         <source>Time Category</source>
         <translation>Časová kategorie</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1441"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1450"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1443"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1452"/>
         <source>Transmitter</source>
         <translation>Vysílač</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1476"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1478"/>
         <source>Location</source>
         <translation>Umistění</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1480"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1482"/>
         <source>ARRL Sect. or DX</source>
         <translation>ARRL Sect. nebo DX</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1488"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1490"/>
         <source>Operators</source>
         <translation>Operátoři</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1493"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1495"/>
         <source>Name</source>
         <translation>Jméno</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1499"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1501"/>
         <source>Email</source>
         <translation>Email</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1504"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1506"/>
         <source>Club</source>
         <translation>Klub</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1510"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1516"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1512"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1518"/>
         <source>Address</source>
         <translation>Adresa</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1522"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1524"/>
         <source>City</source>
         <translation>Město</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1528"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1530"/>
         <source>State</source>
         <translation>Stát</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1535"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1537"/>
         <source>Zip</source>
         <translation>PSČ</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1551"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1553"/>
         <source>Country</source>
         <translation>Země</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1661"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1663"/>
         <source>Date UTC Start</source>
         <translation>Datum UTC Začátek</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1666"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1668"/>
         <source>End</source>
         <translation>KOnec</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1679"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1681"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1713"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1715"/>
         <source>Log</source>
         <translation>Log</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1726"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1728"/>
         <source>   Menu   </source>
         <translation>Menu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1730"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1732"/>
         <source>Create New Log  And Back Up Old</source>
         <translation>Vytvoření nového logu a zálohování starého</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1734"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1736"/>
         <source>Create Log Backup</source>
         <translation>Vztvoření zálohy logu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1738"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1740"/>
         <source>Add Log</source>
         <translation>Přidat log</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1742"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1744"/>
         <source>Add ADIF To Log</source>
         <translation>Přidat ADIF do logu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1746"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1748"/>
         <source>Export Selected In ADIF</source>
         <translation>Export vybraných ADIF</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1749"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1751"/>
         <source>Export All In ADIF</source>
         <translation>Export všech ADIF</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1757"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1759"/>
         <source>Upload Selected To</source>
         <translation>Nahrát vybrané do</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1760"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1762"/>
         <source>Use Save QSOs In ADIF Log</source>
         <translation>Uložit QSO v protokolu ADIF</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1793"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1795"/>
         <source>DELETE SELECTED</source>
         <translation>VYMAZAT VYBRANÉ</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1798"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1800"/>
         <source>DEFAULT SORT</source>
         <translation>DEFAULTNÍ TŘÍDĚNÍ</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1802"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1815"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1804"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1817"/>
         <source>EDIT QSO</source>
         <translation>EDIT QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1805"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1822"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1807"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1824"/>
         <source>ADD QSO MANUALLY</source>
         <translation>Přidání QSO ručně</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1815"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1817"/>
         <source>Exit Edit Mode</source>
         <translation>Ukončení editačního módu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1815"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1817"/>
         <source>Apply Changes</source>
         <translation>Použij změny</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1822"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1824"/>
         <source>Exit Add Mode</source>
         <translation>Ukončení přidávání</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1829"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1830"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1831"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1832"/>
         <source>Find</source>
         <translation>Najdi</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1848"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="1850"/>
         <source>QSOs In Log</source>
         <translation>QSO v logu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2168"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2181"/>
         <source>The maximum number of QSOs in Log is</source>
         <translation>Maximální počet QSO v logu je</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2169"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2182"/>
         <source>Your Log contains</source>
         <translation>Tvůj log obsahuje</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2170"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2183"/>
         <source>Please make backup of your Log and then delete a minimum of</source>
         <translation>Vytvořte si zálohu protokolu a poté odstraňte minimálně</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2170"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2183"/>
         <source>of your old QSOs.</source>
         <translation>vašich starých QSO.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2206"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3003"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2219"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3016"/>
         <source>Adding QSOs</source>
         <translation>Přidat QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2206"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3003"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2219"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3016"/>
         <source>Please Wait, Adding QSOs</source>
         <translation>Prosím čekejte, přidávám QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2516"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2529"/>
         <source>Added</source>
         <translation>Přidáno</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2516"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2529"/>
         <source>QSOs from ADIF to Log.</source>
         <translation>QSO z ADIF do logu.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2517"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2530"/>
         <source>Non-supported modes of QSOs</source>
         <translation>Nepodporované režimy QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2830"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3972"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4177"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2843"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3985"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4190"/>
         <source>Please select QSO.</source>
         <translation>Prosím vyberte QSO.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2835"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2848"/>
         <source>Please select only one QSO to edit.</source>
         <translation>Prosím vyberte pouze jedno QSO pro editaci.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2906"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2919"/>
         <source>Do you want to delete the following entries from the log?</source>
         <translation>Chcete z logu odstranit následující záznamy?</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2921"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2934"/>
         <source>Do you want to delete</source>
         <translation>Chcete smazat </translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2921"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="2934"/>
         <source>QSOs from the log?</source>
         <translation>OSQ z logu?</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3194"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3207"/>
         <source>From</source>
         <translation>Od</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3195"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3208"/>
         <source>To</source>
         <translation>Do</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3204"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3217"/>
         <source>Do you want to add the following entry in the log?</source>
         <translation>Chcete do logu přidat následující záznam?</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3228"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3241"/>
         <source>Auto Logging Info Settings</source>
         <translation>Nastavení automatického logování</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3239"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3252"/>
         <source>Close</source>
         <translation>Zavřít</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3775"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3788"/>
         <source>Save QSOs In Backup File</source>
         <translation>Uložení QSO do záložního souboru</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3776"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3789"/>
         <source>Save QSOs And Create New Log</source>
         <translation>Uložení QSO a vytvoření nového logu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3778"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3791"/>
         <source>Please Wait</source>
         <translation>Prosím čekejte</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3809"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3822"/>
         <source>QSOs Have Been Successfully Saved In MSHV Log Format.</source>
         <translation>QSO byla úspěšně uložena do formátu deníku MSHV.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3810"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3823"/>
         <source>QSOs Have Been Successfully Saved In MSHV Log Format  And A New Log Has Been Created.</source>
         <translation>QSO byla úspěšně uložena do formátu deníku MSHV a byl vytvořen nový deník.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3812"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4152"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4749"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3825"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4165"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4762"/>
         <source>Full Path And File Name is</source>
         <translation>Úplná cesta a název souboru je</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3982"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="3995"/>
         <source>No QSO In List.</source>
         <translation>Žádné QSO v seznamu.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4098"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4446"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4111"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4459"/>
         <source>Export QSOs</source>
         <translation>Export QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4098"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4446"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4111"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4459"/>
         <source>Please Wait, Export QSOs</source>
         <translation>Prosím čekejte, exportuji QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4151"/>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4748"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4164"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4761"/>
         <source>Successfully Exported</source>
         <translation>Export dokončen</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4151"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4164"/>
         <source>QSOs In ADIF Format.</source>
         <translation>QSO ve formátu ADIF.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4186"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4199"/>
         <source>Upload QSOs</source>
         <translation>Nahrávání QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4186"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4199"/>
         <source>Please Wait, Uploading QSOs</source>
         <translation>Prosím čekejte, nahrávám QSO</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4327"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4340"/>
         <source>Please select Contest Name.</source>
         <translation>Prosím vyberte název závodu.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4333"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4346"/>
         <source>The starting Date and Time have to be earlier than the End Date and Time</source>
         <translation>Datum a čas zahájení musí být dřívější než datum a čas ukončení</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4360"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4373"/>
         <source>No QSOs In Log For</source>
         <translation>Žádná QSO v logu pro</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4748"/>
+        <location filename="../HvTxW/HvLogW/hvlogw.cpp" line="4761"/>
         <source>QSOs In Cabrillo Format.</source>
         <translation>QSO ve formátu Cabrillo.</translation>
     </message>
@@ -1303,7 +1565,7 @@ Pokud jste v režimu MSK144, jsou povoleny pouze tyto typy aktivit:</translation
     </message>
     <message>
         <location filename="../HvRigControl/hvrigcontrol.cpp" line="281"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1143"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1144"/>
         <source>Connect</source>
         <translation>Připojeno</translation>
     </message>
@@ -1394,23 +1656,23 @@ Pokud jste v režimu MSK144, jsou povoleny pouze tyto typy aktivit:</translation
     <message>
         <location filename="../HvRigControl/hvrigcontrol.cpp" line="444"/>
         <location filename="../HvRigControl/hvrigcontrol.cpp" line="633"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1419"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1632"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1639"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2453"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1420"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1633"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1640"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2456"/>
         <source>START PTT TEST    NO PORT SELECTED</source>
         <translation>SPUSTIT PTT TEST NENÍ VYBRÁN ŽÁDNÝ PORT</translation>
     </message>
     <message>
         <location filename="../HvRigControl/hvrigcontrol.cpp" line="473"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="895"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="899"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="896"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="900"/>
         <source>Select  Audio Frequency</source>
         <translation>Vyber audio frekvenci</translation>
     </message>
     <message>
         <location filename="../HvRigControl/hvrigcontrol.cpp" line="556"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2208"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2211"/>
         <source>Transverter Local Oscillator Or RIG Offset:   For Band</source>
         <translation>Místní oscilátor transvertoru nebo RIG Offset:   Pro pásmo</translation>
     </message>
@@ -1420,37 +1682,37 @@ Pokud jste v režimu MSK144, jsou povoleny pouze tyto typy aktivit:</translation
         <translation>TX watchdog</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="996"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1108"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1239"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1410"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1548"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2421"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2448"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2515"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="997"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1109"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1240"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1411"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1549"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2424"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2451"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2518"/>
         <source>START PTT TEST</source>
         <translation>START PTT test</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1013"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1014"/>
         <source>START PTT TEST    FAILED TO START OMNIRIG</source>
         <translation>SPUŠTĚNÍ TESTU PTT SE NEPODAŘILO SPUSTIT OMNIRIG</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1231"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2413"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1232"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2416"/>
         <source>STOP PTT TEST</source>
         <translation>STOP PTT TEST</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1420"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2454"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1421"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2457"/>
         <source>START PTT TEST    PORT</source>
         <translation>START PPT TEST PORT</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1420"/>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2454"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1421"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="2457"/>
         <source>IS BUSY</source>
         <translation>JE OBSAZEN</translation>
     </message>
@@ -1522,12 +1784,12 @@ Pokud jste v režimu MSK144, jsou povoleny pouze tyto typy aktivit:</translation
         <translation>Periody</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1104"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1105"/>
         <source>Disconnect</source>
         <translation>Odpojeno</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1124"/>
+        <location filename="../HvRigControl/hvrigcontrol.cpp" line="1125"/>
         <source>Wait</source>
         <translation>Čekání</translation>
     </message>
@@ -1545,7 +1807,7 @@ Pokud jste v režimu MSK144, jsou povoleny pouze tyto typy aktivit:</translation
     <message>
         <location filename="../HvTxW/hvspinbox.cpp" line="24"/>
         <source>CLR DT</source>
-        <translation type="unfinished"></translation>
+        <translation>CLR DT</translation>
     </message>
 </context>
 <context>
@@ -1601,237 +1863,237 @@ Max Time or Max Periods</source>
 <context>
     <name>HvTxW</name>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="578"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="582"/>
         <source>Super Hound</source>
         <translation>Super Hound</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="582"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="586"/>
         <source>Super Fox</source>
         <translation>Super Fox</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="637"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="641"/>
         <source>Automatic Sequencing</source>
         <translation>Automatické sekvencování</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="682"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="686"/>
         <source>ADD TO LOG</source>
         <translation>Přidat do logu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="685"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="689"/>
         <source>Left Click, ADD TO LOG</source>
         <translation>Lavé tlačítko. Přidsat do logu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="685"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="689"/>
         <source>Right Click, Logging Settings</source>
         <translation>Pravé tlačítko, Nastavení logu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="690"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="694"/>
         <source>TO RADIO</source>
         <translation>Do rádia</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="720"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="3548"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="3561"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="724"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="3576"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="3589"/>
         <source>AUTO IS OFF</source>
         <translation>AUTO je vypnuto</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="726"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="730"/>
         <source>GEN MSG</source>
         <translation>GEN MSG</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="752"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="756"/>
         <source>TX To RX</source>
         <translation>TX do RX</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="755"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="759"/>
         <source>RX To TX</source>
         <translation>RX do TX</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="765"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="769"/>
         <source>Lock TX &amp; RX</source>
         <translation>Zamknout TX &amp; RX</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="785"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="789"/>
         <source>RX Only First/Second Period</source>
         <translation>Pouze RXv první/druhé periodě</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="788"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="792"/>
         <source>TX FIRST</source>
         <translation>První TX</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="790"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="794"/>
         <source>TX SECOND</source>
         <translation>Druhé TX</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="886"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="890"/>
         <source>LOCATOR</source>
         <translation>Lokátor</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="892"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="896"/>
         <source>Dist</source>
         <translation>Vzdálenost</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="898"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="902"/>
         <source>Azimuth</source>
         <translation>Azimut</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="904"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="908"/>
         <source>Elevation</source>
         <translation>nadmořská výška</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="914"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="918"/>
         <source>LOOKUP</source>
         <translation>VYHLEDÁVÁNÍ</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="922"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="926"/>
         <source>ADD</source>
         <translation>Přidat</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="956"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="960"/>
         <source>R1</source>
         <translation>R1</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="963"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="967"/>
         <source>MONITOR</source>
         <translation>MONITOR</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="964"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="968"/>
         <source>R2</source>
         <translation>R2</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="971"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="975"/>
         <source>MOON</source>
         <translation>Měsíc</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="974"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="1315"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="978"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="1320"/>
         <source>Az</source>
         <translation>Az</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="977"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="1316"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="981"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="1321"/>
         <source>El</source>
         <translation>n.v</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="980"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="1317"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="984"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="1322"/>
         <source>Dop</source>
         <translation>Dop</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="983"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="1318"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="987"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="1323"/>
         <source>Dgrd</source>
         <translation>Dgrd</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="1726"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="1731"/>
         <source>Overwrite Locator Database</source>
         <translation>Přepsání databáze lokátorů</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="1779"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2557"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="1784"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2562"/>
         <source>Please set valid call sign</source>
         <translation>Prosím zadejte správnou volačku</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2187"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2192"/>
         <source>In Multi Answering Auto Seq Protocol Standard</source>
         <translation>V protokolu Multi Answering Auto Seq Standard</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2188"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2193"/>
         <source>In the HF bands</source>
         <translation>V KV pásmu</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2189"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2194"/>
         <source>Not possible to TX in second period if TX Slots is more then one</source>
         <translation>Není možné TX ve druhé periodě, pokud je TX slotů více než jeden</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2212"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2298"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2217"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2303"/>
         <source>There were two non-standard callsigns,</source>
         <translation>Existují dva nestandardní volací znaky,</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2215"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2230"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2301"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2317"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2220"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2235"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2306"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2322"/>
         <source>My Call</source>
         <translation>Moje volačka</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2216"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2231"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2302"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2318"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2221"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2236"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2307"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2323"/>
         <source>His Call</source>
         <translation>Jeho volačka</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2217"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2232"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2303"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2319"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2222"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2237"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2308"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2324"/>
         <source>so this QSO is not possible in this protocol</source>
         <translation>takže toto QSO není v tomto protokolu možné</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2213"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2229"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2299"/>
-        <location filename="../HvTxW/hvtxw.cpp" line="2316"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2218"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2234"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2304"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2321"/>
         <source>There were non-standard callsign,</source>
         <translation>Existují nestandardní volací znaky,</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2339"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2344"/>
         <source>You have a Call in the queue already</source>
         <translation>Ve frontě již máte hovor</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="2564"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="2569"/>
         <source>Please set valid locator</source>
         <translation>Prosmí zadejte správný lokátor</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="3570"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="3598"/>
         <source>AUTO IS ON</source>
         <translation>AUTO je zapnuto</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvtxw.cpp" line="4893"/>
+        <location filename="../HvTxW/hvtxw.cpp" line="4924"/>
         <source>Are you sure you want to spot your call</source>
         <translation>Jste si jisti, že chcete upozornit na svůj hovor</translation>
     </message>
@@ -2107,653 +2369,663 @@ Max Time or Max Periods</source>
 <context>
     <name>Main_Ms</name>
     <message>
-        <location filename="../main_ms.cpp" line="402"/>
+        <location filename="../main_ms.cpp" line="422"/>
         <source>Generate Messages For Test Tones</source>
         <translation>Generování zpráv pro testovací tóny</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="405"/>
+        <location filename="../main_ms.cpp" line="425"/>
         <source>Time Synchronization</source>
         <translation>Synchronizace času</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="409"/>
+        <location filename="../main_ms.cpp" line="429"/>
         <source>Online Time Check</source>
         <translation>Online kontrola času</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="412"/>
+        <location filename="../main_ms.cpp" line="432"/>
         <source>Font Settings</source>
         <translation>Nastavení písma</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="416"/>
+        <location filename="../main_ms.cpp" line="436"/>
         <source>Text Highlight</source>
         <translation>Zvýraznění textu</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="419"/>
+        <location filename="../main_ms.cpp" line="439"/>
         <source>Options</source>
         <translation>Možnosti</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="447"/>
+        <location filename="../main_ms.cpp" line="467"/>
         <source>Decode Lists Options</source>
         <translation>Možnosti dekódování seznamů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="460"/>
+        <location filename="../main_ms.cpp" line="480"/>
         <source>Use Two Decode Lists</source>
         <translation>Použití dvou dekódovacích seznamů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="465"/>
+        <location filename="../main_ms.cpp" line="485"/>
         <source>Double Click On Call Sets Auto Is On</source>
         <translation>Dvojité kliknutí na volání nastaví automatické zapnutí</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="469"/>
+        <location filename="../main_ms.cpp" line="489"/>
         <source>New decode period to clear Message List</source>
         <translation>Nové období dekódování pro vymazání seznamu zpráv</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="473"/>
+        <location filename="../main_ms.cpp" line="493"/>
         <source>Single Click On Call Shows Country Info</source>
         <translation>Jediné kliknutí na volání zobrazí informace o zemi</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="504"/>
+        <location filename="../main_ms.cpp" line="524"/>
         <source>Decode List Filters</source>
         <translation>Dekódování filtrů seznamu</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="514"/>
+        <location filename="../main_ms.cpp" line="534"/>
         <source>Log Options</source>
         <translation>Možnosti logu</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="517"/>
+        <location filename="../main_ms.cpp" line="537"/>
         <source>Log Automatically QSO</source>
         <translation>Automatický záznam QSO</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="521"/>
+        <location filename="../main_ms.cpp" line="541"/>
         <source>Prompt Me To Log QSO</source>
         <translation>Požádejte mě, abych zaznamenal QSO</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="526"/>
+        <location filename="../main_ms.cpp" line="546"/>
         <source>Warn Me If QSO Before</source>
         <translation>Upozorni mě, pokud QSO před</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="530"/>
+        <location filename="../main_ms.cpp" line="550"/>
         <source>Log QSO Start Date,Time = End Date,Time</source>
         <translation>Záznam QSO Počáteční datum,čas = Koncové datum,čas</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="535"/>
+        <location filename="../main_ms.cpp" line="555"/>
         <source>Turn Auto Comments Off</source>
         <translation>Vypnutí automatických komentářů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="544"/>
+        <location filename="../main_ms.cpp" line="564"/>
         <source>Other Options</source>
         <translation>Ostatní možnosti</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="547"/>
+        <location filename="../main_ms.cpp" line="567"/>
         <source>Skip Tx1</source>
         <translation>Přeskočit TX1</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="547"/>
+        <location filename="../main_ms.cpp" line="567"/>
         <source>Uncheck for DXpedition</source>
         <translation>Zrušte zaškrtnutí políčka DXpedice</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="552"/>
+        <location filename="../main_ms.cpp" line="572"/>
         <source>Use Queue (For Contest Activitiеs Only)</source>
         <translation>Použití fronty (pouze pro soutěžní aktivity)</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="558"/>
-        <location filename="../main_ms.cpp" line="562"/>
+        <location filename="../main_ms.cpp" line="578"/>
+        <location filename="../main_ms.cpp" line="582"/>
         <source>Recognize Period</source>
         <translation>Rozpoznat období</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="569"/>
+        <location filename="../main_ms.cpp" line="589"/>
         <source>View JT65 DF Axis On Display</source>
         <translation>Zobrazení JT65 DF Axis na displayi</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="575"/>
+        <location filename="../main_ms.cpp" line="595"/>
         <source>Turn Off JT65 Display Markers</source>
         <translation>Vypnutí značek na displeji JT65</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="664"/>
+        <location filename="../main_ms.cpp" line="684"/>
         <source>View Astronomical Data</source>
         <translation>Zobrazit astronomická data</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="677"/>
+        <location filename="../main_ms.cpp" line="697"/>
         <source>TX Confirmation If 73 Or RR73</source>
         <translation>Potvrzení TX Pokud 73 nebo RR73</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="687"/>
+        <location filename="../main_ms.cpp" line="707"/>
         <source>Auto RESET QSO at end</source>
         <translation>Automatický RESET QSO na konci</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="695"/>
+        <location filename="../main_ms.cpp" line="715"/>
         <source>Monitor ON At Startup</source>
         <translation>Monitor zapnutý při spuštění</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="815"/>
+        <location filename="../main_ms.cpp" line="836"/>
         <source>File</source>
         <translation>Soubor</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="820"/>
+        <location filename="../main_ms.cpp" line="841"/>
         <source>Overwrite Locator Database</source>
         <translation>Přepsání databáze lokátorů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="831"/>
-        <location filename="../main_ms.cpp" line="840"/>
+        <location filename="../main_ms.cpp" line="852"/>
+        <location filename="../main_ms.cpp" line="861"/>
         <source>Palette</source>
         <translation>Paleta</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="833"/>
+        <location filename="../main_ms.cpp" line="854"/>
         <source>Default BW</source>
         <translation>Výchozí černobílé</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="835"/>
+        <location filename="../main_ms.cpp" line="856"/>
         <source>Default Color</source>
         <translation>Výchozí barevné</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="843"/>
+        <location filename="../main_ms.cpp" line="864"/>
         <source>Custom Palette</source>
         <translation>Vlastní paleta</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="852"/>
+        <location filename="../main_ms.cpp" line="873"/>
         <source>Custom Palette Editor</source>
         <translation>Editor vlastní palety</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="857"/>
+        <location filename="../main_ms.cpp" line="878"/>
         <source>Dark Style</source>
         <translation>Tmavý styl</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="867"/>
+        <location filename="../main_ms.cpp" line="888"/>
         <source>Mode</source>
         <translation>Mód</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="896"/>
+        <location filename="../main_ms.cpp" line="917"/>
         <source>Band</source>
         <translation>Pásmo</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="930"/>
-        <location filename="../main_ms.cpp" line="931"/>
+        <location filename="../main_ms.cpp" line="951"/>
+        <location filename="../main_ms.cpp" line="952"/>
         <source>Help</source>
         <translation>Nápověda</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="943"/>
+        <location filename="../main_ms.cpp" line="964"/>
         <source>Beacon List</source>
         <translation>Seznam majáků</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="947"/>
-        <location filename="../main_ms.cpp" line="949"/>
+        <location filename="../main_ms.cpp" line="968"/>
+        <location filename="../main_ms.cpp" line="970"/>
         <source>MS Procedures</source>
         <translation>MS procedury</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="970"/>
+        <location filename="../main_ms.cpp" line="991"/>
         <source>Decode</source>
         <translation>Dekódování</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="977"/>
+        <location filename="../main_ms.cpp" line="998"/>
         <source>Threads</source>
         <translation>Vlákna</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="979"/>
+        <location filename="../main_ms.cpp" line="1000"/>
         <source>Only 1</source>
         <translation>Pouze 1</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="953"/>
-        <location filename="../main_ms.cpp" line="955"/>
+        <location filename="../main_ms.cpp" line="974"/>
+        <location filename="../main_ms.cpp" line="976"/>
         <source>About</source>
         <translation>O programu</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="434"/>
+        <location filename="../main_ms.cpp" line="297"/>
+        <source>FlexRadio forward power and SWR</source>
+        <translation>Výstupní výkon a SWR zařízení FlexRadio</translation>
+    </message>
+    <message>
+        <location filename="../main_ms.cpp" line="302"/>
+        <source>FlexRadio meters, antenna and mode</source>
+        <translation>Měřicí přístroje, anténa a režim FlexRadio</translation>
+    </message>
+    <message>
+        <location filename="../main_ms.cpp" line="454"/>
         <source>Network Configuration</source>
         <translation>Konfigurace sítě</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="435"/>
+        <location filename="../main_ms.cpp" line="455"/>
         <source>Radio And Frequencies Configuration</source>
         <translation>Konfigurace rádia a frekvencí</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="477"/>
+        <location filename="../main_ms.cpp" line="497"/>
         <source>Show/Hide Time Column</source>
         <translation>Zobrazit/skrýt sloupec času</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="481"/>
+        <location filename="../main_ms.cpp" line="501"/>
         <source>Show/Hide Country Column</source>
         <translation>Zobrazit/skrýt sloupec Země</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="484"/>
+        <location filename="../main_ms.cpp" line="504"/>
         <source>Show/Hide Distance Column</source>
         <translation>Zobrazit/skrýt sloupec Vzdálenost</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="487"/>
+        <location filename="../main_ms.cpp" line="507"/>
         <source>Show/Hide Frequency Column</source>
         <translation>Zobrazit/skrýt sloupec Frekvence</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="539"/>
+        <location filename="../main_ms.cpp" line="559"/>
         <source>Auto Logging Info Settings</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="581"/>
+        <location filename="../main_ms.cpp" line="601"/>
         <source>Turn On Mouse Markers</source>
         <translation>Zapnutí značek myši</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="585"/>
+        <location filename="../main_ms.cpp" line="605"/>
         <source>Turn On RX Markers</source>
         <translation>Zapnutí značek RX</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="590"/>
+        <location filename="../main_ms.cpp" line="610"/>
         <source>Turn On TX Markers</source>
         <translation>Zapnutí značek TX</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="612"/>
+        <location filename="../main_ms.cpp" line="632"/>
         <source>Manually Add Calls To Queue By Double Click</source>
         <translation>Ruční přidání volání do fronty dvojitým kliknutím</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="630"/>
-        <location filename="../main_ms.cpp" line="633"/>
+        <location filename="../main_ms.cpp" line="650"/>
+        <location filename="../main_ms.cpp" line="653"/>
         <source>Mode Switcher Buttons</source>
         <translation>Tlačítka přepínače režimů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="630"/>
+        <location filename="../main_ms.cpp" line="650"/>
         <source>Choose Modes</source>
         <translation>Výběr režimů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="631"/>
+        <location filename="../main_ms.cpp" line="651"/>
         <source>USE MODE SWITCHER</source>
         <translation>Použijte přepínač režimů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="645"/>
-        <location filename="../main_ms.cpp" line="648"/>
+        <location filename="../main_ms.cpp" line="665"/>
+        <location filename="../main_ms.cpp" line="668"/>
         <source>Band Switcher Buttons</source>
         <translation>Tlačítka přepínače pásem</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="645"/>
+        <location filename="../main_ms.cpp" line="665"/>
         <source>Choose Bands</source>
         <translation>Výběr pásem</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="646"/>
+        <location filename="../main_ms.cpp" line="666"/>
         <source>USE BAND SWITCHER</source>
         <translation>POUŽITÍ PŘEPÍNAČE PÁSEM</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="671"/>
+        <location filename="../main_ms.cpp" line="691"/>
         <source>ASeq: Reply to the Most Distant.</source>
         <translation>ASeq: Odpověď nejvzdálenějšímu.</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="981"/>
-        <location filename="../main_ms.cpp" line="983"/>
-        <location filename="../main_ms.cpp" line="985"/>
-        <location filename="../main_ms.cpp" line="987"/>
-        <location filename="../main_ms.cpp" line="989"/>
-        <location filename="../main_ms.cpp" line="997"/>
-        <location filename="../main_ms.cpp" line="998"/>
-        <location filename="../main_ms.cpp" line="999"/>
-        <location filename="../main_ms.cpp" line="1000"/>
-        <location filename="../main_ms.cpp" line="1001"/>
+        <location filename="../main_ms.cpp" line="1002"/>
+        <location filename="../main_ms.cpp" line="1004"/>
+        <location filename="../main_ms.cpp" line="1006"/>
+        <location filename="../main_ms.cpp" line="1008"/>
+        <location filename="../main_ms.cpp" line="1010"/>
+        <location filename="../main_ms.cpp" line="1018"/>
+        <location filename="../main_ms.cpp" line="1019"/>
+        <location filename="../main_ms.cpp" line="1020"/>
+        <location filename="../main_ms.cpp" line="1021"/>
+        <location filename="../main_ms.cpp" line="1022"/>
         <source>Max</source>
         <translation>Max</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="997"/>
-        <location filename="../main_ms.cpp" line="998"/>
-        <location filename="../main_ms.cpp" line="999"/>
-        <location filename="../main_ms.cpp" line="1000"/>
-        <location filename="../main_ms.cpp" line="1001"/>
+        <location filename="../main_ms.cpp" line="1018"/>
+        <location filename="../main_ms.cpp" line="1019"/>
+        <location filename="../main_ms.cpp" line="1020"/>
+        <location filename="../main_ms.cpp" line="1021"/>
+        <location filename="../main_ms.cpp" line="1022"/>
         <source>Do Not Use If TXing</source>
         <translation>Nepoužívejte, pokud TXing</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1004"/>
+        <location filename="../main_ms.cpp" line="1025"/>
         <source>Fast</source>
         <translation>Rychle</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1006"/>
+        <location filename="../main_ms.cpp" line="1027"/>
         <source>Normal</source>
         <translation>Normálně</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1008"/>
+        <location filename="../main_ms.cpp" line="1029"/>
         <source>Deep</source>
         <translation>Hluboké</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1015"/>
+        <location filename="../main_ms.cpp" line="1036"/>
         <source>Use Three-stage Decoding</source>
         <translation>Použití třístupňového dekódování</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1019"/>
+        <location filename="../main_ms.cpp" line="1040"/>
         <source>Use</source>
         <translation>Použít</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1022"/>
+        <location filename="../main_ms.cpp" line="1043"/>
         <source>Parameters</source>
         <translation>Parametr</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1026"/>
+        <location filename="../main_ms.cpp" line="1047"/>
         <source>Decoder Cycles 1</source>
         <translation>Cykly dekodéru 1</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1028"/>
+        <location filename="../main_ms.cpp" line="1049"/>
         <source>Decoder Cycles 2</source>
         <translation>Cykly dekodéru 2</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1030"/>
+        <location filename="../main_ms.cpp" line="1051"/>
         <source>Decoder Cycles 3</source>
         <translation>Cykly dekodéru 3</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1034"/>
+        <location filename="../main_ms.cpp" line="1055"/>
         <source>Sensitivity Minimum</source>
         <translation>Minimální citlivost</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1036"/>
+        <location filename="../main_ms.cpp" line="1057"/>
         <source>Sensitivity Use Low Thresholds</source>
         <translation>Citlivost Používejte nízké prahové hodnoty</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1038"/>
+        <location filename="../main_ms.cpp" line="1059"/>
         <source>Sensitivity Use Subpass</source>
         <translation>Citlivost Použití Subpass</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1043"/>
+        <location filename="../main_ms.cpp" line="1064"/>
         <source>MSK RX Equalization Off</source>
         <translation>Vyrovnání MSK RX Vypnuto</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1045"/>
+        <location filename="../main_ms.cpp" line="1066"/>
         <source>MSK RX Equalization Static</source>
         <translation>MSK RX Vyrovnání statické</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1047"/>
+        <location filename="../main_ms.cpp" line="1068"/>
         <source>MSK RX Equalization Dynamic</source>
         <translation>MSK RX Vyrovnání dynamické</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1049"/>
+        <location filename="../main_ms.cpp" line="1070"/>
         <source>MSK RX Equalization S And D</source>
         <translation>Vyrovnání MSK RX S a D</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1059"/>
+        <location filename="../main_ms.cpp" line="1080"/>
         <source>Aggressive Levels</source>
         <translation>Agresivní úrovně</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1084"/>
+        <location filename="../main_ms.cpp" line="1105"/>
         <source>Check for VHF/UHF Uncheck for HF Features</source>
         <translation>Kontrola pro VHF/UHF Zrušení kontroly pro vysokofrekvenční funkce</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1095"/>
+        <location filename="../main_ms.cpp" line="1116"/>
         <source>Enable Averaging</source>
         <translation>Povolení průměrování</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1099"/>
+        <location filename="../main_ms.cpp" line="1120"/>
         <source>Auto Clear Averaging After Decode</source>
         <translation>Automatické vymazání průměrování po dekódování</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1106"/>
+        <location filename="../main_ms.cpp" line="1127"/>
         <source>Enable Deep Search</source>
         <translation>Povolení hloubkového vyhledávání</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1119"/>
+        <location filename="../main_ms.cpp" line="1140"/>
         <source>Enable AP</source>
         <translation>Povolení AP</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1131"/>
-        <location filename="../main_ms.cpp" line="1149"/>
+        <location filename="../main_ms.cpp" line="1152"/>
+        <location filename="../main_ms.cpp" line="1170"/>
         <source>Single Decoded Signal</source>
         <translation>Jednotlivý dekódovaný signál</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1137"/>
+        <location filename="../main_ms.cpp" line="1158"/>
         <source>Use Drift Correction</source>
         <translation>Použití korekce driftu</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1143"/>
+        <location filename="../main_ms.cpp" line="1164"/>
         <source>Decode After EME Delay</source>
         <translation>Dekódování po zpoždění EME</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1151"/>
+        <location filename="../main_ms.cpp" line="1172"/>
         <source>Max 4 Decoded Signals</source>
         <translation>Max. 4 dekódované signály</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1153"/>
+        <location filename="../main_ms.cpp" line="1174"/>
         <source>Max 8 Decoded Signals</source>
         <translation>Max. 8 dekódovaných signálů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1155"/>
+        <location filename="../main_ms.cpp" line="1176"/>
         <source>Max 16 Decoded Signals</source>
         <translation>Max. 16 dekódovaných signálů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1157"/>
+        <location filename="../main_ms.cpp" line="1178"/>
         <source>Max 32 Decoded Signals</source>
         <translation>Max. 32 dekódovaných signálů</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1247"/>
+        <location filename="../main_ms.cpp" line="1281"/>
         <source>STOP MONITOR</source>
         <translation>ZASTAVENÍ MONITORU</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1251"/>
+        <location filename="../main_ms.cpp" line="1285"/>
         <source>MONITOR</source>
         <translation>MONITOR</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1257"/>
+        <location filename="../main_ms.cpp" line="1291"/>
         <source>STOP TX</source>
         <translation>ZASTAVENÍ TX</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1261"/>
-        <location filename="../main_ms.cpp" line="3455"/>
+        <location filename="../main_ms.cpp" line="1295"/>
+        <location filename="../main_ms.cpp" line="3531"/>
         <source>CLEAR MESSAGES</source>
         <translation>VYMAZÁNÍ ZPRÁV</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1267"/>
+        <location filename="../main_ms.cpp" line="1301"/>
         <source>CLR RX FREQ MSG</source>
         <translation>VYMAZÁNÍ RX FREQ ZPRÁV</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1271"/>
+        <location filename="../main_ms.cpp" line="1305"/>
         <source>RESET QSO</source>
         <translation>NULOVÁNÍ QSO</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1276"/>
+        <location filename="../main_ms.cpp" line="1310"/>
         <source>TUNE</source>
         <translation>LADĚNÍ</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1285"/>
-        <location filename="../main_ms.cpp" line="1306"/>
-        <location filename="../main_ms.cpp" line="1312"/>
-        <location filename="../main_ms.cpp" line="2179"/>
-        <location filename="../main_ms.cpp" line="2184"/>
-        <location filename="../main_ms.cpp" line="2188"/>
+        <location filename="../main_ms.cpp" line="1319"/>
+        <location filename="../main_ms.cpp" line="1340"/>
+        <location filename="../main_ms.cpp" line="1346"/>
+        <location filename="../main_ms.cpp" line="2214"/>
+        <location filename="../main_ms.cpp" line="2219"/>
+        <location filename="../main_ms.cpp" line="2223"/>
         <source>CLEAR AVG</source>
         <translation>VYMAZÁNÍ AVG</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1290"/>
-        <location filename="../main_ms.cpp" line="2050"/>
-        <location filename="../main_ms.cpp" line="2055"/>
-        <location filename="../main_ms.cpp" line="2060"/>
-        <location filename="../main_ms.cpp" line="2066"/>
-        <location filename="../main_ms.cpp" line="2068"/>
+        <location filename="../main_ms.cpp" line="1324"/>
+        <location filename="../main_ms.cpp" line="2085"/>
+        <location filename="../main_ms.cpp" line="2090"/>
+        <location filename="../main_ms.cpp" line="2095"/>
+        <location filename="../main_ms.cpp" line="2101"/>
+        <location filename="../main_ms.cpp" line="2103"/>
         <source>DECODE</source>
         <translation>DEKÓDOVÁNÍ</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1385"/>
+        <location filename="../main_ms.cpp" line="1419"/>
         <source>Auto Dec</source>
         <translation>Automatické dekódování</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1392"/>
+        <location filename="../main_ms.cpp" line="1426"/>
         <source>RT Dec</source>
         <translation>RT dekódování</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1422"/>
-        <location filename="../main_ms.cpp" line="1429"/>
-        <location filename="../main_ms.cpp" line="4716"/>
-        <location filename="../main_ms.cpp" line="4733"/>
+        <location filename="../main_ms.cpp" line="1457"/>
+        <location filename="../main_ms.cpp" line="1464"/>
+        <location filename="../main_ms.cpp" line="4808"/>
+        <location filename="../main_ms.cpp" line="4825"/>
         <source>SAVE DISPLAY</source>
         <translation>ULOŽ DISPLAY</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1442"/>
+        <location filename="../main_ms.cpp" line="1477"/>
         <source>Flatten Display</source>
         <translation>Zploštění displeje</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1456"/>
+        <location filename="../main_ms.cpp" line="1491"/>
         <source>Auto Flatten Display</source>
         <translation>Automatické zploštění displeje</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1473"/>
+        <location filename="../main_ms.cpp" line="1508"/>
         <source>Speed</source>
         <translation>Rychlost</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1486"/>
+        <location filename="../main_ms.cpp" line="1521"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1555"/>
+        <location filename="../main_ms.cpp" line="1590"/>
         <source>Change Waterfall Size</source>
         <translation>Změna velikosti vodopádu</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1715"/>
+        <location filename="../main_ms.cpp" line="1750"/>
         <source>To change the Style, you need to MANUALLY RESTART MSHV</source>
         <translation>Chcete-li změnit styl, musíte ručně restartovat MSHV</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1876"/>
+        <location filename="../main_ms.cpp" line="1911"/>
         <source>MA DXpedition</source>
         <translation>MA DXpedition</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="1877"/>
+        <location filename="../main_ms.cpp" line="1912"/>
         <source>MA Standard</source>
         <translation>MA Standartní</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="3447"/>
+        <location filename="../main_ms.cpp" line="3523"/>
         <source>CLR MSG</source>
         <translation>VYČIŠTĚNÍ ZPRÁVY</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="4709"/>
+        <location filename="../main_ms.cpp" line="4801"/>
         <source>SAVE THIS</source>
         <translation>Uložit</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="4726"/>
+        <location filename="../main_ms.cpp" line="4818"/>
         <source>SAVE PREVIOUS</source>
         <translation>Ulož předchozí</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="4764"/>
-        <location filename="../main_ms.cpp" line="4780"/>
+        <location filename="../main_ms.cpp" line="4856"/>
+        <location filename="../main_ms.cpp" line="4872"/>
         <source>File Name</source>
         <translation>Jméno souboru</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="4790"/>
+        <location filename="../main_ms.cpp" line="4882"/>
         <source>Open</source>
         <translation>Otevřít</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="4790"/>
+        <location filename="../main_ms.cpp" line="4882"/>
         <source>Files</source>
         <translation>Soubor</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="4814"/>
+        <location filename="../main_ms.cpp" line="4906"/>
         <source>Open File</source>
         <translation>Otevřít soubor</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="4966"/>
+        <location filename="../main_ms.cpp" line="5058"/>
         <source>Windows Xp:
 1.Click on the Internet Time tab.
 2.Click on the Update Now button.
@@ -2770,7 +3042,7 @@ Windows 7,8,8.1,10:
 3.Klikněte na tlačítko Aktualizovat nyní.</translation>
     </message>
     <message>
-        <location filename="../main_ms.cpp" line="5212"/>
+        <location filename="../main_ms.cpp" line="5304"/>
         <source>Multi Answering Auto Seq Protocol
 can be used only in Standard Activity Type
 Go to Options Macros and correct.</source>
@@ -2859,7 +3131,7 @@ A2AA RR73; B2BB &lt;C2CC&gt; +05</translation>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2033"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2052"/>
         <source>In Settings MA, TX Slots: It Is Set To ONE.
 Please choose another dial frequency.
 MSHV will not operate on more than one slot
@@ -2870,18 +3142,18 @@ MSHV nebude pracovat na více než jednom slotu
 ve standardních vysokofrekvenčních subpásmech FT8 a FT4.</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2514"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2533"/>
         <source>Maximum QSOs per Call</source>
         <translation>Maximum QSO pro volání</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2539"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2558"/>
         <source>QSO Before</source>
         <translation>QSo před</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2511"/>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2539"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2530"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2558"/>
         <source>Call</source>
         <translation>Volání</translation>
     </message>
@@ -2947,22 +3219,22 @@ MA DXpedition</source>
 MA DXpedice</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2511"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2530"/>
         <source>Filtered By</source>
         <translation>Filtrováno podle</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2512"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2531"/>
         <source>Band</source>
         <translation>Pásmo</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2513"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2532"/>
         <source>Mode</source>
         <translation>Mód</translation>
     </message>
     <message>
-        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2540"/>
+        <location filename="../HvTxW/hvmultianswermodw.cpp" line="2559"/>
         <source>Do You Want To Continue QSO?</source>
         <translation>Chcete pokračovat v QSO?</translation>
     </message>
@@ -2970,73 +3242,73 @@ MA DXpedice</translation>
 <context>
     <name>Network</name>
     <message>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="641"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="849"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="867"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="881"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="895"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="910"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="924"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="938"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1958"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2193"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2211"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2225"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2249"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2264"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2278"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2293"/>
         <source>Connecting to</source>
         <translation>Připojování k</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="641"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="849"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="867"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="881"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="895"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="910"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="924"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="938"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1097"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1317"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1345"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1378"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1436"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1451"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1503"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1589"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1958"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2193"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2211"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2225"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2249"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2264"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2278"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2293"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2479"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2704"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2732"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2765"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2823"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2838"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2890"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="3005"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="849"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="867"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="881"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="895"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="910"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="924"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="938"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2193"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2211"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2225"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2249"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2264"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2278"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2293"/>
         <source>Try</source>
         <translation>Zkusit</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="834"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="862"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="876"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="890"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="904"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="919"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="933"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2178"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2206"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2220"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2244"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2258"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2273"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2287"/>
         <source>Error To Initialize</source>
         <translation>Chyba při inicializaci</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1097"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1317"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1345"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1378"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1436"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1451"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1503"/>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1589"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2479"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2704"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2732"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2765"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2823"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2838"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="2890"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="3005"/>
         <source>Connected to</source>
         <translation>Připojeno k</translation>
     </message>
     <message>
-        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="655"/>
+        <location filename="../HvRigControl/HvRigCat/network/network.cpp" line="1985"/>
         <source>Disconnected</source>
         <translation>Odpojeno</translation>
     </message>
@@ -3092,26 +3364,26 @@ MA DXpedice</translation>
     </message>
     <message>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1032"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3026"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3051"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3027"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3052"/>
         <source>PSK Reporter Is Disabled And Disconnected</source>
         <translation>Reportér PSK je vypnut a odpojen</translation>
     </message>
     <message>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1051"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3010"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3011"/>
         <source>Disconnected</source>
         <translation>Odpojeno</translation>
     </message>
     <message>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1058"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3012"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3013"/>
         <source>Press To Connect</source>
         <translation>Stiskni pro připojení</translation>
     </message>
     <message>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1122"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3442"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3443"/>
         <source>UDP Broadcast Is Disabled And Disconnected</source>
         <translation>Vysílání UDP je zakázáno a odpojeno</translation>
     </message>
@@ -3159,13 +3431,13 @@ MA DXpedice</translation>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1032"/>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1051"/>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1122"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3007"/>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3008"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3024"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3026"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3051"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3440"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3442"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3009"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3025"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3027"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3052"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3441"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3443"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
@@ -3256,7 +3528,7 @@ MA DXpedice</translation>
     </message>
     <message>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1492"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3941"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3974"/>
         <source>List Servers</source>
         <translation>Seznam serverů</translation>
     </message>
@@ -3287,108 +3559,108 @@ MA DXpedice</translation>
     </message>
     <message>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1569"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3118"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3119"/>
         <source>N/A For This Activity Type</source>
         <translation>Nepoužije se pro tento typ činnosti</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1669"/>
         <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1670"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="1671"/>
         <source>Page</source>
         <translation>Strana</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2118"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2275"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2460"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2119"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2276"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2461"/>
         <source>Unsuccessful upload to</source>
         <translation>Neúspěšné nahrávání do</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2214"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2361"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2460"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2215"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2362"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2461"/>
         <source>Please check your Internet connection</source>
         <translation>Prosím zkontrolujte internetové připojení</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2463"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2464"/>
         <source>or stop uploading to</source>
         <translation>nebo zastavte nahrávání</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2464"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2465"/>
         <source>Unposted QSOs are in the MSHV Log directori and the filename is</source>
         <translation>Nezveřejněná QSO jsou v adresáři MSHV Log a název souboru je</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2472"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2473"/>
         <source>Successful upload</source>
         <translation>Nahrávání dokončeno</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2473"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2474"/>
         <source>Upload accepted and queued!</source>
         <translation>Odeslání přijato a zařazeno do fronty!</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2635"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2636"/>
         <source>Missing: E-Mail or Password or Callsign</source>
         <translation>Chybějící: E-Mail, heslo nebo volačka</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2636"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2637"/>
         <source>Go to Options, Network Configuration and correct it</source>
         <translation>Přejděte do nabídky Možnosti, Konfigurace sítě a opravte ji</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2862"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2863"/>
         <source>Default frequencies have been changed for the</source>
         <translation>Výchozí frekvence byly změněny pro</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2910"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="2911"/>
         <source>Default frequencies have been changed to</source>
         <translation>Výchozí frekvence byly změněny na</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3017"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3018"/>
         <source>Press To Disconnect</source>
         <translation>Stiskni pro odpojení</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3032"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3418"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3033"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3419"/>
         <source>Status: Reconnecting...</source>
         <translation>Stav: Znovu se připojuje...</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3043"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3403"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3429"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3044"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3404"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3430"/>
         <source>Status: Connecting...</source>
         <translation>Stav: Připojení...</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3113"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3114"/>
         <source>Default FREQs For</source>
         <translation>Defaultní frekvence pro</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3259"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3260"/>
         <source>PSK Reporter Problem</source>
         <translation>Problém PSK reporteru</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3259"/>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3339"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3260"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3340"/>
         <source>Is Not A Valid Call
 Go To Menu Options Macros And Set MY CALL</source>
         <translation>Neplatné volačka
 Přejděte do nabídky Možnosti Makra a nastavte Moje volačka</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3260"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3261"/>
         <source>PSK Reporter Problem
 MY CALL: Is Empty
 Go To Menu Options Macros And Set MY CALL</source>
@@ -3397,7 +3669,7 @@ Moje volačka: je prázdná
 Přejděte do nabídky Možnosti Makra a nastavte Moje volačka</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3340"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3341"/>
         <source>DX-Spot Problem
 MY CALL: Is Empty
 Go To Menu Options Macros And Set MY CALL</source>
@@ -3406,7 +3678,7 @@ Moje volačka: je prázdná
 Přejděte do nabídky Možnosti Makra a nastavte Moje volačka</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3339"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3340"/>
         <source>DX-Spot Problem</source>
         <translation>Problém DX-Spotu</translation>
     </message>
@@ -3433,7 +3705,7 @@ Přejděte do nabídky Možnosti Makra a nastavte Moje volačka</translation>
         <translation>Nastavení OTP</translation>
     </message>
     <message>
-        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3410"/>
+        <location filename="../HvTxW/HvRadioNetW/radionetw.cpp" line="3411"/>
         <source>Status: Disconnecting...</source>
         <translation>Stav:odpojeno...</translation>
     </message>
@@ -3508,28 +3780,30 @@ Přejděte do nabídky Možnosti Makra a nastavte Moje volačka</translation>
         <translation>Rychlost obnovování měřiče úrovně (nejrychlejší=0 nejpomalejší=5)</translation>
     </message>
     <message>
-        <location filename="../SettingsMs/settings_ms.cpp" line="745"/>
+        <location filename="../SettingsMs/settings_ms.cpp" line="787"/>
+        <location filename="../SettingsMs/settings_ms.cpp" line="788"/>
+        <location filename="../SettingsMs/settings_ms.cpp" line="789"/>
         <source>Output and Input Devices</source>
         <translation>Výstupní a vstupní zařízení</translation>
     </message>
     <message>
-        <location filename="../SettingsMs/settings_ms.cpp" line="750"/>
+        <location filename="../SettingsMs/settings_ms.cpp" line="790"/>
         <source>Output Device</source>
         <translation>Výstupní zařízení</translation>
     </message>
     <message>
-        <location filename="../SettingsMs/settings_ms.cpp" line="755"/>
+        <location filename="../SettingsMs/settings_ms.cpp" line="791"/>
         <source>Input Device</source>
         <translation>Vstupní zařízení</translation>
     </message>
     <message>
-        <location filename="../SettingsMs/settings_ms.cpp" line="787"/>
-        <source>The TCI Client does not support 44100 Hz Sample Rate
+        <location filename="../SettingsMs/settings_ms.cpp" line="799"/>
+        <source>The TCI Client and Flex Native does not support 44100 Hz Sample Rate
 Not possible to use modes JTMS, FSK, ISCAT and JT6M
 Please in Sound Settings choose other</source>
-        <translation>TCI Client není podporován 44100 HzVzorkovací frekvence
-Není možné používat režimy JTMS, FSK, ISCAT a JT6M
-V nastavení audia vyberte možnost jiné</translation>
+        <translation>Klient TCI a Flex Native nepodporují vzorkovací frekvenci 44100 Hz.
+Nelze použít režimy JTMS, FSK, ISCAT a JT6M.
+V nastavení zvuku prosím vyberte jinou možnost</translation>
     </message>
 </context>
 <context>

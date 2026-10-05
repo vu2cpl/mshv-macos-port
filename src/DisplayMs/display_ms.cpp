@@ -907,8 +907,7 @@ void DisplayMs::RtdDecode()
     //qDebug()<<"Tim="<<disp_ident<<"kkk="<<kkk;
     //kkk++; if(kkk>100) kkk=0;
 
-    if (f_dec_busy || f_priority_disp1)
-        return;
+    if (f_dec_busy || f_priority_disp1) return;
 
     //qDebug()<<"Tim="<<disp_ident<<"dec="<<f_dec_busy<<f_priority_disp1;
 
@@ -970,10 +969,8 @@ void DisplayMs::RtdDecode()
         if (f_decode_to_end)
         {
             pos_rtd_beg = raw_count-7168;
-            pos_rtd_end = raw_count;
-            //qDebug()<<"pos_rtd_beg"<<pos_rtd_beg<<pos_rtd_end;
-            if (pos_rtd_beg < 0)
-                pos_rtd_beg = 0;
+            pos_rtd_end = raw_count; //qDebug()<<"pos_rtd_beg"<<pos_rtd_beg<<pos_rtd_end;
+            if (pos_rtd_beg < 0) pos_rtd_beg = 0;
             f_decode_to_end = false;
             end_rtd = true;
         }
@@ -987,7 +984,7 @@ void DisplayMs::RtdDecode()
         for (int j = pos_rtd_beg; j<pos_rtd_end; j++)
         {
             raw_t[count_t] = raw[j];
-            count_t++;
+            count_t++; 
         }
 
         if (!s_start_stop_rtd_timer || end_rtd)//
@@ -998,7 +995,6 @@ void DisplayMs::RtdDecode()
             emit EmitRriorityDisp(false);
             //qDebug()<<"Timer STOP RtdDecode()"<<disp_ident;
         }
-
 
         //qDebug()<<"StartE"<<count_t;
         //1.27 psk rep   fopen bool true    false no file open

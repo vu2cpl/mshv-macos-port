@@ -1,7 +1,8 @@
 /* MSHV
  * By Hrisimir Hristov - LZ2HV
  * May be used under the terms of the GNU General Public License (GPL)
- * MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ramawarrier, VU2CPL 2026
+ * MSHV Flex Panel, Copyright (C) 2026 Manoj Ramawarrier, VU2CPL
+ * MSHV Native FlexRadio VITA-49 audio and control backend, Copyright (C) 2026 Manoj Ramawarrier, VU2CPL
  */
 #include "flexpanel.h"
 #include "network.h"
@@ -127,6 +128,31 @@ FlexPanel::FlexPanel(bool dark, QWidget *parent)
     gb_p->setLayout(P);
     V->addWidget(gb_p);
 
+    // The radio's antenna tuner.  Hidden until the radio says it has one
+    // (atu_present in "info"), so nobody without a tuner sees controls that do
+    // nothing.  Two buttons rather than SmartSDR's single toggle: the button
+    // you press says what happens, with no "was it tuned at this frequency?"
+    // guess in between.
+    gb_atu = new QGroupBox(tr("Antenna tuner"));
+    QGridLayout *T = new QGridLayout();
+    T->setContentsMargins(8, 6, 8, 6);
+    T->setSpacing(5);
+    l_atu = ValueLabel();
+    pb_atu_tune   = new QPushButton(tr("Tune"));
+    pb_atu_bypass = new QPushButton(tr("Bypass"));
+    cb_atu_mem    = new QCheckBox(tr("Memories"));
+    pb_atu_tune->setToolTip(tr("Runs the radio's antenna tuner (atu start).\n"
+                               "The radio TRANSMITS while it tunes -\n"
+                               "put an amplifier in standby first."));
+    pb_atu_bypass->setToolTip(tr("Takes the tuner out of the antenna path (atu bypass)."));
+    cb_atu_mem->setToolTip(tr("Use the tuner's stored settings\n"
+                              "(atu set memories enabled)."));
+    T->addWidget(new QLabel(tr("Status")), 0, 0); T->addWidget(l_atu, 0, 1);
+    T->addWidget(pb_atu_tune, 1, 0);              T->addWidget(pb_atu_bypass, 1, 1);
+    T->addWidget(cb_atu_mem, 2, 0, 1, 2);
+    gb_atu->setLayout(T);
+    gb_atu->hide();
+    V->addWidget(gb_atu);
 
     // Working the radio through MSHV otherwise means hearing it twice: once
     // from the decoded DAX stream and once out of the radio's own speaker.
@@ -156,6 +182,9 @@ FlexPanel::FlexPanel(bool dark, QWidget *parent)
     connect(sb_tunepower, SIGNAL(editingFinished()), this, SLOT(TunePowerEdited()));
     connect(sb_maxpower,  SIGNAL(editingFinished()), this, SLOT(MaxPowerEdited()));
     connect(cb_hwalc,     SIGNAL(toggled(bool)),     this, SLOT(HwAlcToggled(bool)));
+    connect(pb_atu_tune,   SIGNAL(clicked()),     this, SLOT(AtuTuneClicked()));
+    connect(pb_atu_bypass, SIGNAL(clicked()),     this, SLOT(AtuBypassClicked()));
+    connect(cb_atu_mem,    SIGNAL(toggled(bool)), this, SLOT(AtuMemoriesToggled(bool)));
 
     timer_speed_one = false;
     timer = new QTimer(this);
@@ -283,7 +312,7 @@ void FlexPanel::SetFlexLastAll(QString s)
             if (!ok || band>=COUNT_BANDS) band = -1;
         }
         // A band this build does not have is dropped rather than misfiled.
-        if (band<0) continue;
+        if (band<0) continue;        	
         if (e.at(1).isEmpty() || e.at(2).isEmpty()) continue;
         flex_band_ant[band] = e.at(1)+":"+e.at(2);
     }
@@ -322,7 +351,6 @@ void FlexPanel::FillSpin(QSpinBox *box, int value, int &shown)
     box->setValue(value);
     filling = false;
 }
-
 // Send a power setting ONLY when the operator actually changed the number.
 //
 // editingFinished() fires on plain focus-out with nothing edited, so the test
@@ -398,7 +426,6 @@ void FlexPanel::Refresh()
     if (st.contains("[!]")) l_conn->setText("<b><font color='#ff5050'>" + st + "</font></b>");
     else l_conn->setText("<b>" + st + "</b>");
 
-    //double fwd = 0.0, ref = 0.0, swr = 0.0, v = 0.0;
     is_meter = _FlexVitaMeters_(&fwd, &ref, &swr);
     if (is_meter)
     {
@@ -414,14 +441,13 @@ void FlexPanel::Refresh()
     if (_FlexVitaMeterByName_("PATEMP", &v)) l_patemp->setText(QString("%1 C").arg(v, 0, 'f', 1));
     if (_FlexVitaMeterByName_("+13.8A", &v)) l_volts->setText(QString("%1 V").arg(v, 0, 'f', 2));
 
-    const QStringList rx_list = _FlexVitaAntList_(false);//FillCombo(cb_rxant, _FlexVitaAntList_(false), _FlexVitaAnt_(false));
-    const QStringList tx_list = _FlexVitaAntList_(true); //FillCombo(cb_txant, _FlexVitaAntList_(true),  _FlexVitaAnt_(true));
+    const QStringList rx_list = _FlexVitaAntList_(false);
+    const QStringList tx_list = _FlexVitaAntList_(true);
     const QString rx_ant = _FlexVitaAnt_(false);
     const QString tx_ant = _FlexVitaAnt_(true); //QString rx_ant = "XVTA"; QString tx_ant = "XVTA";
     FillCombo(cb_rxant, rx_list, rx_ant);
     FillCombo(cb_txant, tx_list, tx_ant);    
     FillCombo(cb_mode,  _FlexVitaModeList_(),     _FlexVitaMode_());
-
     // The antennas the operator last used ON THIS BAND: remembered while the
     // backend runs, put back after the start-up frequency push and after every
     // band change.
@@ -483,8 +509,55 @@ void FlexPanel::Refresh()
         cb_hwalc->setChecked(hwalc);
         filling = false;
     }
+    // Antenna tuner: shown only on a radio that reports one, usable only while
+    // MSHV owns the transmitter (a tune keys the radio) and the radio says the
+    // tuner is enabled.  isHidden(), not isVisible(): the panel itself is
+    // created hidden, and isVisible() would be false for that reason alone.
+    const bool atu_here = (_FlexVitaAtuPresent_() == 1);
+    if (gb_atu->isHidden() == atu_here) gb_atu->setHidden(!atu_here);
+    if (atu_here)
+    {
+        const QString ast = _FlexVitaAtuStatus_();
+        QString text, color;
+        if      (ast == "TUNE_SUCCESSFUL")    { text = tr("Tuned");            color = "rgb(80,200,80)"; }
+        else if (ast == "TUNE_OK")            { text = tr("OK");               color = "rgb(80,200,80)"; }
+        else if (ast == "TUNE_IN_PROGRESS")   { text = tr("Tuning...");        }
+        // TUNE_BYPASS straight after a cycle means the antenna was already
+        // matched and the tuner left itself out: a good result, which FlexRadio
+        // counts as success.  From a Memories recall it is just "Bypass".
+        else if (ast == "TUNE_BYPASS" && _FlexVitaAtuAfterCycle_())
+                                              { text = tr("No tuning required"); color = "rgb(80,200,80)"; }
+        else if (ast == "TUNE_BYPASS")        { text = tr("Bypass");           color = "rgb(255,180,60)"; }
+        else if (ast == "TUNE_MANUAL_BYPASS") { text = tr("Bypass (manual)");  color = "rgb(255,180,60)"; }
+        else if (ast == "TUNE_FAIL_BYPASS")   { text = tr("Failed, bypassed"); color = "rgb(255,80,80)"; }
+        else if (ast == "TUNE_FAIL")          { text = tr("Failed");           color = "rgb(255,80,80)"; }
+        else if (ast == "TUNE_ABORTED")       { text = tr("Aborted");          color = "rgb(255,80,80)"; }
+        else if (ast == "TUNE_NOT_STARTED")   { text = tr("Not tuned");        }
+        else if (ast.isEmpty() || ast == "NONE") text = "--";
+        else                                     text = ast;   // a word this build does not know: show the radio's own
+        if (_FlexVitaAtuUsingMem_()) text += " (" + tr("memory") + ")";
+        const QString refused = _FlexVitaAtuRefused_();
+        if (!refused.isEmpty())
+        {
+            text  = tr("Refused by the radio") + " 0x" + refused;
+            color = "rgb(255,80,80)";
+        }
+        if (l_atu->text() != text) l_atu->setText(text);
+        const QString css = color.isEmpty() ? QString() : "QLabel{color:" + color + ";}";
+        if (l_atu->styleSheet() != css) l_atu->setStyleSheet(css);
 
-
+        const bool usable = _FlexVitaTxActive_() && _FlexVitaAtuEnabled_();
+        pb_atu_tune->setEnabled(usable && ast != "TUNE_IN_PROGRESS");
+        pb_atu_bypass->setEnabled(usable);
+        cb_atu_mem->setEnabled(usable);
+        const bool mem = _FlexVitaAtuMemories_();
+        if (cb_atu_mem->isChecked() != mem)
+        {
+            filling = true;
+            cb_atu_mem->setChecked(mem);
+            filling = false;
+        }
+    }
     // Only an M series radio has a front speaker; on anything else the
     // command does not exist, so grey the control rather than offer one that
     // silently does nothing.
@@ -498,7 +571,6 @@ void FlexPanel::Refresh()
         cb_localmute->setChecked(muted);
         filling = false;
     }
-
     // Model only -- no explanatory suffix. Why the box is greyed goes in the
     // tooltip, which costs no width; a sentence here stretched the whole
     // panel to fit it.
@@ -510,7 +582,7 @@ void FlexPanel::Refresh()
                                  ? tr("Mutes the speaker in the radio's front panel.\n"
                                       "Line-out and headphones are left alone, and the\n"
                                       "DAX audio MSHV decodes is unaffected.")
-                                 : tr("This radio has no front panel speaker.\n"
+                                 : QString("%1 ").arg(model) + tr("has no front panel speaker.\n"
                                       "This control is for M series radios."));
     }
     emit EmitUpdateFlexMeter(flex_up,is_meter,fwd,swr,flex_push_pending); //qDebug()<<rx_and_tx<<has_met<<fwd<<swr;//emit EmitUpdateFlexMeter(true,true,1.0,1.8);
@@ -563,6 +635,23 @@ void FlexPanel::LocalMuteToggled(bool on)
     // that would bounce straight back at the radio as a fresh command.
     if (filling) return;
     _FlexVitaSetFrontSpeakerMute_(on);
+}
+// A tune cycle keys the radio, so it goes out only from this click -- never
+// from Refresh() -- and the button is enabled only while MSHV owns the
+// transmitter.
+void FlexPanel::AtuTuneClicked()
+{
+    _FlexVitaAtuTune_();
+}
+void FlexPanel::AtuBypassClicked()
+{
+    _FlexVitaAtuBypass_();
+}
+void FlexPanel::AtuMemoriesToggled(bool on)
+{
+    // Refresh() mirrors the radio's own setting into this box; don't echo it.
+    if (filling) return;
+    _FlexVitaSetAtuMemories_(on);
 }
 
 #if defined _MACOS_

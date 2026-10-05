@@ -4,7 +4,7 @@
 //-------------------------Semantic Versioning 2.0.0---------------------------------------//
 #define VERSION_MAJOR 2  //version when you make incompatible API changes
 #define VERSION_MINOR 76 //version when you add functionality in a backward compatible manner
-#define VERSION_PATCH 6  //version when you make backward compatible bug fixes
+#define VERSION_PATCH 7  //version when you make backward compatible bug fixes
 //#define VERSION_REVISION 1
 //--------------------END--Semantic Versioning 2.0.0--END----------------------------------//
 
@@ -30,13 +30,14 @@
 #endif
 #if defined _MACOS_
 // macOS-port release revision. Manually bumped for each -mac<N> release tag
-// (the previous published release was v2.76.6-mac8, 2026-09-04; these
-// changes ship as mac9). Keep this in step with the git release tag, and
-// check `gh release list` + `git ls-remote --tags origin` before picking
-// the next number.
-#define MSHV_MAC_REV 10
-// Window-title / About identity, e.g. "MSHV macOS 2.76.6 mac6" (main_ms
-// inserts the band after "MSHV": "MSHV 28 MHz macOS 2.76.6 mac6 …").
+// and NOT reset when the upstream version moves: 2.76.6 ended at mac10
+// (2026-09-10), LZ2HV's final 2.76.7 ships as mac11 (2026-10-05), so one
+// number always names one Mac build. Keep this in step with the git release
+// tag, and check `gh release list` + `git ls-remote --tags origin` before
+// picking the next number.
+#define MSHV_MAC_REV 11
+// Window-title / About identity, e.g. "MSHV macOS 2.76.7 mac11" (main_ms
+// inserts the band after "MSHV": "MSHV 28 MHz macOS 2.76.7 mac11 …").
 #define APP_NAME "MSHV macOS " VER_MS " mac" TOSTR0(MSHV_MAC_REV)
 #endif
 

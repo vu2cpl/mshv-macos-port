@@ -1074,6 +1074,8 @@ HvLogW::HvLogW(QString inst,QString app_path, bool indsty,int x,int y,QWidget *w
 {
     //w_parent = wp_;
     f_km_mi = false;
+    pend_w = 0;
+    pend_h = 0;    
     THvProgrD = new HvProgressD(this);
     THvProgrD->close();
     s_udportcp_broad_logged_adif = false;
@@ -2156,6 +2158,7 @@ void HvLogW::Show_log()// 2.28
 {
     //if(!isVisible()) THvLogList->scrollToBottom();
     show();
+    if (pend_w>0) { resize(pend_w,pend_h); pend_w = 0; }// macOS: the size is reset before the first show
     //slow down first open HV
     //THvLogList->setCurrentIndex(THvLogList->model.index(THvLogList->model.rowCount()-1,0));
     THvLogList->scrollToBottom();//2.52
@@ -2163,15 +2166,25 @@ void HvLogW::Show_log()// 2.28
 void HvLogW::SetPosXYWH(QString s)//2.48
 {
     QStringList list_s = s.split("#");
-    if (list_s.count()==4)
+    if (list_s.count()>=4)
     {
         move(list_s[0].toInt(),list_s[1].toInt());
         if (!list_s[2].isEmpty() && !list_s[3].isEmpty())
         {
-            if (list_s[2] == "FULL" || list_s[3] == "FULL" )
-                setWindowState(Qt::WindowMaximized);
-            else
-                resize(list_s[2].toInt(), list_s[3].toInt());
+            if (list_s[2] == "FULL" || list_s[3] == "FULL" ) setWindowState(Qt::WindowMaximized);
+            else 
+            {
+            	resize(list_s[2].toInt(), list_s[3].toInt());
+            	pend_w = list_s[2].toInt(); pend_h = list_s[3].toInt();
+            	if (list_s.count()>=4+THvLogList->model.columnCount())
+            	{
+            		for (int i = 0; i<THvLogList->model.columnCount(); ++i)
+            		{
+            			int width0 = list_s[4+i].toInt();
+            			if (width0>0 && width0<1001) THvLogList->setColumnWidth(i,width0);          		
+           			}             		
+           		}          	
+           	}
         }
     }
 }

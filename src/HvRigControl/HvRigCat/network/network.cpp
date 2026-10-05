@@ -8,7 +8,7 @@ Copyright (c) 2017 Expert Electronics
 Distributed under the MIT software license, see the accompanying
 file COPYING or http://www.opensource.org/licenses/mit-license.php.
 TCI Client modified by Hrisimir Hristov, LZ2HV 2021
-MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ramawarrier, VU2CPL 2026
+MSHV Native FlexRadio VITA-49 audio and control backend, Copyright (C) 2026 Manoj Ramawarrier, VU2CPL
 */
 #define _NETWORK_RIGS_
 #include "network_def.h"
@@ -750,6 +750,7 @@ enum
     VITA_MISC,          // a reply that only needs consuming
     VITA_MIXER_ON,      // "mixer front_speaker mute on"
     VITA_MIXER_OFF,     // "mixer front_speaker mute off"
+    VITA_ATU            // "atu start" / "atu bypass" / "atu set memories_enabled="
 };
 // ---- state the hooks read.  Written on the GUI thread by Network, except
 //      the meter values, which FlexVita writes on vThread -- hence the mutex
@@ -775,6 +776,19 @@ static bool    flex_front_spkr_mute = false, flex_front_spkr_supported = false;
 // rather than as 0 -- displaying 0 W would be a lie the operator might act on.
 static int     flex_rfpower = -1, flex_tunepower = -1, flex_maxpower = -1;
 static bool    flex_hwalc = false;
+// The radio's antenna tuner.  flex_atu_present is -1 until the "info" reply has
+// said, so the panel keeps the tuner group hidden rather than guess.  The rest
+// is mirrored from "atu status=... atu_enabled= memories_enabled= using_mem="
+// after "sub atu all".
+static int     flex_atu_present = -1;
+static QString flex_atu_status;                 // the radio's own word: TUNE_SUCCESSFUL, TUNE_MANUAL_BYPASS, ...
+static bool    flex_atu_enabled = false, flex_atu_memories = false, flex_atu_using_mem = false;
+static QString flex_atu_refused;                // hex code of the last atu command the radio refused
+// True when the current status followed TUNE_IN_PROGRESS, i.e. it is the result
+// of a tune cycle rather than a Memories recall or a Bypass click.  Kept here,
+// where every status line passes: a cycle can be over in 0.7 s, inside one
+// 500 ms panel poll.
+static bool    flex_atu_after_cycle = false;
 
 // ---- TX ring.  Rawplayer's thread writes 4096-int blocks (stereo 48 kHz,
 //      24-bit scale); vThread reads them out at 24 kHz mono.  One producer,
@@ -840,6 +854,21 @@ bool _FlexVitaHwAlc_()     { QMutexLocker lk(&flex_mutex); return flex_hwalc;   
 void _FlexVitaSetTransmit_(QString key, int value)
 {
     if (g_vita_net) g_vita_net->VitaSetTransmit(key, value);
+}
+// Antenna tuner.  A tune cycle keys the radio, so nothing here is ever called
+// except from an operator's click in the panel.
+int     _FlexVitaAtuPresent_()  { QMutexLocker lk(&flex_mutex); return flex_atu_present;   }
+QString _FlexVitaAtuStatus_()   { QMutexLocker lk(&flex_mutex); return flex_atu_status;    }
+bool    _FlexVitaAtuEnabled_()  { QMutexLocker lk(&flex_mutex); return flex_atu_enabled;   }
+bool    _FlexVitaAtuMemories_() { QMutexLocker lk(&flex_mutex); return flex_atu_memories;  }
+bool    _FlexVitaAtuUsingMem_() { QMutexLocker lk(&flex_mutex); return flex_atu_using_mem; }
+QString _FlexVitaAtuRefused_()  { QMutexLocker lk(&flex_mutex); return flex_atu_refused;   }
+bool    _FlexVitaAtuAfterCycle_() { QMutexLocker lk(&flex_mutex); return flex_atu_after_cycle; }
+void _FlexVitaAtuTune_()   { if (g_vita_net) g_vita_net->VitaAtu("start");  }
+void _FlexVitaAtuBypass_() { if (g_vita_net) g_vita_net->VitaAtu("bypass"); }
+void _FlexVitaSetAtuMemories_(bool on)
+{
+    if (g_vita_net) g_vita_net->VitaAtu(QString("set memories_enabled=%1").arg(on ? 1 : 0));
 }
 
 // ---- byte order
@@ -1235,6 +1264,16 @@ void Network::VitaLine(QString line)
                 flex_front_spkr_supported = flex_radio_model.trimmed().toUpper().endsWith("M");
             }
         }
+        // The same reply says whether there is an antenna tuner to offer.
+        if (line.contains("atu_present="))
+        {
+            QRegExp ap("\\batu_present=([01])\\b");
+            if (ap.indexIn(line) >= 0)
+            {
+                QMutexLocker lk(&flex_mutex);
+                flex_atu_present = ap.cap(1).toInt();
+            }
+        }
         const int bar = line.indexOf('|');
         if (bar < 0) return;
         bool ok = false;
@@ -1299,6 +1338,34 @@ void Network::VitaLine(QString line)
             at += kv.matchedLength();
         }
     }    
+    // Antenna tuner: "atu status=TUNE_MANUAL_BYPASS atu_enabled=1 memories_enabled=0
+    // using_mem=0" (verified on the 6600).  A fresh status also means the radio
+    // has moved on from any command it refused.
+    if (line.contains("|atu "))
+    {
+        QRegExp kv("\\b(status|atu_enabled|memories_enabled|using_mem)=([^\\s]+)");
+        QMutexLocker lk(&flex_mutex);
+        int at = 0;
+        while ((at = kv.indexIn(line, at)) >= 0)
+        {
+            const QString k = kv.cap(1), v = kv.cap(2);
+            if (k == "status")
+            {
+                // The radio repeats a status in several lines; only a CHANGE says
+                // where this one came from.
+                if (v != flex_atu_status)
+                {
+                    flex_atu_after_cycle = (flex_atu_status == "TUNE_IN_PROGRESS");
+                    flex_atu_status = v;
+                }
+                flex_atu_refused.clear();
+            }
+            else if (k == "atu_enabled")      flex_atu_enabled   = (v == "1");
+            else if (k == "memories_enabled") flex_atu_memories  = (v == "1");
+            else if (k == "using_mem")        flex_atu_using_mem = (v == "1");
+            at += kv.matchedLength();
+        }
+    }
     // The front speaker is not in the status stream on a 6600; if a firmware
     // does report it, believe that over our own shadow.
     if (line.contains("|radio slices="))
@@ -1404,6 +1471,7 @@ void Network::VitaReply(int step, quint32 code, QString body)
         VitaSend("sub dax all", VITA_MISC);
         VitaSend("sub meter all", VITA_MISC);
         VitaSend("sub radio all", VITA_MISC);
+        VitaSend("sub atu all", VITA_MISC);   // read-only; a radio without a tuner just never reports
         if (vita_want_tx) VitaSend("sub tx all", VITA_MISC);
         vita_step = VITA_UDPPORT;
         VitaSend("client udpport " + QString::number(vita_->LocalPort()), VITA_UDPPORT);
@@ -1465,6 +1533,16 @@ void Network::VitaReply(int step, quint32 code, QString body)
         	if (code == 0) flex_front_spkr_mute = (step == VITA_MIXER_ON);
     	}
     	return;
+    case VITA_ATU:
+        // "atu start" needs a transmit slice and the interlock READY.  Keep the
+        // code so the panel says the radio refused, rather than a click that
+        // seems to do nothing.
+        if (code != 0)
+        {
+            QMutexLocker lk(&flex_mutex);
+            flex_atu_refused = QString::number(code, 16).toUpper();
+        }
+        return;
     default:
         return;
     }
@@ -1710,6 +1788,9 @@ void Network::VitaStop(bool tell_radio)
         flex_rxant.clear();
         flex_txant.clear();
         flex_mode.clear();
+        flex_atu_status.clear();      // "sub atu all" on the next start reports afresh
+        flex_atu_after_cycle = false;
+        flex_atu_refused.clear();
     }
     vita_status = "Flex Native: idle";
     VitaMirror();
@@ -1779,6 +1860,19 @@ void Network::VitaSetTransmit(QString key, int value)
 {
     if (key.isEmpty()) return;
     VitaSend(QString("transmit set %1=%2").arg(key).arg(value), VITA_MISC);
+}
+// The radio's antenna tuner.  "atu start" and "atu bypass" are in the SmartSDR
+// API reference, page "TCPIP atu"; "atu set memories_enabled=0|1" is not on that
+// page, but it is what AetherSDR sends for its MEM button.  "atu start" runs a
+// tune cycle, and the radio TRANSMITS while it tunes.
+void Network::VitaAtu(QString args)
+{
+    if (args.isEmpty()) return;
+    {
+        QMutexLocker lk(&flex_mutex);
+        flex_atu_refused.clear();     // this command's own answer decides now
+    }
+    VitaSend("atu " + args, VITA_ATU);
 }
 // ============================================================ end flex native vita-49
 //----- end vita49 ---------------------------------------------------

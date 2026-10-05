@@ -216,7 +216,13 @@ public:
         }
         else
         {
-        	str.append("#"+QString("%1").arg(this->width())+"#"+QString("%1").arg(this->height()));
+        	//str.append("#"+QString("%1").arg(this->width())+"#"+QString("%1").arg(this->height()));
+        	if (pend_w>0) str.append("#"+QString("%1").arg(pend_w)+"#"+QString("%1").arg(pend_h));// never shown
+        	else str.append("#"+QString("%1").arg(this->width())+"#"+QString("%1").arg(this->height()));        	
+        	for (int i = 0; i<THvLogList->model.columnCount(); ++i)
+        	{
+        		str.append("#"+QString("%1").arg(THvLogList->columnWidth(i)));        		
+       		}
         }
 		return str;				
 	}
@@ -287,6 +293,7 @@ private:
 	QAction *ac_use_adif_save;
 	HvQthLoc THvQthLoc;
 	bool f_km_mi;
+	int pend_w, pend_h;// macOS: size from settings, kept until the first show
 	QString CalcDistance(QString);
 	int beg_append;
 	bool save_in_new_format;

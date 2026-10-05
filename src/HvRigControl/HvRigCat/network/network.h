@@ -8,7 +8,7 @@ Copyright (c) 2017 Expert Electronics
 Distributed under the MIT software license, see the accompanying
 file COPYING or http://www.opensource.org/licenses/mit-license.php.
 TCI Client modified by Hrisimir Hristov, LZ2HV 2021
-MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ramawarrier, VU2CPL 2026
+MSHV Native FlexRadio VITA-49 audio and control backend, Copyright (C) 2026 Manoj Ramawarrier, VU2CPL
 */
 
 #ifndef NETWORK_H
@@ -115,6 +115,19 @@ extern int         _FlexVitaTunePower_();
 extern int         _FlexVitaMaxPower_();
 extern bool        _FlexVitaHwAlc_();
 extern void        _FlexVitaSetTransmit_(QString key, int value);
+// The radio's antenna tuner.  AtuPresent is -1 until the radio has said, then
+// 0 or 1.  AtuStatus is the radio's own word (TUNE_SUCCESSFUL, TUNE_BYPASS, ...).
+// AtuRefused is the hex code of the last atu command refused, else empty.
+extern int         _FlexVitaAtuPresent_();
+extern QString     _FlexVitaAtuStatus_();
+extern bool        _FlexVitaAtuEnabled_();
+extern bool        _FlexVitaAtuMemories_();
+extern bool        _FlexVitaAtuUsingMem_();
+extern QString     _FlexVitaAtuRefused_();
+extern bool        _FlexVitaAtuAfterCycle_();  // the current status is the result of a tune cycle
+extern void        _FlexVitaAtuTune_();      // TRANSMITS while the radio tunes
+extern void        _FlexVitaAtuBypass_();
+extern void        _FlexVitaSetAtuMemories_(bool on);
 
 // Native FlexRadio VITA-49 DAX audio -- the UDP half only.
 //
@@ -313,6 +326,7 @@ public:
 	void VitaSetSlice(QString key,QString value);//flex native vita-49: rxant/txant/mode from the panel
 	void VitaSetTransmit(QString key,int value);  //flex native vita-49: rfpower/tunepower/max_power_level/hwalc from the panel
 	void VitaSetFrontSpeaker(bool mute);          //flex native vita-49: M-series speaker
+	void VitaAtu(QString args);                   //flex native vita-49: antenna tuner from the panel
 	FlexVita *VitaAudio();                        //flex native vita-49: the UDP side, for _SetTxAudioFlex_()
 	//----- end vita49 --------------------------------------------------- 
 	

@@ -327,9 +327,9 @@ the local quarantine attribute is the problem.
 connects to for rig control was running at the time. That program can be
 SDR-Control, a Hamlib `rigctld`, or your TCI server such as ExpertSDR or
 AetherSDR. If it was not running, you have met a Qt bug on macOS: a
-connection that is refused can crash the app. This is fixed in the source
-since 2026-10-02 and will be in the next release. Until then, start that
-program before MSHV, or simply launch MSHV again.
+connection that is refused can crash the app. This is fixed from **mac11**
+(2.76.7). On mac10 or earlier, start that program before MSHV, or simply
+launch MSHV again.
 
 For any other crash:
 

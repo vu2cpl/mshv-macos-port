@@ -15,7 +15,8 @@
  *
  * The panel is inert when the Flex backend is not running: it simply shows
  * that it is not connected.
- * MSHV Native FlexRadio VITA-49 audio and control backend, was created by Manoj Ramawarrier, VU2CPL 2026
+ * MSHV Flex Panel, Copyright (C) 2026 Manoj Ramawarrier, VU2CPL
+ * MSHV Native FlexRadio VITA-49 audio and control backend, Copyright (C) 2026 Manoj Ramawarrier, VU2CPL
  */
  
 #ifndef FLEXPANEL_H
@@ -54,10 +55,6 @@ public:
     	if (flex_native_last_freq.toLongLong() < 100000) flex_native_last_freq = "14074000";   // nothing remembered: 20m FT8
         return flex_native_last_freq;
     };  
-	/*void SetFlexLastFreq(QString s)
-	{
-		flex_native_last_freq = s;
-	};*/
   	QString GetFlexLastAll();
 	void SetFlexLastAll(QString s);
     
@@ -73,6 +70,9 @@ private slots:
     void TunePowerEdited();
     void MaxPowerEdited();
     void HwAlcToggled(bool);
+    void AtuTuneClicked();
+    void AtuBypassClicked();
+    void AtuMemoriesToggled(bool);
 signals:
 	void EmitUpdateFlexMeter(bool,bool,double,double,bool);
 
@@ -104,6 +104,11 @@ private:
     QSpinBox  *sb_maxpower;
     QCheckBox *cb_hwalc;
     QLabel    *l_model;
+    QGroupBox *gb_atu;
+    QLabel    *l_atu;
+    QPushButton *pb_atu_tune;
+    QPushButton *pb_atu_bypass;
+    QCheckBox *cb_atu_mem;
     bool 	  timer_speed_one;
     QTimer    *timer;
     bool      filling;   // suppress the change signals while repopulating

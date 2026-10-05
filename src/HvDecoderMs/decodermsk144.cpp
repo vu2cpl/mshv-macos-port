@@ -2309,10 +2309,8 @@ QString DecoderMs::str_round_20ms(double v)
 }
 bool f_only_one_color_rtd_msk = true;
 void DecoderMs::msk_144_40_rtd(double *dat,int,double s_istart,bool rpt_db_msk)
-{
-    //qDebug()<<"msk_144_40_rtd"<<ccc<<s_istart;
-    if (ss_msk144ms != rpt_db_msk)
-        f_first_msk144 = false;
+{     
+    if (ss_msk144ms != rpt_db_msk) f_first_msk144 = false;
     ss_msk144ms = rpt_db_msk;
 
     double rms;
@@ -2765,8 +2763,7 @@ void DecoderMs::print_rtd_decode_text(QString msgreceived,QString &s_msg_,int ns
 
 void DecoderMs::msk_144_40_decode(double *dat,int npts_in,double s_istart,bool rpt_db_msk)
 {
-    if (ss_msk144ms != rpt_db_msk)
-        f_first_msk144 = false;
+    if (ss_msk144ms != rpt_db_msk) f_first_msk144 = false;
     ss_msk144ms = rpt_db_msk;
 
     int NMAX = 30*DEC_SAMPLE_RATE;
