@@ -145,6 +145,14 @@ FlexPanel::FlexPanel(bool dark, QWidget *parent)
                                "The radio TRANSMITS while it tunes -\n"
                                "put an amplifier in standby first."));
     pb_atu_bypass->setToolTip(tr("Takes the tuner out of the antenna path (atu bypass)."));
+    // Never the dialog's default button.  In a QDialog every push button is
+    // autoDefault, so Tune -- the first one -- took the Return key, and Enter
+    // in a power box (which its tooltip asks for) started a tune: the radio
+    // keyed.  These two go out only on a click.
+    pb_atu_tune->setAutoDefault(false);
+    pb_atu_tune->setDefault(false);
+    pb_atu_bypass->setAutoDefault(false);
+    pb_atu_bypass->setDefault(false);
     cb_atu_mem->setToolTip(tr("Use the tuner's stored settings\n"
                               "(atu set memories enabled)."));
     T->addWidget(new QLabel(tr("Status")), 0, 0); T->addWidget(l_atu, 0, 1);

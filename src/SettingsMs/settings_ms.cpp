@@ -877,7 +877,7 @@ void SettingsMs::OutDeviceChanged(QString)
 {
     if (!no_emit)
     {
-        if (DevBoxOut->currentText()=="TCI Client Output")//2.70
+        if (DevBoxOut->currentText()=="TCI Client Output" || DevBoxOut->currentText()=="Flex Native Output")//2.70
         {
             OutBuf->setEnabled(false);
             cb_out_bitpersample->setEnabled(false);
@@ -939,7 +939,7 @@ void SettingsMs::InDeviceChanged(QString)
     {
         //if (!g_block_alsa)//
         //{
-        if (DevBoxIn->currentText()=="TCI Client Input")//2.70
+        if (DevBoxIn->currentText()=="TCI Client Input" || DevBoxIn->currentText().startsWith("Flex Native Input"))//2.70
         {
             cb_in_bitpersample->setEnabled(false);
             CardLatency->setEnabled(false);

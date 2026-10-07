@@ -3,6 +3,9 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #define _BANDS_H_
+#if defined _MACOS_
+#include "../mshv_userbands.h"
+#endif
 #include "hvrigcontrol.h"
 #if defined _MACOS_
 #include <QTime>
@@ -2237,6 +2240,7 @@ void HvRigControl::SetBand(QString band)
             if (trb_id==0) rb_offset_tr_off->setChecked(true);
             if (trb_id==1) rb_offset_tr_sum->setChecked(true);
             if (trb_id==2) rb_offset_tr_sub->setChecked(true);
+            if (trb_id>2) rb_offset_tr_off->setChecked(true);// a mode this build does not have - never inherit the previous band's
             break;
         }
     }
@@ -2274,6 +2278,16 @@ void HvRigControl::SetFreqOffsetTR()
         double t_frq = frq_b.toDouble();
         inf = t_frq * 1000000000;
     }
+#if defined _MACOS_
+    // macOS port -- a user-defined band carries no frequency in its name, so
+    // the preview showed the bare offset; use the band's own default
+    // frequency (kHz in user_bands.txt) instead
+    if (inf==0 && s_id_band>=COUNT_BANDS_STD && s_id_band<COUNT_BANDS)
+    {
+        const MshvUserBand &ub = MshvUserBands::Inst().At(s_id_band-COUNT_BANDS_STD);
+        if (ub.used()) inf = ub.bandtofrq.toLongLong()*1000;
+    }
+#endif
     if (rb_offset_tr_sum->isChecked())
     {
         if (lof>inf)

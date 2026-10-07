@@ -663,6 +663,37 @@ void Network::SetTciStrtStopAudio(bool f)
 {
     static bool start_stop_audio = false; //qDebug()<<"audio_???"<<f;
     if (start_stop_audio == f) return;
+#if defined _MACOS_
+    /* Never latch a state we could not actually transmit.
+     *
+     * writeData() DROPS every command below when the TCI WebSocket is not
+     * in ConnectedState (it returns false; see its s_ModelID 3/4 branch),
+     * but the latch above was set regardless. At start-up that is exactly
+     * what happens: HvRigCat calls SetTciSelect(tci_select,...) from the
+     * rig's own construction (hvrigcatw.cpp), long before connectToHost()
+     * has created the socket -- and on macOS MacConnectStart() defers that
+     * by a further 350 ms+ since the CFSocket fix (aa13103). So audio_start
+     * went nowhere while start_stop_audio was left true.
+     *
+     * readNet() re-arms the stream at TCI init-complete with
+     * "if (tci_select>0) SetTciStrtStopAudio(true);" -- the right place,
+     * with the socket up -- but that call then hit the == test above and
+     * returned, so audio_start was never sent and no IQ/audio stream ever
+     * started. The operator's workaround (Interface Control -> Disconnect,
+     * then Connect) worked only because the Disconnect path calls
+     * SetTciStrtStopAudio(false), clearing the latch so the next
+     * init-complete re-arm gets through.
+     *
+     * f == false is always safe to record: a socket that is down IS
+     * stopped. Only the "start" direction has to wait for a live socket.
+     */
+    if (f && !(is_wsocket && wsocket->state() == QAbstractSocket::ConnectedState))
+    {
+        fprintf(stderr, "[MSHV TCI] audio_start deferred: socket not up yet "
+                        "(will be sent at init-complete)\n");
+        return;
+    }
+#endif
     start_stop_audio = f;
     if (f)
     {
@@ -676,10 +707,16 @@ void Network::SetTciStrtStopAudio(bool f)
             writeData("tx_stream_audio_buffering:"+s_tcitxbuff+";",false,NULL);
         }
         writeData("audio_start:"+tci_trx+";",false,NULL);
+#if defined _MACOS_
+        fprintf(stderr, "[MSHV TCI] audio_start sent (trx %s)\n", qPrintable(tci_trx));
+#endif
     }
     else
     {
         writeData("audio_stop:"+tci_trx+";",false,NULL); //qDebug()<<"audio_stop";
+#if defined _MACOS_
+        fprintf(stderr, "[MSHV TCI] audio_stop sent (trx %s)\n", qPrintable(tci_trx));
+#endif
     }
 }
 void Network::SetTciSelect(int i,int vr,bool vt)//tci 0=non 1=rx 2=tx 3=rx,tx
@@ -2118,6 +2155,15 @@ void Network::disconnected_s()
 {
 #if defined _MACOS_
     fprintf(stderr, "[MSHV TCI] disconnected_s fired\n");
+    /* Clear the audio-stream latch on ANY drop, not just the operator's own
+     * Disconnect (connectToHost() already does it on that path). Without
+     * this, a socket the radio or ExpertSDR closed leaves start_stop_audio
+     * true, and the re-arm readNet() performs at the next init-complete is
+     * swallowed by the == test in SetTciStrtStopAudio() -- the same silent
+     * "no IQ stream" as the start-up case above. The socket is already
+     * gone, so the audio_stop write is a no-op; clearing the latch is the
+     * whole point. Mirrors what the vita49 block below does for Flex. */
+    SetTciStrtStopAudio(false);
 #endif
     //----- vita49 ---------------------------------------------------
     //flex native vita-49: the control socket is gone, so there is nobody to
