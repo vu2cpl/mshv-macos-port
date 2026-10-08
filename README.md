@@ -9,6 +9,11 @@ PI4, FSK441/315, ISCAT, Q65 A/B/C/D**, and MA (Multi-Answer) modes
 on macOS 11 or later. A prebuilt, notarised **Apple Silicon** (arm64)
 bundle is attached to each release, as a DMG and as a zip.
 
+FT2 was created by Martino Merola IU8LMC (ARI Caserta), with Salvatore
+Raccampo 9H1SR as lead C++ developer; it first went on air in Decodium
+on 2026-02-16 ([ft2.it](https://ft2.it)), and MSHV added it in 2.76.5
+on 2026-03-24.
+
 **Intel Macs:** releases up to and including **mac10** are universal
 (Apple Silicon and Intel in one app) and stay on the Releases page.
 Releases after mac10 are Apple Silicon only — the build machine can no
