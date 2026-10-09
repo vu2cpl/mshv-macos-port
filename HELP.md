@@ -104,6 +104,8 @@ NOT inside the app bundle. This means:
 │   ├── azel.dat           ← Moon/Sun Az/El + Doppler for rotator /
 │   │                        tracking programs; rewritten every 2 s
 │   │                        while the Astronomical Data window is open
+│   ├── ms_update.ini      ← update check: automatic on/off, last
+│   │                        check, skipped version
 │   └── database/          ← cty.dat, msloc_db, msbcn_db, mstn_db
 ├── log/mshvlog.edim       ← QSO log
 ├── AllTxtMonthly/         ← ALL_YYYY_MM.TXT — running text log
@@ -373,6 +375,25 @@ lot.
 ---
 
 ## Updating to a new version
+
+**From mac13, MSHV tells you when a new release is out.** The MSHV
+application menu, under *About MSHV*, has **Check for Updates...** and
+**Check for Updates Automatically** (ticked by default; untick it to turn
+the automatic check off). About 10 s after start, and every hour while
+MSHV stays open, it asks GitHub for the latest release of this port —
+at most once a day once a check has got an answer. That is one anonymous
+request to `api.github.com`; all it sends is the MSHV version. If a newer
+release exists, a window shows its notes with **Download** (opens the
+release page in your browser — MSHV downloads and installs nothing
+itself), **Skip This Version** (no more automatic reminders for that
+release) and **Remind Me Later**. No button in that window is the
+default, so Return never opens the browser, and Esc is Remind Me Later;
+when the automatic check opens it, it does not take the keyboard from
+what you are typing in MSHV. A check that fails (offline, GitHub not
+answering) stays silent; *Check for Updates...* always says what
+happened. The choices are kept in `settings/ms_update.ini`.
+
+To update:
 
 1. Download the new release from the
    [Releases page](../../releases).

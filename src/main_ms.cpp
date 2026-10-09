@@ -10,6 +10,9 @@
 #include "mshv_app_path.h"
 #include "mshv_userbands.h"
 #include "mshv_txtrace.h"
+#if defined _MACOS_
+#include "mshv_update_check.h"
+#endif
 
 #include <QScreen>
 #include <QWindow>
@@ -1044,6 +1047,14 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     Help_abaut = new QAction(QPixmap(":pic/ms_ico.png"),tr("About")+" MSHV",this);
     connect(Help_abaut, SIGNAL(triggered()), THvAboutMsHv, SLOT(exec()));
     Help_m->addAction(Help_abaut);
+#if defined _MACOS_
+    // macOS port: "Check for Updates..." + "Check for Updates Automatically"
+    // against the port's GitHub releases (src/mshv_update_check.{h,cpp}; state
+    // in settings/ms_update.ini, never ms_settings). Cocoa shows both in the
+    // application menu under About MSHV; the automatic check runs ~10 s after
+    // start, at most once a day.
+    (new MshvUpdateCheck(App_Path+"/settings/ms_update.ini", this))->AddToMenu(Help_m);
+#endif
 
     for (int i = 0; i < COUNT_MODE; ++i) decoder_depth_all[i] = 1;
     decoder_depth_all[0]  = 2;  //MSK144 and MSK40

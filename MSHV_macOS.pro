@@ -138,6 +138,7 @@ QMAKE_EXTRA_TARGETS += notarize
 HEADERS = src/main_ms.h \
  src/mshv_userbands.h \
  src/mshv_txtrace.h \
+ src/mshv_update_check.h \
  src/config.h \
  src/config_msg_all.h \
  src/config_str_all.h \
@@ -244,6 +245,7 @@ HEADERS = src/main_ms.h \
  src/HvAggressiveW/aggressiv_d.h
 SOURCES = src/main.cpp \
  src/mshv_userbands.cpp \
+ src/mshv_update_check.cpp \
  src/main_ms.cpp \
  src/nhash.cpp \
  src/DisplayMs/display_ms.cpp \

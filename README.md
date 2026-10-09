@@ -69,6 +69,12 @@ WAVs, screenshots) lives in
 `~/Library/Application Support/MSHV/`. Replacing the bundle with a
 new release does **not** wipe your data.
 
+**Updates:** from mac13 MSHV checks this port's Releases page itself and
+offers a newer release when there is one — *Check for Updates...* and
+*Check for Updates Automatically* in the MSHV application menu (see
+[HELP.md](HELP.md#updating-to-a-new-version)). It only opens the release
+page in your browser; nothing is downloaded or installed by MSHV.
+
 **Run MSHV from Applications.** macOS runs a downloaded app from a
 randomised read-only location until you move it out of the disk image or
 Downloads folder, which stops MSHV writing some of its files.

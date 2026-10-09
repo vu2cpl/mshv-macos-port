@@ -35,7 +35,7 @@
 // number always names one Mac build. Keep this in step with the git release
 // tag, and check `gh release list` + `git ls-remote --tags origin` before
 // picking the next number.
-#define MSHV_MAC_REV 12
+#define MSHV_MAC_REV 13
 // Window-title / About identity, e.g. "MSHV macOS 2.76.7 mac11" (main_ms
 // inserts the band after "MSHV": "MSHV 28 MHz macOS 2.76.7 mac11 …").
 #define APP_NAME "MSHV macOS " VER_MS " mac" TOSTR0(MSHV_MAC_REV)
