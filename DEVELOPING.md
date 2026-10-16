@@ -117,3 +117,17 @@ After `make standalone` the script prints `main binary: clean (no
 Homebrew paths)` and `embedded libs: all clean`. If it doesn't, the
 bundle won't run on a Mac without Homebrew. Investigate before
 shipping.
+
+It also prints `bundle refs: all resolve`, and exits 1 when it can't:
+every `@executable_path` / `@loader_path` / `@rpath` reference of every
+Mach-O in the bundle must name a file that is in it. Having no Homebrew
+path is not enough. Homebrew `freetype` 2.15.0 started linking
+`libbrotlidec`, which loads `@rpath/libbrotlicommon.1.dylib`, and
+`macdeployqt` does not follow `@rpath`. The library was left out, the
+cocoa platform plugin failed to load and the app aborted at start
+("Could not load the Qt platform plugin cocoa … even though it was
+found"), while both older checks said clean. The script now copies such
+`@rpath` dylibs from the Homebrew `lib` directory and repeats its sweep,
+plugins included, until nothing new arrives. A Homebrew update can
+change the bundle with no change in this tree, so launch every new
+bundle before shipping it.

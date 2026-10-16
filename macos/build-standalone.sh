@@ -83,7 +83,12 @@ fi
 embed_remaining() {
     local target="$1"
     local rewrote_any=0
+    # A plugin keeps its Homebrew install id (macdeployqt leaves it); that id
+    # is otool -L's first line, not a dependency, so never "embed" it.
+    local SELF_ID
+    SELF_ID="$(otool -D "$target" | awk 'NR>1 {print $1}')"
     while read -r DEP; do
+        [[ -n "$SELF_ID" && "$DEP" == "$SELF_ID" ]] && continue
         case "$DEP" in
             /opt/homebrew/* | /usr/local/Cellar/* | /usr/local/opt/* )
                 # Qt-style framework? Path looks like .../QtX.framework/Versions/N/QtX
@@ -112,10 +117,34 @@ embed_remaining() {
                 fi
                 rewrote_any=1
                 ;;
+            @rpath/*.dylib )
+                # c) A plain dylib reached through @rpath, which macdeployqt
+                #    copies the parent of but does not follow (2026-10-16:
+                #    Homebrew freetype 2.15.0 links libbrotlidec, which links
+                #    @rpath/libbrotlicommon.1.dylib -- left out, the cocoa
+                #    plugin failed to load and every bundle aborted at start).
+                #    Homebrew links every keg's dylibs into $HB_LIB.
+                local NAME
+                NAME="${DEP#@rpath/}"
+                if [[ ! -f "$FW/$NAME" ]]; then
+                    if [[ ! -f "$HB_LIB/$NAME" ]]; then
+                        echo "    WARN: $(basename "$target") needs $DEP, not in $HB_LIB — skipping"
+                        continue
+                    fi
+                    echo "    embedding @rpath dep: $NAME (from $HB_LIB)"
+                    cp "$HB_LIB/$NAME" "$FW/$NAME"
+                    chmod u+w "$FW/$NAME"
+                    install_name_tool -id "@executable_path/../Frameworks/$NAME" "$FW/$NAME"
+                fi
+                install_name_tool -change "$DEP" \
+                    "@executable_path/../Frameworks/$NAME" "$target"
+                rewrote_any=1
+                ;;
         esac
     done < <(otool -L "$target" | awk 'NR>1 {print $1}')
     return $rewrote_any
 }
+HB_LIB="${QT_ROOT%/opt/qt@5}/lib"
 
 # Repair any "flat Qt ref" left behind by an earlier run of this script —
 # load paths like @executable_path/../Frameworks/QtCore that point at a
@@ -167,13 +196,20 @@ done
 
 echo "==> sweep for any leftover Homebrew references"
 embed_remaining "$BIN" || true
-for LIB_PATH in "$FW"/*.dylib; do
-    [[ -f "$LIB_PATH" ]] || continue
-    embed_remaining "$LIB_PATH" || true
-done
-for FW_BIN in "$FW"/*.framework/Versions/*/[A-Z]*; do
-    [[ -f "$FW_BIN" ]] || continue
-    embed_remaining "$FW_BIN" || true
+# A dylib embedded by one pass can need another (brotlidec -> brotlicommon),
+# and the globs below are expanded once per pass, so repeat until a pass
+# adds no file. The plugins are swept too: libqcocoa is what pulls freetype.
+for pass in 1 2 3 4 5; do
+    n_before=$(ls "$FW" | wc -l)
+    for LIB_PATH in "$FW"/*.dylib "$APP"/Contents/PlugIns/*/*.dylib; do
+        [[ -f "$LIB_PATH" ]] || continue
+        embed_remaining "$LIB_PATH" || true
+    done
+    for FW_BIN in "$FW"/*.framework/Versions/*/[A-Z]*; do
+        [[ -f "$FW_BIN" ]] || continue
+        embed_remaining "$FW_BIN" || true
+    done
+    [[ $(ls "$FW" | wc -l) -eq $n_before ]] && break
 done
 
 # 3. Ad-hoc codesign (required after install_name_tool mutates the binary).
@@ -260,6 +296,33 @@ for LIB_PATH in "$FW"/*.dylib "$FW"/*.framework/Versions/*/[A-Z]*; do
     fi
 done
 [[ $LIB_LEAKS -eq 0 ]] && echo "  embedded libs: all clean"
+
+# No Homebrew path is not enough: a bundle-relative reference to a file that
+# is not in the bundle fails just the same, at launch (2026-10-16, the missing
+# libbrotlicommon). Every @executable_path / @loader_path / @rpath reference
+# of every Mach-O in the bundle must name a file that is there; @rpath is
+# taken as Contents/Frameworks, the only rpath this bundle uses.
+UNRESOLVED=0
+while IFS= read -r MO; do
+    while IFS= read -r DEP; do
+        case "$DEP" in
+            @executable_path/*) P="$APP/Contents/MacOS/${DEP#@executable_path/}" ;;
+            @loader_path/*)     P="$(dirname "$MO")/${DEP#@loader_path/}" ;;
+            @rpath/*)           P="$FW/${DEP#@rpath/}" ;;
+            *) continue ;;
+        esac
+        if [[ ! -e "$P" ]]; then
+            UNRESOLVED=$((UNRESOLVED + 1))
+            echo "WARN: ${MO#$APP/} needs $DEP — not in the bundle"
+        fi
+    done < <(otool -L "$MO" 2>/dev/null | awk 'NR>1 {print $1}')
+done < <(find "$APP/Contents" -type f \( -name '*.dylib' -o -perm -u+x \) -exec sh -c 'file -b "$1" | /usr/bin/grep -q Mach-O && echo "$1"' _ {} \;)
+if [[ $UNRESOLVED -eq 0 ]]; then
+    echo "  bundle refs: all resolve"
+else
+    echo "error: $UNRESOLVED bundle reference(s) do not resolve — the app will not start" >&2
+    exit 1
+fi
 
 SIZE="$(du -sh "$APP" | cut -f1)"
 echo "==> done. $APP ($SIZE) is now self-contained."
