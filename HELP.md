@@ -393,6 +393,11 @@ what you are typing in MSHV. A check that fails (offline, GitHub not
 answering) stays silent; *Check for Updates...* always says what
 happened. The choices are kept in `settings/ms_update.ini`.
 
+A test build given out before a release says so in its title: it names
+the release it leads up to and its candidate number, e.g. *2.76.7 mac14
+rc1*. The release itself is plain *mac14*, and a candidate is told when
+that release is out.
+
 To update:
 
 1. Download the new release from the

@@ -29,16 +29,26 @@
 #define APP_NAME "MSHV version " VER_MS    //c11++ intervaly -> "MSHV version " VER_MS
 #endif
 #if defined _MACOS_
-// macOS-port release revision. Manually bumped for each -mac<N> release tag
-// and NOT reset when the upstream version moves: 2.76.6 ended at mac10
-// (2026-09-10), LZ2HV's final 2.76.7 ships as mac11 (2026-10-05), so one
-// number always names one Mac build. Keep this in step with the git release
-// tag, and check `gh release list` + `git ls-remote --tags origin` before
-// picking the next number.
-#define MSHV_MAC_REV 13
-// Window-title / About identity, e.g. "MSHV macOS 2.76.7 mac11" (main_ms
-// inserts the band after "MSHV": "MSHV 28 MHz macOS 2.76.7 mac11 …").
-#define APP_NAME "MSHV macOS " VER_MS " mac" TOSTR0(MSHV_MAC_REV)
+// macOS-port release revision and release candidate. MSHV_MAC_REV is the
+// -mac<N> release this tree is for, NOT reset when the upstream version
+// moves: 2.76.6 ended at mac10 (2026-09-10), LZ2HV's final 2.76.7 shipped as
+// mac11 (2026-10-05), so one number always names one Mac release.
+// MSHV_MAC_RC numbers the builds given out before that release -- "mac14
+// rc1", "mac14 rc2", ... -- and the release itself is RC 0, plain "mac14"
+// (2026-10-19). Keep REV in step with the git release tag, and check `gh
+// release list` + `git ls-remote --tags origin` before picking the next
+// number.
+#define MSHV_MAC_REV 14
+#define MSHV_MAC_RC 1
+#if MSHV_MAC_RC > 0
+#define MSHV_RC_SUFFIX " rc" TOSTR0(MSHV_MAC_RC)
+#else
+#define MSHV_RC_SUFFIX ""
+#endif
+// Window-title / About identity, e.g. "MSHV macOS 2.76.7 mac13", or
+// "MSHV macOS 2.76.7 mac14 rc1" for a release candidate (main_ms inserts the
+// band after "MSHV": "MSHV 28 MHz macOS 2.76.7 mac13 …").
+#define APP_NAME "MSHV macOS " VER_MS " mac" TOSTR0(MSHV_MAC_REV) MSHV_RC_SUFFIX
 #endif
 
 #define DATA_HEIGHT         150

@@ -40,23 +40,26 @@ static const qint64 MSHV_UPDATE_RETRY_MS = 3600 * 1000;   // after a failed auto
 
 // ------------------------------------------------------------------ pure --
 
-bool MshvParseVersionTag(const QString &tag, int v[4])
+bool MshvParseVersionTag(const QString &tag, int v[5])
 {
-    // optional v, major.minor.patch, then optionally [-_ .]mac<N>; anything
-    // after that (e.g. "-priv") is ignored
+    // optional v, major.minor.patch, then optionally [-_ .]mac<N> and after it
+    // [-_ .]rc<N>; anything after that (e.g. "-priv") is ignored.  No rc = a
+    // release, which sorts above every candidate of the same mac number.
     static const QRegularExpression rx(
-        "^\\s*v?(\\d{1,6})\\.(\\d{1,6})\\.(\\d{1,6})(?:[-_ .]?mac(\\d{1,6}))?",
+        "^\\s*v?(\\d{1,6})\\.(\\d{1,6})\\.(\\d{1,6})(?:[-_ .]?mac(\\d{1,6})(?:[-_ .]?rc(\\d{1,5}))?)?",
         QRegularExpression::CaseInsensitiveOption);
     const QRegularExpressionMatch m = rx.match(tag);
     if (!m.hasMatch()) return false;
     for (int i = 0; i < 3; ++i) v[i] = m.captured(i + 1).toInt();
     v[3] = m.captured(4).isEmpty() ? 0 : m.captured(4).toInt();
+    v[4] = m.captured(5).isEmpty() ? MSHV_RC_RELEASE : m.captured(5).toInt();
+    if (v[4] <= 0) v[4] = MSHV_RC_RELEASE;   // "rc0" is the release itself
     return true;
 }
 
-int MshvCompareVersions(const int a[4], const int b[4])
+int MshvCompareVersions(const int a[5], const int b[5])
 {
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 5; ++i)
     {
         if (a[i] < b[i]) return -1;
         if (a[i] > b[i]) return 1;
@@ -66,22 +69,25 @@ int MshvCompareVersions(const int a[4], const int b[4])
 
 bool MshvIsNewerVersion(const QString &latest, const QString &current)
 {
-    int l[4], c[4];
+    int l[5], c[5];
     if (!MshvParseVersionTag(latest, l) || !MshvParseVersionTag(current, c)) return false;
     return MshvCompareVersions(l, c) > 0;
 }
 
-QString MshvVersionDisplay(const int v[4])
+QString MshvVersionDisplay(const int v[5])
 {
     QString s = QString("%1.%2.%3").arg(v[0]).arg(v[1]).arg(v[2]);
     if (v[3] > 0) s += QString(" mac%1").arg(v[3]);
+    if (v[3] > 0 && v[4] < MSHV_RC_RELEASE) s += QString(" rc%1").arg(v[4]);
     return s;
 }
 
 QString MshvBuildVersion()
 {
-    return QString("%1.%2.%3-mac%4").arg(VERSION_MAJOR).arg(VERSION_MINOR)
-           .arg(VERSION_PATCH).arg(MSHV_MAC_REV);
+    QString s = QString("%1.%2.%3-mac%4").arg(VERSION_MAJOR).arg(VERSION_MINOR)
+                .arg(VERSION_PATCH).arg(MSHV_MAC_REV);
+    if (MSHV_MAC_RC > 0) s += QString("-rc%1").arg(MSHV_MAC_RC);
+    return s;
 }
 
 bool MshvParseReleaseJson(const QByteArray &json, MshvReleaseInfo &out, QString &err)
@@ -100,7 +106,7 @@ bool MshvParseReleaseJson(const QByteArray &json, MshvReleaseInfo &out, QString 
     out.html_url = o.value("html_url").toString().trimmed();
     out.body     = o.value("body").toString();
     out.body.replace("\r\n", "\n");
-    int v[4];
+    int v[5];
     if (out.tag.isEmpty())
     {
         err = "no tag_name";
@@ -237,7 +243,7 @@ MshvUpdateCheck::MshvUpdateCheck(const QString &ini, QWidget *parent)
     uptime.start();
     current = MshvBuildVersion();
     const QString tv = QString::fromLatin1(qgetenv("MSHV_UPDATE_TEST_VERSION")).trimmed();
-    int v[4];
+    int v[5];
     if (!tv.isEmpty() && MshvParseVersionTag(tv, v))
     {
         current = tv;
@@ -364,7 +370,7 @@ void MshvUpdateCheck::FetchDone(bool ok)
     }
 
     const MshvReleaseInfo &r = fetcher->Info();
-    int lv[4] = {0, 0, 0, 0}, cv[4] = {0, 0, 0, 0};
+    int lv[5] = {0, 0, 0, 0, MSHV_RC_RELEASE}, cv[5] = {0, 0, 0, 0, MSHV_RC_RELEASE};
     MshvParseVersionTag(r.tag, lv);          // the fetcher only accepts a parsable tag
     MshvParseVersionTag(current, cv);
     const bool newer = MshvCompareVersions(lv, cv) > 0;
@@ -442,7 +448,7 @@ void MshvUpdateCheck::ShowMessage(bool failed, const QString &text)
     ShowWindow(mb, true);       // only a manual check reports up to date / a failure
 }
 
-void MshvUpdateCheck::ShowNewer(const MshvReleaseInfo &r, const int lv[4], const int cv[4], bool take_focus)
+void MshvUpdateCheck::ShowNewer(const MshvReleaseInfo &r, const int lv[5], const int cv[5], bool take_focus)
 {
     if (dlg) dlg->close();      // WA_DeleteOnClose: one update window at a time
 

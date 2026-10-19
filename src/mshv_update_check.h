@@ -81,17 +81,21 @@ struct MshvReleaseInfo
 };
 
 // ---- Pure helpers: no network, no UI (unit-tested on their own) ----
-// "v2.76.7-mac12", "2.76.7-mac12-priv", "2.76.7 mac12" -> {2,76,7,12}.  A
-// version without a mac part gets mac 0.  False unless it starts with
+// "v2.76.7-mac12", "2.76.7-mac12-priv", "2.76.7 mac12" -> {2,76,7,12,MSHV_RC_RELEASE};
+// a release candidate "2.76.7-mac14-rc1" / "2.76.7 mac14 rc1" -> {2,76,7,14,1}.
+// A version without a mac part gets mac 0.  False unless it starts with
 // major.minor.patch.
-bool MshvParseVersionTag(const QString &tag, int v[4]);
-// -1 / 0 / 1 for a < b / a == b / a > b, comparing (major, minor, patch, mac).
-int MshvCompareVersions(const int a[4], const int b[4]);
+#define MSHV_RC_RELEASE 1000000   // the rc slot of a release: above every candidate
+bool MshvParseVersionTag(const QString &tag, int v[5]);
+// -1 / 0 / 1 for a < b / a == b / a > b, comparing (major, minor, patch, mac, rc),
+// so mac14 rc1 < mac14 rc2 < mac14 < mac15 rc1.
+int MshvCompareVersions(const int a[5], const int b[5]);
 // True only if both parse and latest is greater than current.
 bool MshvIsNewerVersion(const QString &latest, const QString &current);
-// {2,76,7,12} -> "2.76.7 mac12", the window title's form.
-QString MshvVersionDisplay(const int v[4]);
-// This build, from config.h: "2.76.7-mac12".
+// {2,76,7,12,MSHV_RC_RELEASE} -> "2.76.7 mac12", {2,76,7,14,1} -> "2.76.7 mac14 rc1",
+// the window title's form.
+QString MshvVersionDisplay(const int v[5]);
+// This build, from config.h: "2.76.7-mac12", or "2.76.7-mac14-rc1" for a candidate.
 QString MshvBuildVersion();
 // The /releases/latest reply.  False, with a reason in err, unless it is a
 // JSON object whose tag_name parses as a version.
@@ -175,7 +179,7 @@ private slots:
     void FetchDone(bool ok);
 
 private:
-    void ShowNewer(const MshvReleaseInfo &r, const int latest[4], const int current[4], bool take_focus);
+    void ShowNewer(const MshvReleaseInfo &r, const int latest[5], const int current[5], bool take_focus);
     void ShowMessage(bool failed, const QString &text);
     void ShowWindow(QDialog *w, bool take_focus);     // no default button; focus only if asked for
     QString DownloadUrl(const MshvReleaseInfo &r) const;
