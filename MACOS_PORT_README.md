@@ -255,7 +255,8 @@ The `MSHV_macOS.pro` `QMAKE_POST_LINK` step still populates the
 bundle's Resources/ with seed data after each `make` so the bundle
 remains self-installable on a fresh Mac. The `cp -n` vs rsync split
 in that step controls which seed files get refreshed on every
-rebuild vs preserved across rebuilds.
+rebuild vs preserved across rebuilds. Its paths are shell-quoted, so
+the tree can sit under a path with spaces in it.
 
 ## Backing up before a major change
 

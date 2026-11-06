@@ -53,6 +53,12 @@ QMAKE_INFO_PLIST = macos/Info.plist
 # /Applications (root-owned). If you ever ship publicly, switch the user
 # dirs to ~/Library/Application Support/MSHV/ on first run.
 RES_DIR = $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app/Contents/Resources
+# Paths reach the shell commands below only through $$shell_quote(), so a
+# tree under a path with a space builds a complete bundle. Unquoted,
+# "/Volumes/HUB NVME/..." split in two and the bundle got no settings, no
+# user dirs and no icon (2026-11-07). A path without one is passed unchanged.
+Q_SRC = $$shell_quote($$PWD)
+Q_RES = $$shell_quote($$RES_DIR)
 # Two-stage settings sync:
 #   1. rsync read-only data (fonts, translations, callsign databases, UI
 #      icons) with --delete so removed files in source disappear from the
@@ -62,21 +68,21 @@ RES_DIR = $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app/Contents/Resources
 #      a rebuild leaves the user's callsign, audio prefs, dark-mode
 #      toggle, font choices, etc. intact. Same convention as e.g.
 #      Homebrew's "share/" vs "etc/".
-QMAKE_POST_LINK += mkdir -p $$RES_DIR/settings && \
+QMAKE_POST_LINK += mkdir -p $$Q_RES/settings && \
     rsync -a --delete \
         --exclude=ms_settings --exclude='ms_settings.bak' \
         --exclude=ms_macros   --exclude=ms_mesages \
         --exclude=ms_start    --exclude=ms_stinfonet \
         --exclude=mshv_status.txt \
-        $$PWD/bin/settings/ $$RES_DIR/settings/ && \
-    cp -n $$PWD/bin/settings/ms_settings  $$RES_DIR/settings/ms_settings  2>/dev/null; \
-    cp -n $$PWD/bin/settings/ms_macros    $$RES_DIR/settings/ms_macros    2>/dev/null; \
-    cp -n $$PWD/bin/settings/ms_mesages   $$RES_DIR/settings/ms_mesages   2>/dev/null; \
-    cp -n $$PWD/bin/settings/ms_start     $$RES_DIR/settings/ms_start     2>/dev/null; \
-    cp -n $$PWD/bin/settings/ms_stinfonet $$RES_DIR/settings/ms_stinfonet 2>/dev/null; \
-    mkdir -p $$RES_DIR/RxWavs $$RES_DIR/log $$RES_DIR/ExportLog \
-             $$RES_DIR/AllTxtMonthly $$RES_DIR/Screenshots; \
-    cp $$PWD/macos/MSHV.icns $$RES_DIR/MSHV.icns; \
+        $$Q_SRC/bin/settings/ $$Q_RES/settings/ && \
+    cp -n $$Q_SRC/bin/settings/ms_settings  $$Q_RES/settings/ms_settings  2>/dev/null; \
+    cp -n $$Q_SRC/bin/settings/ms_macros    $$Q_RES/settings/ms_macros    2>/dev/null; \
+    cp -n $$Q_SRC/bin/settings/ms_mesages   $$Q_RES/settings/ms_mesages   2>/dev/null; \
+    cp -n $$Q_SRC/bin/settings/ms_start     $$Q_RES/settings/ms_start     2>/dev/null; \
+    cp -n $$Q_SRC/bin/settings/ms_stinfonet $$Q_RES/settings/ms_stinfonet 2>/dev/null; \
+    mkdir -p $$Q_RES/RxWavs $$Q_RES/log $$Q_RES/ExportLog \
+             $$Q_RES/AllTxtMonthly $$Q_RES/Screenshots; \
+    cp $$Q_SRC/macos/MSHV.icns $$Q_RES/MSHV.icns; \
     true
 
 # De-standalone the bundle after a plain `make`.
@@ -105,13 +111,14 @@ QMAKE_POST_LINK += mkdir -p $$RES_DIR/settings && \
 # deploy over a rebuilt binary, so `make standalone` after this is a normal
 # redeploy, not a repair.
 BUNDLE_DIR = $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app/Contents
+Q_BUNDLE = $$shell_quote($$BUNDLE_DIR)
 QMAKE_POST_LINK += ; \
-    if [ -d $$BUNDLE_DIR/Frameworks ] || [ -e $$BUNDLE_DIR/Resources/qt.conf ] || \
-       [ -d $$BUNDLE_DIR/_CodeSignature ]; then \
+    if [ -d $$Q_BUNDLE/Frameworks ] || [ -e $$Q_BUNDLE/Resources/qt.conf ] || \
+       [ -d $$Q_BUNDLE/_CodeSignature ]; then \
         echo \"==> plain build: dropping the standalone deployment; run make standalone to restore it\"; \
-        rm -rf $$BUNDLE_DIR/Frameworks $$BUNDLE_DIR/PlugIns \
-               $$BUNDLE_DIR/Resources/qt.conf \
-               $$BUNDLE_DIR/_CodeSignature $$BUNDLE_DIR/CodeResources; \
+        rm -rf $$Q_BUNDLE/Frameworks $$Q_BUNDLE/PlugIns \
+               $$Q_BUNDLE/Resources/qt.conf \
+               $$Q_BUNDLE/_CodeSignature $$Q_BUNDLE/CodeResources; \
     fi; \
     true
 
@@ -120,7 +127,7 @@ QMAKE_POST_LINK += ; \
 # .app runs on a Mac without Homebrew installed. See
 # macos/build-standalone.sh for the actual logic.
 standalone.target = standalone
-standalone.commands = $$PWD/macos/build-standalone.sh
+standalone.commands = $$Q_SRC/macos/build-standalone.sh
 standalone.depends = first
 QMAKE_EXTRA_TARGETS += standalone
 
@@ -130,7 +137,7 @@ QMAKE_EXTRA_TARGETS += standalone
 # logic. Override the keychain credential profile name with:
 #   MSHV_NOTARY_PROFILE=other-name make notarize
 notarize.target = notarize
-notarize.commands = $$PWD/macos/notarize.sh
+notarize.commands = $$Q_SRC/macos/notarize.sh
 notarize.depends = standalone
 QMAKE_EXTRA_TARGETS += notarize
 
